@@ -35,13 +35,13 @@ export default function ScholaOneLogo({
     : (FULL_SIZES[size] ?? FULL_SIZES.md)
 
   return (
-    <div className={cn('inline-flex shrink-0 items-center', className)}>
+    <div className={cn('scholaone-logo inline-flex shrink-0 items-center bg-transparent', className)}>
       <img
         src={LOGO_FULL_PATH}
         alt={alt}
         draggable={false}
         className={cn(
-          'w-auto select-none',
+          'w-auto select-none bg-transparent',
           isIcon
             ? cn(sizeClass, 'object-cover object-top')
             : cn(sizeClass, 'object-contain object-center'),

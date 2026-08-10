@@ -22,7 +22,7 @@ export default function WebsiteFooter() {
       <div className="landing-wrap landing-footer-inner">
         <div className="grid w-full gap-6 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-5">
-            <Link to="/" className="inline-flex">
+            <Link to="/" className="inline-flex bg-transparent">
               <ScholaOneLogo size="md" variant="full" imageClassName="max-h-12 sm:max-h-14" />
             </Link>
             <p className="mt-2 max-w-md text-xs font-semibold leading-relaxed landing-text-muted sm:text-sm">

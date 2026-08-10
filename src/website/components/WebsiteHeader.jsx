@@ -52,7 +52,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
             scrolled ? 'shadow-xl' : ''
           }`}
         >
-          <Link to="/" className="landing-header-logo-wrap flex items-center">
+          <Link to="/" className="landing-header-logo-wrap flex items-center bg-transparent">
             <ScholaOneLogo
               size="xl"
               variant="full"

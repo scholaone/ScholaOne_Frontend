@@ -244,10 +244,22 @@
   display: flex;
   justify-content: center;
   margin-bottom: 1.25rem;
+  background: transparent !important;
 }
 
 .auth-form-logo-link {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.auth-form-logo-link img,
+.auth-form-logo .scholaone-logo,
+.auth-form-logo .scholaone-logo img {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .auth-form-logo-link:hover {

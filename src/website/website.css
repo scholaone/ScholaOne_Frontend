@@ -244,23 +244,34 @@
   z-index: 2;
   display: flex;
   width: 100%;
-  max-width: 520px;
+  max-width: none;
   align-items: center;
   justify-content: center;
-  padding: clamp(0.5rem, 2vw, 1rem);
-  background: transparent;
+  padding: 0;
+  background: transparent !important;
   border: none;
   box-shadow: none;
 }
 
 .landing-toxic-logo-glow {
-  position: absolute;
-  inset: 10%;
-  z-index: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.35), rgba(59, 130, 246, 0.12) 55%, transparent 75%);
-  filter: blur(8px);
-  pointer-events: none;
+  display: none;
+}
+
+.landing-header-logo-wrap,
+.landing-header-logo-wrap img,
+.scholaone-logo,
+.scholaone-logo img {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.landing-header-logo-wrap {
+  border-radius: 0;
+  padding: 0;
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
 }
 
 .landing-toxic-badge {
@@ -332,14 +343,6 @@
     0 8px 40px rgba(37, 99, 235, 0.1),
     0 0 60px rgba(34, 211, 238, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 1);
-}
-
-.landing-header-logo-wrap {
-  border-radius: 0.75rem;
-  padding: 0.15rem 0.25rem;
-  background: transparent;
-  border: none;
-  box-shadow: none;
 }
 
 @media (min-width: 1280px) {

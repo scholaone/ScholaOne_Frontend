@@ -70,7 +70,7 @@ export default function HeroSection({ isAuthenticated }) {
               </a>
             </div>
 
-            <div className="landing-toxic-trust relative z-[1]">
+            <div className="landing-toxic-trust relative z-[1] mt-auto">
               <span className="flex items-center gap-2">
                 <FiShield className="h-4 w-4 text-[#06b6d4]" />
                 Enterprise-grade security

@@ -23,6 +23,7 @@ export default function SignInHero() {
         <p className="auth-brand-copy">
           Sign in to access courses, live classes, assessments, and your personalized learning dashboard.
         </p>
+   
       </motion.div>
     </div>
   )

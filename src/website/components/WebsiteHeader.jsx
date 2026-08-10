@@ -48,15 +48,15 @@ export default function WebsiteHeader({ isAuthenticated }) {
     <header ref={headerRef} className="fixed inset-x-0 top-0 z-50 w-full">
       <div className="landing-wrap py-1 transition-all duration-300">
         <div
-          className={`flex min-h-[56px] w-full items-center justify-between rounded-2xl px-4 transition-all duration-300 sm:min-h-[64px] sm:px-6 lg:px-8 landing-glass-nav-toxic ${
+          className={`flex min-h-[60px] w-full items-center justify-between rounded-2xl px-4 transition-all duration-300 sm:min-h-[72px] sm:px-6 lg:px-8 landing-glass-nav-toxic ${
             scrolled ? 'shadow-xl' : ''
           }`}
         >
           <Link to="/" className="landing-header-logo-wrap flex items-center">
             <ScholaOneLogo
-              size="lg"
+              size="xl"
               variant="full"
-              imageClassName="max-h-10 sm:max-h-12"
+              imageClassName="max-h-14 sm:max-h-16 lg:max-h-[4.75rem]"
             />
           </Link>
 

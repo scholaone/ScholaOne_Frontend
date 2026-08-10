@@ -2,25 +2,25 @@ import { cn } from '@/lib/utils'
 import { BRAND_NAME, LOGO_FULL_PATH } from '@/config/brand'
 
 const FULL_SIZES = {
-  sm: 'max-h-12',
-  md: 'max-h-16',
-  lg: 'max-h-20',
-  xl: 'max-h-28',
-  '2xl': 'max-h-36',
-  '3xl': 'max-h-44',
-  hero: 'max-h-48 sm:max-h-56 lg:max-h-64 xl:max-h-72',
+  sm: 'max-h-14',
+  md: 'max-h-20',
+  lg: 'max-h-24',
+  xl: 'max-h-32',
+  '2xl': 'max-h-40',
+  '3xl': 'max-h-48',
+  hero: 'max-h-60 sm:max-h-72 lg:max-h-[22rem] xl:max-h-[24rem]',
 }
 
 const ICON_SIZES = {
-  xs: 'h-8 w-8',
+  xs: 'h-9 w-9',
   sm: 'h-10 w-10',
-  md: 'h-12 w-12',
-  lg: 'h-14 w-14',
+  md: 'h-11 w-11',
+  lg: 'h-12 w-12',
 }
 
 /**
- * ScholaOne logo image — use everywhere (auth, header, sidebar, landing).
- * @param {'icon'|'full'} variant — icon: emblem crop; full: complete logo with wordmark
+ * ScholaOne logo — transparent PNG with full wordmark + tagline.
+ * @param {'icon'|'full'} variant — icon: emblem crop; full: complete logo
  */
 export default function ScholaOneLogo({
   size = 'md',
@@ -41,8 +41,10 @@ export default function ScholaOneLogo({
         alt={alt}
         draggable={false}
         className={cn(
-          'w-auto object-contain',
-          isIcon ? cn(sizeClass, 'object-top object-cover') : cn(sizeClass, 'object-center'),
+          'w-auto select-none',
+          isIcon
+            ? cn(sizeClass, 'object-cover object-top')
+            : cn(sizeClass, 'object-contain object-center'),
           imageClassName,
         )}
       />

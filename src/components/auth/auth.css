@@ -342,6 +342,82 @@
   color: var(--lp-muted);
 }
 
+.auth-mini-footer {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--lp-border);
+  text-align: center;
+}
+
+.auth-mini-footer__cert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.65rem;
+}
+
+.auth-mini-footer__site {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: var(--lp-primary);
+  transition: color 0.2s;
+}
+
+.auth-mini-footer__site:hover {
+  color: var(--lp-teal);
+}
+
+.auth-mini-footer__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid rgba(243, 128, 32, 0.35);
+  background: rgba(243, 128, 32, 0.08);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ea580c;
+}
+
+.auth-mini-footer__links {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.auth-mini-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--lp-muted);
+  transition: color 0.2s;
+}
+
+.auth-mini-footer__link:hover {
+  color: var(--lp-primary);
+}
+
+.auth-mini-footer__email {
+  word-break: break-all;
+}
+
+.auth-mini-footer__copy {
+  margin-top: 0.45rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: var(--lp-muted);
+  opacity: 0.85;
+}
+
 /* ─── Solo card (forgot password etc.) ─── */
 .auth-split-card--solo .auth-split-card__form {
   padding: 0;

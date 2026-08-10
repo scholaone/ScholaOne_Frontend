@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import AuthLayout from '@/components/auth/layout/AuthLayout'
 import AuthCard from '@/components/auth/ui/AuthCard'
 import AuthButton from '@/components/auth/ui/AuthButton'
+import AuthMiniFooter from '@/components/auth/ui/AuthMiniFooter'
 import { AuthInput } from '@/components/auth/ui/AuthInput'
 import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 import { FiMail } from 'react-icons/fi'
@@ -24,7 +25,7 @@ export default function ForgotPasswordPage() {
             variant="full"
             size="2xl"
             className="mx-auto w-full justify-center"
-            imageClassName="mx-auto max-h-24 object-contain"
+            imageClassName="mx-auto max-h-28 object-contain"
           />
         </Link>
         <div className="mb-5 text-center">
@@ -48,6 +49,7 @@ export default function ForgotPasswordPage() {
             Back to login
           </Link>
         </form>
+        <AuthMiniFooter />
       </AuthCard>
     </AuthLayout>
   )

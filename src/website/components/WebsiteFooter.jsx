@@ -1,6 +1,12 @@
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiGithub, FiMail, FiTwitter } from 'react-icons/fi'
+import { FiArrowRight, FiGithub, FiMail, FiShield } from 'react-icons/fi'
 import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
+import {
+  BRAND_CONTACT_EMAIL,
+  BRAND_GITHUB_URL,
+  BRAND_NAME,
+  BRAND_WEBSITE_URL,
+} from '@/config/brand'
 import { WEBSITE, MODULES } from '../content'
 
 const EXPLORE = [
@@ -13,27 +19,27 @@ const EXPLORE = [
 export default function WebsiteFooter() {
   return (
     <footer className="landing-footer w-full">
-      <div className="landing-wrap py-16 lg:py-20">
-        <div className="grid w-full gap-12 lg:grid-cols-12">
+      <div className="landing-wrap landing-footer-inner">
+        <div className="grid w-full gap-6 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-5">
             <Link to="/" className="inline-flex">
-              <ScholaOneLogo size="md" variant="full" />
+              <ScholaOneLogo size="md" variant="full" imageClassName="max-h-12 sm:max-h-14" />
             </Link>
-            <p className="mt-5 max-w-md text-sm font-semibold leading-relaxed landing-text-muted">
+            <p className="mt-2 max-w-md text-xs font-semibold leading-relaxed landing-text-muted sm:text-sm">
               {WEBSITE.subdescription}
             </p>
             <Link
               to="/login"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold landing-text-accent hover:opacity-80"
+              className="mt-3 inline-flex items-center gap-2 text-xs font-extrabold landing-text-accent hover:opacity-80 sm:text-sm"
             >
-              Sign in to the LMS <FiArrowRight className="h-4 w-4" />
+              Sign in to the LMS <FiArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-7">
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:col-span-7 lg:gap-6">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider landing-text-muted">Explore</p>
-              <ul className="mt-4 space-y-3">
+              <p className="text-[11px] font-extrabold uppercase tracking-wider landing-text-muted">Explore</p>
+              <ul className="mt-2 space-y-1.5">
                 {EXPLORE.map((item) => (
                   <li key={item.label}>
                     <a href={item.href} className="text-sm font-bold landing-text-muted hover:landing-text-accent">
@@ -44,39 +50,58 @@ export default function WebsiteFooter() {
               </ul>
             </div>
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider landing-text-muted">LMS modules</p>
-              <ul className="mt-4 space-y-2">
-                {MODULES.slice(0, 8).map((m) => (
+              <p className="text-[11px] font-extrabold uppercase tracking-wider landing-text-muted">LMS modules</p>
+              <ul className="mt-2 space-y-1">
+                {MODULES.slice(0, 6).map((m) => (
                   <li key={m} className="text-sm font-semibold landing-text-muted">{m}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider landing-text-muted">Account</p>
-              <ul className="mt-4 space-y-3">
+              <p className="text-[11px] font-extrabold uppercase tracking-wider landing-text-muted">Account</p>
+              <ul className="mt-2 space-y-1.5">
                 <li><Link to="/login" className="text-sm font-bold landing-text-muted hover:landing-text-accent">Sign in</Link></li>
                 <li><Link to="/forgot-password" className="text-sm font-bold landing-text-muted hover:landing-text-accent">Forgot password</Link></li>
               </ul>
-              <div className="mt-6 flex gap-3">
-                {[FiTwitter, FiGithub, FiMail].map((Icon, i) => (
-                  <span
-                    key={i}
-                    className="landing-icon-box flex h-10 w-10 cursor-default items-center justify-center landing-text-muted"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-14 flex w-full flex-col items-center justify-between gap-4 border-t border-[var(--lp-border)] pt-8 sm:flex-row">
-          <p className="text-xs font-semibold landing-text-muted">
-            © {new Date().getFullYear()} {WEBSITE.name}. Learning Management System.
-          </p>
-          <p className="text-xs font-semibold landing-text-muted">
-            React · Tailwind · Framer Motion
+        <div className="landing-footer-bar flex w-full flex-col items-center justify-between border-t border-[var(--lp-border)] sm:flex-row">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            <a
+              href={BRAND_WEBSITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-extrabold landing-text-accent hover:opacity-80"
+            >
+              scholaone.in
+            </a>
+            <span className="landing-footer-cloudflare">
+              <FiShield className="h-3 w-3" aria-hidden />
+              Cloudflare certified
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={BRAND_GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="landing-footer-link inline-flex items-center gap-1.5"
+              aria-label="GitHub"
+            >
+              <FiGithub className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href={`mailto:${BRAND_CONTACT_EMAIL}`}
+              className="landing-footer-link inline-flex items-center gap-1.5"
+            >
+              <FiMail className="h-3.5 w-3.5" />
+              {BRAND_CONTACT_EMAIL}
+            </a>
+          </div>
+          <p className="text-[11px] font-semibold landing-text-muted">
+            © {new Date().getFullYear()} {BRAND_NAME}
           </p>
         </div>
       </div>

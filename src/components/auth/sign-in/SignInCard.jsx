@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FiMail, FiLock } from 'react-icons/fi'
 import { AuthInput, AuthPasswordInput } from '../ui/AuthInput'
 import AuthButton from '../ui/AuthButton'
+import AuthMiniFooter from '../ui/AuthMiniFooter'
 import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 
 const fieldVariants = {
@@ -33,7 +34,7 @@ export default function SignInCard({
           variant="full"
           size="3xl"
           className="mx-auto w-full justify-center"
-          imageClassName="mx-auto w-full max-w-[180px] sm:max-w-[200px] md:max-w-[220px] max-h-24 sm:max-h-28 md:max-h-32 object-contain"
+          imageClassName="mx-auto w-full max-w-[200px] sm:max-w-[220px] md:max-w-[260px] max-h-28 sm:max-h-32 md:max-h-36 object-contain"
         />
       </Link>
 
@@ -97,12 +98,7 @@ export default function SignInCard({
         </motion.div>
       </form>
 
-      <p className="auth-form-footer">
-        Need an account?{' '}
-        <Link to="/" className="auth-login-link">
-          Contact your institution
-        </Link>
-      </p>
+      <AuthMiniFooter />
     </motion.div>
   )
 }

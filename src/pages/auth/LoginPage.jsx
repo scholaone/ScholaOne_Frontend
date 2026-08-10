@@ -7,6 +7,8 @@ import { getErrorMessage } from '@/api/client'
 import AuthLayout from '@/components/auth/layout/AuthLayout'
 import SignInHero from '@/components/auth/sign-in/SignInHero'
 import SignInCard from '@/components/auth/sign-in/SignInCard'
+import { SEO_ROBOTS_NOINDEX } from '@/config/seo'
+import usePageMeta from '@/hooks/usePageMeta'
 import '@/components/auth/auth.css'
 
 export default function LoginPage() {
@@ -17,6 +19,11 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: { email: '', password: '', rememberMe: false } })
+
+  usePageMeta({
+    title: 'Sign in | ScholaOne',
+    robots: SEO_ROBOTS_NOINDEX,
+  })
 
   useEffect(() => {
     if (isAuthenticated) {

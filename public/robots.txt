@@ -1,4 +1,14 @@
+# Cloudflare may prepend managed rules at the edge. Keep this file compatible with Search Console.
+
 User-agent: *
 Allow: /
+
+# Authenticated application areas (not public marketing pages)
+Disallow: /dashboard
+Disallow: /login
+Disallow: /forgot-password
+Disallow: /profile
+Disallow: /settings
+Disallow: /f/
 
 Sitemap: https://scholaone.in/sitemap.xml

@@ -8,6 +8,8 @@ import { isInputField } from '../utils/fieldFactory'
 import { getErrorMessage } from '@/api/client'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { validateByKind } from '@/utils/validation'
+import { SEO_ROBOTS_NOINDEX } from '@/config/seo'
+import usePageMeta from '@/hooks/usePageMeta'
 
 function buildInitialValues(fields) {
   const initial = {}
@@ -46,6 +48,11 @@ export default function PublicFormPage() {
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  usePageMeta({
+    title: form?.title ? `${form.title} | ScholaOne` : 'Form | ScholaOne',
+    robots: SEO_ROBOTS_NOINDEX,
+  })
 
   useEffect(() => {
     let active = true

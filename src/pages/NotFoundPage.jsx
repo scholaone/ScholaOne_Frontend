@@ -2,10 +2,17 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import Button from '@/components/ui/Button'
 import { PageHeader, Card } from '@/components/ui/Card'
+import { SEO_ROBOTS_NOINDEX } from '@/config/seo'
+import usePageMeta from '@/hooks/usePageMeta'
 
 export default function NotFoundPage() {
   const { isAuthenticated } = useAuth()
   const home = isAuthenticated ? '/dashboard' : '/login'
+
+  usePageMeta({
+    title: 'Page not found | ScholaOne',
+    robots: SEO_ROBOTS_NOINDEX,
+  })
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">

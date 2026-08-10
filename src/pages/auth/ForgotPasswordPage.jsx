@@ -7,11 +7,18 @@ import AuthButton from '@/components/auth/ui/AuthButton'
 import AuthMiniFooter from '@/components/auth/ui/AuthMiniFooter'
 import { AuthInput } from '@/components/auth/ui/AuthInput'
 import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
+import { SEO_ROBOTS_NOINDEX } from '@/config/seo'
+import usePageMeta from '@/hooks/usePageMeta'
 import { FiMail } from 'react-icons/fi'
 import '@/components/auth/auth.css'
 
 export default function ForgotPasswordPage() {
   const { register, handleSubmit, formState: { isSubmitting } } = useForm()
+
+  usePageMeta({
+    title: 'Forgot password | ScholaOne',
+    robots: SEO_ROBOTS_NOINDEX,
+  })
 
   const onSubmit = async () => {
     toast.success('If an account exists, reset instructions have been sent.')

@@ -21,7 +21,7 @@ export default function AiHubPage() {
         <HubFeatureCard
           to="/ai-hub/assistant"
           icon={FiMessageSquare}
-          title="Nexus AI Assistant"
+          title="ScholaOne AI Assistant"
           description="Ask questions about organizations, schools, roles, and get LMS guidance instantly."
           accent="sage"
         />
@@ -33,9 +33,9 @@ export default function AiHubPage() {
           accent="forest"
         />
         <HubFeatureCard
-          to="/edu-nexus-post"
+          to="/scholaone-post"
           icon={FiMail}
-          title="EduNexus Post"
+          title="ScholaOne Post"
           description="Send mail from the browser with Gmail-style compose and sent history."
           accent="mint"
         />

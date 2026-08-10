@@ -1,8 +1,8 @@
 import { AUTOMATION_TEMPLATES } from '@/config/automationTemplates'
 
-const STORAGE_KEY = 'edunexus-automations'
-const SESSION_KEY = 'edunexus-automation-session'
-const DISABLED_AUTO_TIP_KEY = 'edunexus-automations-no-default-tip'
+const STORAGE_KEY = 'scholaone-automations'
+const SESSION_KEY = 'scholaone-automation-session'
+const DISABLED_AUTO_TIP_KEY = 'scholaone-automations-no-default-tip'
 
 function disableDefaultDashboardTip(automations) {
   if (localStorage.getItem(DISABLED_AUTO_TIP_KEY)) return automations

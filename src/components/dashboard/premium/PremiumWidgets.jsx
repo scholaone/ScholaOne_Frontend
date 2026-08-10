@@ -70,7 +70,7 @@ export const DEFAULT_PLATFORM_QUICK_ACTIONS = [
   { key: 'audit', label: 'Audit Logs', path: '/audit-logs', icon: 'audit' },
   { key: 'settings', label: 'Settings', path: '/settings', icon: 'settings' },
   { key: 'ai-hub', label: 'AI Hub', path: '/ai-hub', icon: 'notice' },
-  { key: 'post', label: 'EduNexus Post', path: '/edu-nexus-post', icon: 'notice' },
+  { key: 'post', label: 'ScholaOne Post', path: '/scholaone-post', icon: 'notice' },
   { key: 'orgs', label: 'Organizations', path: '/organizations', icon: 'organization' },
   { key: 'schools', label: 'Schools', path: '/schools', icon: 'school' },
 ]

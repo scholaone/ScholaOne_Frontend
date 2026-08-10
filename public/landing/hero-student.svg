@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Student">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="640" fill="url(#bg)"/>
+  <circle cx="320" cy="220" r="95" fill="#fcd9bd"/>
+  <path d="M180 580c20-120 60-180 140-180s120 60 140 180" fill="url(#shirt)"/>
+  <ellipse cx="320" cy="430" rx="70" ry="55" fill="#fff" opacity="0.95"/>
+  <rect x="275" y="400" width="90" height="65" rx="6" fill="#f97316"/>
+  <path d="M285 400h70v8H285z" fill="#1e40af"/>
+  <circle cx="290" cy="200" r="8" fill="#1e293b" opacity="0.6"/>
+  <circle cx="350" cy="200" r="8" fill="#1e293b" opacity="0.6"/>
+  <path d="M300 245q20 18 40 0" stroke="#c4845c" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>

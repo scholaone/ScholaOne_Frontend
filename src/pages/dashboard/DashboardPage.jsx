@@ -129,7 +129,7 @@ function DefaultDashboardView() {
 
   return (
     <div className="space-y-6 w-full">
-      <ClayInsightBanner userName={userName} message="Welcome to EduNexus." />
+      <ClayInsightBanner userName={userName} message="Welcome to ScholaOne." />
       <Card>
         <p className="text-sm text-muted-foreground">
           Your account does not have a dashboard for this role yet. Use the sidebar to open modules available to you.

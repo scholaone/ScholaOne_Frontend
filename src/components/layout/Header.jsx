@@ -93,8 +93,8 @@ export default function Header() {
                 <FiZap className="h-5 w-5" />
               </Link>
               <Link
-                to="/edu-nexus-post"
-                title="EduNexus Mailer"
+                to="/scholaone-post"
+                title="ScholaOne Mailer"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <FiMail className="h-5 w-5" />

@@ -57,7 +57,7 @@ export default function FormSettingsPanel({ form, onChange, onClose }) {
           onChange={(e) => updateSettings({ showBranding: e.target.checked })}
           className="rounded text-brand-600"
         />
-        Show &quot;Powered by EduNexus&quot; on public form
+        Show &quot;Powered by ScholaOne&quot; on public form
       </label>
     </div>
   )

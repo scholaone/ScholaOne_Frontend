@@ -1,17 +1,16 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiMail, FiLock } from 'react-icons/fi'
-import AuthCard from '../ui/AuthCard'
 import { AuthInput, AuthPasswordInput } from '../ui/AuthInput'
 import AuthButton from '../ui/AuthButton'
-import AuthFooter from '../ui/AuthFooter'
-import BrandLogo from '../ui/BrandLogo'
+import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
+
 const fieldVariants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 10 },
   visible: (i) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: 0.15 + i * 0.08, duration: 0.4 },
+    transition: { delay: 0.08 + i * 0.06, duration: 0.35 },
   }),
 }
 
@@ -23,39 +22,31 @@ export default function SignInCard({
   isSubmitting,
 }) {
   return (
-    <AuthCard>
-      <header className="auth-login-card-header mb-5 text-center">
-        <motion.div
-          className="auth-login-logo mx-auto mb-4 flex justify-center"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-        >
-          <BrandLogo variant="full" size="md" />
-        </motion.div>
-        <motion.h2
-          className="text-2xl font-bold text-[var(--clay-primary)]"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          Welcome Back
-        </motion.h2>
-        <motion.p
-          className="mt-2 text-sm text-[var(--clay-primary-soft)]"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          Sign in to your LMS Account
-        </motion.p>
+    <motion.div
+      className="auth-form-panel"
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+    >
+      <Link to="/" className="auth-form-logo auth-form-logo-link" aria-label="Go to ScholaOne website">
+        <ScholaOneLogo
+          variant="full"
+          size="3xl"
+          className="mx-auto w-full justify-center"
+          imageClassName="mx-auto w-full max-w-[180px] sm:max-w-[200px] md:max-w-[220px] max-h-24 sm:max-h-28 md:max-h-32 object-contain"
+        />
+      </Link>
+
+      <header className="auth-form-header text-center">
+        <h2 className="auth-form-title">Sign in</h2>
+        <p className="auth-form-subtitle">Enter your credentials to continue</p>
       </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} className="auth-form-fields" noValidate>
         <motion.div custom={0} variants={fieldVariants} initial="hidden" animate="visible">
           <AuthInput
             id="signin-email"
-            label="Email address"
+            label="Email"
             type="email"
             icon={FiMail}
             autoComplete="email"
@@ -65,7 +56,7 @@ export default function SignInCard({
               required: 'Email is required',
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Enter a valid email address',
+                message: 'Enter a valid email',
               },
             })}
           />
@@ -77,42 +68,41 @@ export default function SignInCard({
             label="Password"
             icon={FiLock}
             autoComplete="current-password"
+            showTextToggle
             error={errors.password?.message}
             {...register('password', { required: 'Password is required' })}
           />
         </motion.div>
 
         <motion.div
-          className="flex items-center justify-between gap-3"
+          className="auth-form-row"
           custom={2}
           variants={fieldVariants}
           initial="hidden"
           animate="visible"
         >
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-[var(--clay-primary-soft)] transition hover:text-[var(--clay-teal)]">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-[var(--clay-border)] text-[var(--clay-teal)] focus:ring-[var(--clay-accent)]/20"
-              {...register('rememberMe')}
-            />
+          <label className="auth-login-remember flex cursor-pointer items-center gap-2.5">
+            <input type="checkbox" className="auth-login-checkbox" {...register('rememberMe')} />
             Remember me
           </label>
-          <Link
-            to="/forgot-password"
-            className="text-sm font-semibold text-[var(--clay-teal)] transition hover:text-[var(--clay-sidebar-deep)] hover:underline"
-          >
+          <Link to="/forgot-password" className="auth-login-link">
             Forgot password?
           </Link>
         </motion.div>
 
         <motion.div custom={3} variants={fieldVariants} initial="hidden" animate="visible">
-          <AuthButton type="submit" loading={isSubmitting} className="!h-12">
+          <AuthButton type="submit" loading={isSubmitting} variant="primary">
             Sign in
           </AuthButton>
         </motion.div>
       </form>
 
-      <AuthFooter />
-    </AuthCard>
+      <p className="auth-form-footer">
+        Need an account?{' '}
+        <Link to="/" className="auth-login-link">
+          Contact your institution
+        </Link>
+      </p>
+    </motion.div>
   )
 }

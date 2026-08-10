@@ -8,21 +8,21 @@ export const AUTOMATION_ACTIONS = [
   { id: 'toast', label: 'Show notification' },
   { id: 'navigate', label: 'Open page' },
   { id: 'ai_tip', label: 'Generate AI tip' },
-  { id: 'compose_mail', label: 'Open EduNexus Post compose' },
+  { id: 'compose_mail', label: 'Open ScholaOne Post compose' },
 ]
 
 export const AUTOMATION_TEMPLATES = [
   {
     id: 'welcome_mail',
     name: 'Welcome email draft',
-    description: 'Opens EduNexus Post with a welcome message template for new school admins.',
+    description: 'Opens ScholaOne Post with a welcome message template for new school admins.',
     trigger: { type: 'manual' },
     actions: [
       {
         type: 'compose_mail',
         payload: {
-          subject: 'Welcome to EduNexus',
-          body: 'Dear Admin,\n\nWelcome to EduNexus LMS! Your organization is now set up.\n\nBest regards,\nEduNexus Team',
+          subject: 'Welcome to ScholaOne',
+          body: 'Dear Admin,\n\nWelcome to ScholaOne LMS! Your organization is now set up.\n\nBest regards,\nScholaOne Team',
         },
       },
     ],

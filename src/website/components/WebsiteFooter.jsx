@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { FiArrowRight, FiGithub, FiMail, FiTwitter } from 'react-icons/fi'
+import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 import { WEBSITE, MODULES } from '../content'
 
 const EXPLORE = [
@@ -15,14 +16,8 @@ export default function WebsiteFooter() {
       <div className="landing-wrap py-16 lg:py-20">
         <div className="grid w-full gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="landing-icon-box flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden">
-                <img src="/edunexus-infinity-logo.png" alt="" className="h-full w-full object-cover object-top scale-150" />
-              </div>
-              <div>
-                <span className="block text-xl font-extrabold landing-text-primary">{WEBSITE.name}</span>
-                <span className="text-xs font-bold uppercase tracking-wider landing-text-accent">EduNexus LMS</span>
-              </div>
+            <Link to="/" className="inline-flex">
+              <ScholaOneLogo size="md" variant="full" />
             </Link>
             <p className="mt-5 max-w-md text-sm font-semibold leading-relaxed landing-text-muted">
               {WEBSITE.subdescription}

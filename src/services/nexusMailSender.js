@@ -141,11 +141,11 @@ export function getSendFailureMessage(error) {
 export function getSendSuccessMessage(mode) {
   switch (mode) {
     case 'emailjs':
-      return 'Message delivered via EduNexus Post'
+      return 'Message delivered via ScholaOne Post'
     case 'mailto':
       return 'Opening your mail app — complete send there to deliver'
     case 'backend':
-      return 'Message delivered via EduNexus Post'
+      return 'Message delivered via ScholaOne Post'
     default:
       return 'Message saved to Sent (configure EmailJS for real delivery)'
   }

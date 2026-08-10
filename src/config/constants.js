@@ -24,16 +24,16 @@ function resolveApiBaseUrl() {
 }
 
 export const APP_NAME =
-  import.meta.env.VITE_APP_NAME || import.meta.env.NEXT_PUBLIC_APP_NAME || 'EduNexus ERP'
+  import.meta.env.VITE_APP_NAME || import.meta.env.NEXT_PUBLIC_APP_NAME || 'ScholaOne ERP'
 
 export const API_BASE_URL = resolveApiBaseUrl()
 
 export const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT || 30000)
 export const DEFAULT_PAGE_SIZE = 20
-export const AUTH_STORAGE_KEY = 'edunexus-auth'
-export const AUTH_REVISION_KEY = 'edunexus-auth-rev'
-export const AUTH_LOGOUT_KEY = 'edunexus-auth-logout'
-export const TENANT_STORAGE_KEY = 'edunexus-tenant'
+export const AUTH_STORAGE_KEY = 'scholaone-auth'
+export const AUTH_REVISION_KEY = 'scholaone-auth-rev'
+export const AUTH_LOGOUT_KEY = 'scholaone-auth-logout'
+export const TENANT_STORAGE_KEY = 'scholaone-tenant'
 
 export const ROLE_TYPES = [
   { label: 'Super Admin', value: 'super_admin' },

@@ -34,6 +34,7 @@ import {
   FiLayout,
   FiCheckCircle,
 } from 'react-icons/fi'
+import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
 import { Avatar } from '@/components/ui/Feedback'
@@ -114,7 +115,7 @@ const superAdminNav = [
     icon: FiCpu,
     children: [
       { id: 'ai-hub', label: 'AI Hub', path: '/ai-hub', icon: FiCpu },
-      { id: 'nexus-ai', label: 'Nexus AI', path: '/ai-hub/assistant', icon: FiMessageSquare },
+      { id: 'nexus-ai', label: 'ScholaOne AI', path: '/ai-hub/assistant', icon: FiMessageSquare },
       { id: 'automations', label: 'Automations', path: '/ai-hub/automations', icon: FiZap },
     ],
   },
@@ -123,7 +124,7 @@ const superAdminNav = [
     label: 'System',
     icon: FiSettings,
     children: [
-      { id: 'edu-post', label: 'EduNexus Post', path: '/edu-nexus-post', icon: FiMail },
+      { id: 'edu-post', label: 'ScholaOne Post', path: '/scholaone-post', icon: FiMail },
       { id: 'audit', label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
       { id: 'settings', label: 'Settings', path: '/settings', icon: FiSettings },
       { id: 'notifications', label: 'Notifications', path: '/notifications', icon: FiBell },
@@ -496,12 +497,9 @@ export default function Sidebar({ mobile, onClose }) {
           collapsed ? 'flex flex-col items-center gap-2 px-2 py-3' : 'flex h-16 items-center gap-3 px-4',
         )}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
-          <FiBook className="h-5 w-5" />
-        </div>
+        <ScholaOneLogo size={collapsed ? 'xs' : 'sm'} variant={collapsed ? 'icon' : 'full'} className={collapsed ? 'mx-auto' : undefined} />
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-foreground">EduNexus</p>
             <p className="truncate text-xs text-muted-foreground">School ERP + LMS</p>
           </div>
         )}

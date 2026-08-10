@@ -5,7 +5,7 @@ import AuthLayout from '@/components/auth/layout/AuthLayout'
 import AuthCard from '@/components/auth/ui/AuthCard'
 import AuthButton from '@/components/auth/ui/AuthButton'
 import { AuthInput } from '@/components/auth/ui/AuthInput'
-import BrandLogo from '@/components/auth/ui/BrandLogo'
+import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 import { FiMail } from 'react-icons/fi'
 import '@/components/auth/auth.css'
 
@@ -19,28 +19,32 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout>
       <AuthCard>
+        <Link to="/" className="auth-form-logo auth-form-logo-link mb-4" aria-label="Go to ScholaOne website">
+          <ScholaOneLogo
+            variant="full"
+            size="2xl"
+            className="mx-auto w-full justify-center"
+            imageClassName="mx-auto max-h-24 object-contain"
+          />
+        </Link>
         <div className="mb-5 text-center">
-          <BrandLogo variant="full" size="md" className="mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[var(--clay-primary)]">Forgot password</h2>
-          <p className="mt-2 text-sm text-[var(--clay-primary-soft)]">
+          <h2 className="auth-form-title">Forgot password</h2>
+          <p className="auth-form-subtitle mt-2">
             Enter your email and we&apos;ll send reset instructions.
           </p>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="auth-form-fields">
           <AuthInput
             id="forgot-email"
-            label="Email address"
+            label="Email"
             type="email"
             icon={FiMail}
             {...register('email', { required: true })}
           />
-          <AuthButton type="submit" loading={isSubmitting}>
+          <AuthButton type="submit" loading={isSubmitting} variant="primary">
             Send reset link
           </AuthButton>
-          <Link
-            to="/login"
-            className="block text-center text-sm font-semibold text-[var(--clay-teal)] hover:underline"
-          >
+          <Link to="/login" className="auth-login-link block text-center">
             Back to login
           </Link>
         </form>

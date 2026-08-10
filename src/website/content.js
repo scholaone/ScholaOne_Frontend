@@ -1,19 +1,15 @@
-/** Marketing copy — EduNexus LMS landing page */
+import { BRAND_AI_NAME, BRAND_MAIL_NAME, BRAND_NAME, BRAND_TAGLINE } from '@/config/brand'
+
+/** Marketing copy — ScholaOne LMS landing page */
 export const WEBSITE = {
-  name: 'EduNexus',
-  tagline: 'Learn · Grow · Connect · Excel',
+  name: BRAND_NAME,
+  tagline: BRAND_TAGLINE,
   description:
     'Deliver world-class learning at scale — courses, classrooms, assessments, progress tracking, and institutional admin in one breathtaking LMS built for schools and universities.',
   subdescription:
     'Empower learners, educators, and administrators with a single platform designed for clarity, connection, and growth.',
 }
 
-export const STATS = [
-  { value: '500+', label: 'Courses managed', sub: 'Across all tenants' },
-  { value: '50k+', label: 'Active learners', sub: 'Engaged daily' },
-  { value: '98%', label: 'Completion uplift', sub: 'With guided paths' },
-  { value: '24/7', label: 'Cloud access', sub: 'Learn anywhere' },
-]
 
 export const HERO_POINTS = [
   'Course builder with modules, lessons & multimedia',
@@ -33,7 +29,7 @@ export const TRUST_ITEMS = [
   'Parent Portal',
   'Admin Dashboard',
   'Multi-School LMS',
-  'EduNexus Post',
+  BRAND_MAIL_NAME,
 ]
 
 export const AUDIENCES = [
@@ -99,7 +95,7 @@ export const FEATURES = [
   },
   {
     title: 'AI Learning Assistant',
-    description: 'Nexus AI answers questions, summarizes lessons, suggests study plans, and powers workflow automations.',
+    description: `${BRAND_AI_NAME} answers questions, summarizes lessons, suggests study plans, and powers workflow automations.`,
     icon: 'ai',
     span: 'large',
     highlight: 'Intelligent support',
@@ -145,7 +141,7 @@ export const MODULES = [
   'Users & Roles',
   'Masters Hub',
   'Audit Logs',
-  'EduNexus Post',
+  BRAND_MAIL_NAME,
   'Settings',
 ]
 

@@ -1,6 +1,6 @@
 /**
  * Module folder keys for POST /api/v1/storage/upload/
- * Must match EduNexus_Backend/core/storage/constants.py
+ * Must match ScholaOne_Backend/core/storage/constants.py
  */
 export const STORAGE_FOLDERS = {
   USER_PROFILE: 'user_profile',

@@ -1,26 +1,15 @@
-import { Link } from 'react-router-dom'
-import { FiArrowLeft } from 'react-icons/fi'
 import { AuthBackgroundFade } from './AuthBackground'
 
 export default function AuthLayout({ hero, children }) {
+  const isSplit = Boolean(hero)
+
   return (
     <AuthBackgroundFade>
-      <div className="auth-login-inner relative flex flex-col lg:flex-row">
-        <Link
-          to="/"
-          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[var(--clay-glass-edge)] bg-white/90 px-4 py-2 text-sm font-semibold text-[var(--clay-primary-soft)] shadow-sm backdrop-blur-md transition hover:border-[var(--clay-accent)] hover:bg-white hover:text-[var(--clay-teal)] lg:hidden"
-        >
-          <FiArrowLeft className="h-4 w-4" />
-          Home
-        </Link>
-
-        <section className="auth-login-hero relative hidden lg:flex lg:w-[55%] flex-col justify-center auth-hero-gradient px-10 xl:px-14 2xl:px-16">
-          {hero}
-        </section>
-
-        <section className="auth-login-form-panel px-5 py-4 sm:px-8 lg:w-[45%]">
-          <div className="auth-login-card-wrap">{children}</div>
-        </section>
+      <div className="auth-split-shell">
+        <div className={`auth-split-card ${isSplit ? '' : 'auth-split-card--solo'}`}>
+          {hero && <div className="auth-split-card__brand">{hero}</div>}
+          <div className="auth-split-card__form">{children}</div>
+        </div>
       </div>
     </AuthBackgroundFade>
   )

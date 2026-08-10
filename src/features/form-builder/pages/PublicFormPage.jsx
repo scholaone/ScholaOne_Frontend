@@ -224,7 +224,7 @@ export default function PublicFormPage() {
         </form>
         {form.settings?.showBranding !== false ? (
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            Powered by EduNexus Form Builder
+            Powered by ScholaOne Form Builder
           </p>
         ) : null}
       </div>

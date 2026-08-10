@@ -1,6 +1,6 @@
 import { AUTH_LOGOUT_KEY, AUTH_REVISION_KEY, AUTH_STORAGE_KEY } from '@/config/constants'
 
-export const AUTH_SYNC_CHANNEL = 'edunexus-auth-sync'
+export const AUTH_SYNC_CHANNEL = 'scholaone-auth-sync'
 
 /** Cross-tab auth events (BroadcastChannel + localStorage fallback). */
 export const AuthSyncEvent = {

@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'edunexus-post-mail'
+const STORAGE_KEY = 'scholaone-post-mail'
 
 function readStore() {
   try {

@@ -33,7 +33,7 @@ export default function DashboardMockup() {
             <span className="h-3 w-3 rounded-full bg-emerald-400/90" />
           </div>
           <div className="mx-auto flex h-8 flex-1 max-w-md items-center justify-center rounded-lg border border-slate-200 bg-white/90 px-4 text-[11px] font-bold text-slate-500">
-            learn.edunexus.io/courses
+            learn.scholaone.in/courses
           </div>
         </div>
 

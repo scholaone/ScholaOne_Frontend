@@ -8,6 +8,6 @@ export const useAdmissionSetupStore = create(
       selectedYearId: null,
       setSelectedYearId: (id) => set({ selectedYearId: id }),
     }),
-    { name: 'edunexus-admission-setup-selection' },
+    { name: 'scholaone-admission-setup-selection' },
   ),
 )

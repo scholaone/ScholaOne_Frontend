@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'edunexus-user-passwords'
+const STORAGE_KEY = 'scholaone-user-passwords'
 
 function readStore() {
   try {

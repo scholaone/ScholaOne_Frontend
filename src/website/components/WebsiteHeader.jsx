@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiArrowRight, FiMenu, FiX } from 'react-icons/fi'
-import { WEBSITE } from '../content'
+import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 
 const NAV = [
   { href: '#features', label: 'Features' },
@@ -12,6 +12,7 @@ const NAV = [
 ]
 
 export default function WebsiteHeader({ isAuthenticated }) {
+  const headerRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -21,22 +22,42 @@ export default function WebsiteHeader({ isAuthenticated }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    const header = headerRef.current
+    if (!header) return
+
+    const syncHeaderHeight = () => {
+      document.documentElement.style.setProperty(
+        '--landing-header-height',
+        `${header.offsetHeight}px`,
+      )
+    }
+
+    syncHeaderHeight()
+    const observer = new ResizeObserver(syncHeaderHeight)
+    observer.observe(header)
+    window.addEventListener('resize', syncHeaderHeight)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', syncHeaderHeight)
+    }
+  }, [mobileOpen, scrolled])
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 w-full">
-      <div className={`landing-wrap transition-all duration-300 ${scrolled ? 'py-2' : 'py-4'}`}>
+    <header ref={headerRef} className="fixed inset-x-0 top-0 z-50 w-full">
+      <div className="landing-wrap py-1 transition-all duration-300">
         <div
-          className={`flex h-14 w-full items-center justify-between rounded-2xl px-4 transition-all duration-300 sm:h-16 sm:px-6 lg:px-8 ${
-            scrolled ? 'landing-glass shadow-xl' : 'bg-white/90 backdrop-blur-md border border-[var(--lp-glass-border)]'
+          className={`flex min-h-[56px] w-full items-center justify-between rounded-2xl px-4 transition-all duration-300 sm:min-h-[64px] sm:px-6 lg:px-8 landing-glass-nav-toxic ${
+            scrolled ? 'shadow-xl' : ''
           }`}
         >
-          <Link to="/" className="flex items-center gap-3">
-            <div className="landing-icon-box relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden sm:h-11 sm:w-11">
-              <img src="/edunexus-infinity-logo.png" alt="" className="h-full w-full object-cover object-top scale-150" />
-            </div>
-            <div>
-              <span className="block text-lg font-extrabold tracking-tight landing-text-primary">{WEBSITE.name}</span>
-              <span className="hidden text-[10px] font-bold uppercase tracking-wider landing-text-accent sm:block">Learning Platform</span>
-            </div>
+          <Link to="/" className="landing-header-logo-wrap flex items-center">
+            <ScholaOneLogo
+              size="lg"
+              variant="full"
+              imageClassName="max-h-10 sm:max-h-12"
+            />
           </Link>
 
           <nav className="hidden items-center gap-0.5 lg:flex">
@@ -44,7 +65,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
               <a
                 key={item.href}
                 href={item.href}
-                className="rounded-xl px-4 py-2.5 text-sm font-bold landing-text-muted transition hover:bg-slate-100 hover:landing-text-primary"
+                className="landing-nav-link"
               >
                 {item.label}
               </a>
@@ -54,7 +75,7 @@ export default function WebsiteHeader({ isAuthenticated }) {
           <div className="hidden items-center gap-3 lg:flex">
             <Link
               to={isAuthenticated ? '/dashboard' : '/login'}
-              className="landing-btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold text-white"
+              className="landing-btn-toxic inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold text-white"
             >
               {isAuthenticated ? 'LMS Dashboard' : 'Sign in'}
               <FiArrowRight className="h-4 w-4" />

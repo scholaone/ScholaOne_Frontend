@@ -8,6 +8,7 @@ export default function AuthButton({
   disabled,
   type = 'button',
   className,
+  variant = 'primary',
   onClick,
 }) {
   const [ripples, setRipples] = useState([])
@@ -37,9 +38,9 @@ export default function AuthButton({
       disabled={disabled || loading}
       onClick={handleClick}
       className={cn(
-        'auth-btn-gradient relative flex h-[60px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl text-base font-semibold text-white shadow-lg transition-all duration-200',
-        'hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60',
-        'shadow-[0_8px_24px_rgba(37,99,235,0.28)] hover:shadow-[0_10px_28px_rgba(37,99,235,0.38)]',
+        'relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl text-base font-bold transition-all duration-200',
+        'disabled:cursor-not-allowed disabled:opacity-60',
+        variant === 'primary' ? 'auth-btn-primary text-white' : 'auth-btn-secondary',
         className,
       )}
       whileHover={!loading && !disabled ? { scale: 1.01 } : undefined}

@@ -102,7 +102,7 @@ function extractTitle(prompt) {
 /**
  * Rule-based AI form generator (frontend only — swap with API later).
  */
-export function generateFormFromPrompt(prompt, { schoolName = 'EduNexus School' } = {}) {
+export function generateFormFromPrompt(prompt, { schoolName = 'ScholaOne School' } = {}) {
   const lower = prompt.toLowerCase()
   let fields = null
 

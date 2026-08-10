@@ -1,19 +1,6 @@
 import { cn } from '@/utils/format'
-import { APP_NAME } from '@/config/constants'
-
-const VARIANTS = {
-  icon: {
-    sm: 'h-10 w-10',
-    md: 'h-14 w-14',
-    lg: 'h-16 w-16',
-  },
-  full: {
-    sm: 'w-32',
-    md: 'w-40',
-    lg: 'w-48',
-    xl: 'w-52',
-  },
-}
+import { BRAND_NAME } from '@/config/brand'
+import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 
 export default function BrandLogo({
   size = 'md',
@@ -23,28 +10,13 @@ export default function BrandLogo({
   className,
   imageClassName,
 }) {
-  const boxClass = VARIANTS[variant]?.[size] ?? VARIANTS.icon.md
-  const isFull = variant === 'full'
-
   const logo = (
-    <div
-      className={cn(
-        'flex shrink-0 items-center justify-center',
-        boxClass,
-        className,
-      )}
-    >
-      <img
-        src="/edunexus-infinity-logo.png"
-        alt={`${APP_NAME} logo`}
-        className={cn(
-          'object-contain object-center',
-          isFull ? 'h-auto w-full max-h-32' : 'max-h-full max-w-full',
-          imageClassName,
-        )}
-        draggable={false}
-      />
-    </div>
+    <ScholaOneLogo
+      size={size}
+      variant={variant === 'full' ? 'full' : 'icon'}
+      className={className}
+      imageClassName={imageClassName}
+    />
   )
 
   if (!showName) return logo
@@ -52,9 +24,9 @@ export default function BrandLogo({
   return (
     <div className="flex items-center gap-3">
       {logo}
-      {!isFull && (
+      {variant !== 'full' && (
         <div>
-          <span className="block text-lg font-bold text-[var(--clay-primary)]">{APP_NAME}</span>
+          <span className="block text-lg font-bold text-[var(--clay-primary)]">{BRAND_NAME}</span>
           {subtitle && (
             <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--clay-teal)]">
               {subtitle}

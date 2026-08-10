@@ -56,7 +56,7 @@ function parseRecipients(value) {
 
 function getDeliveryHint() {
   if (!NEXUS_MAIL_IS_FRONTEND) {
-    return 'Server mode: messages are sent through the EduNexus backend SMTP.'
+    return 'Server mode: messages are sent through the ScholaOne backend SMTP.'
   }
   const method = getFrontendDeliveryMethod()
   if (method === 'emailjs') {
@@ -104,7 +104,7 @@ function MailSidebar({ folder, onFolderChange, onCompose, counts, deliveryHint, 
       </nav>
 
       <div className="mt-auto rounded-2xl border border-[#dadce0] bg-white p-4 text-xs text-[#5f6368]">
-        <p className="font-semibold text-[#1f1f1f]">EduNexus Post</p>
+        <p className="font-semibold text-[#1f1f1f]">ScholaOne Post</p>
         <p className="mt-1">{deliveryHint}</p>
         {!isEmailJsConfigured() && NEXUS_MAIL_IS_FRONTEND && (
           <p className="mt-2 rounded-lg bg-[#fef7e0] px-2 py-1.5 text-[11px] text-[#8a6d00]">
@@ -123,7 +123,7 @@ function ComposePanel({ open, draft, onChange, onClose, onSend, onSaveDraft, sen
     <div className="fixed bottom-10 right-8 z-50 flex max-h-[min(720px,calc(100vh-5rem))] w-[min(640px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-[#dadce0] bg-white shadow-[0_8px_28px_rgba(60,64,67,0.28)] sm:bottom-14 sm:right-10">
       <div className="flex items-center justify-between bg-[#f2f6fc] px-4 py-3">
         <div>
-          <p className="text-sm font-medium text-[#041e49]">New Message — EduNexus Post</p>
+          <p className="text-sm font-medium text-[#041e49]">New Message — ScholaOne Post</p>
           {composeHint && (
             <p className="text-[11px] text-[#5f6368]">{composeHint}</p>
           )}
@@ -210,7 +210,7 @@ function ComposePanel({ open, draft, onChange, onClose, onSend, onSaveDraft, sen
   )
 }
 
-export default function EduNexusPostPage() {
+export default function ScholaOnePostPage() {
   const location = useLocation()
   const fromAddress = NEXUS_MAIL_FROM_EMAIL
   const deliveryHint = getDeliveryHint()
@@ -392,8 +392,8 @@ export default function EduNexusPostPage() {
             <FiMail className="h-4 w-4" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-[#1f1f1f]">EduNexus Post</h1>
-            <p className="text-xs text-[#5f6368]">Send mail from EduNexus</p>
+            <h1 className="text-lg font-semibold text-[#1f1f1f]">ScholaOne Post</h1>
+            <p className="text-xs text-[#5f6368]">Send mail from ScholaOne</p>
           </div>
         </div>
         <div className="ml-auto flex min-w-0 flex-1 max-w-2xl items-center gap-2 rounded-full bg-[#eaf1fb] px-4 py-2.5">
@@ -455,7 +455,7 @@ export default function EduNexusPostPage() {
                   <div className="flex h-full flex-col items-center justify-center px-6 text-center text-sm text-[#5f6368]">
                     <FiMail className="mb-3 h-10 w-10 text-[#c4c7c5]" />
                     <p className="font-medium text-[#1f1f1f]">No messages in {folderLabel}</p>
-                    <p className="mt-1">Use Compose to send your first message with EduNexus Post.</p>
+                    <p className="mt-1">Use Compose to send your first message with ScholaOne Post.</p>
                     <Button className="mt-4 rounded-full" onClick={() => openCompose()}>
                       <FiEdit3 className="h-4 w-4" />
                       Compose

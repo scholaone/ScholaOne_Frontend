@@ -80,8 +80,9 @@ const ROUTE_TITLES = [
   { pattern: /^\/notifications$/, title: 'Notifications' },
   { pattern: /^\/settings/, title: 'Settings' },
   { pattern: /^\/school-users/, title: 'School Users' },
-  { pattern: /^\/edu-nexus-post$/, title: 'EduNexus Post' },
-  { pattern: /^\/ai-hub\/assistant$/, title: 'Nexus AI Assistant' },
+  { pattern: /^\/scholaone-post$/, title: 'ScholaOne Post' },
+  { pattern: /^\/edu-nexus-post$/, title: 'ScholaOne Post' },
+  { pattern: /^\/ai-hub\/assistant$/, title: 'ScholaOne AI Assistant' },
   { pattern: /^\/ai-hub\/automations$/, title: 'Automations' },
   { pattern: /^\/ai-hub$/, title: 'AI Hub' },
 ]

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { BRAND_AI_NAME, BRAND_MAIL_NAME } from '@/config/brand'
 import { MODULES } from '../content'
 
 const HIGHLIGHTS = [
@@ -14,14 +15,14 @@ const HIGHLIGHTS = [
   },
   {
     title: 'AI study companion',
-    desc: 'Nexus AI tutors learners, assists educators, and automates admin workflows.',
+    desc: `${BRAND_AI_NAME} tutors learners, assists educators, and automates admin workflows.`,
     icon: '✨',
   },
 ]
 
 export default function ModulesSection() {
   return (
-    <section id="modules" className="relative w-full py-24 sm:py-32">
+    <section id="modules" className="landing-section-glass landing-band-light relative w-full py-24 sm:py-32">
       <div className="landing-wrap">
         <div className="grid w-full items-start gap-16 xl:grid-cols-2 xl:gap-20">
           <motion.div
@@ -35,7 +36,7 @@ export default function ModulesSection() {
               <span className="landing-gradient-text">beautifully unified</span>
             </h2>
             <p className="mt-5 max-w-xl text-lg font-semibold landing-text-muted">
-              Every module follows EduNexus patterns: search, export, smart forms, and role-aware access.
+              Every module follows ScholaOne patterns: search, export, smart forms, and role-aware access.
             </p>
 
             <div className="mt-10 space-y-4">
@@ -87,7 +88,7 @@ export default function ModulesSection() {
               <p className="mt-3 text-sm font-semibold leading-relaxed landing-text-muted lg:text-base">
                 Multi-tenant <strong className="landing-text-primary">organizations & schools</strong>, granular{' '}
                 <strong className="landing-text-primary">roles & permissions</strong>, master data, audit logs, and{' '}
-                <strong className="landing-text-primary">EduNexus Post</strong> — the ERP layer your LMS runs on.
+                <strong className="landing-text-primary">{BRAND_MAIL_NAME}</strong> — the ERP layer your LMS runs on.
               </p>
             </div>
           </motion.div>

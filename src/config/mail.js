@@ -1,5 +1,5 @@
 /**
- * EduNexus Post — frontend-only mail configuration.
+ * ScholaOne Post — frontend-only mail configuration.
  *
  * Real delivery uses EmailJS (no backend required).
  * Optional later: VITE_NEXUS_MAIL_MODE=backend for Django SMTP API.
@@ -13,7 +13,7 @@ export const NEXUS_MAIL_FROM_EMAIL =
   import.meta.env.VITE_NEXUS_MAIL_FROM?.trim() || 'sharanreddy26372@gmail.com'
 
 export const NEXUS_MAIL_FROM_NAME =
-  import.meta.env.VITE_NEXUS_MAIL_FROM_NAME?.trim() || 'EduNexus Post'
+  import.meta.env.VITE_NEXUS_MAIL_FROM_NAME?.trim() || 'ScholaOne Post'
 
 export const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID?.trim() || ''
 export const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID?.trim() || ''

@@ -30,12 +30,12 @@ function useFloatingField(props) {
 
 const fieldShell = (error, focused) =>
   cn(
-    'auth-input-glow relative flex h-12 items-center rounded-2xl border bg-white/90 shadow-sm backdrop-blur-md transition-all duration-200',
+    'auth-ref-field relative flex h-[52px] items-center rounded-xl border transition-all duration-200',
     error
-      ? 'border-red-400 bg-red-50/40'
+      ? 'border-red-400 bg-red-50/60'
       : focused
-        ? 'border-[var(--clay-teal)] bg-white'
-        : 'border-[var(--clay-border)] hover:border-[var(--clay-accent)] hover:bg-white',
+        ? 'border-[#2563eb]/50 bg-[#f8fafc]'
+        : 'border-transparent bg-[#eef2f7] hover:bg-[#e8edf4]',
   )
 
 export const AuthInput = forwardRef(function AuthInput(
@@ -51,7 +51,7 @@ export const AuthInput = forwardRef(function AuthInput(
           <Icon
             className={cn(
               'pointer-events-none absolute left-4 h-5 w-5 transition-colors duration-200',
-              focused ? 'text-[var(--clay-teal)]' : 'text-[var(--clay-primary-soft)]',
+              focused ? 'text-[#2563eb]' : 'text-[#475569]',
             )}
             aria-hidden
           />
@@ -61,7 +61,7 @@ export const AuthInput = forwardRef(function AuthInput(
           id={id}
           type={type}
           placeholder=" "
-          className="peer h-full w-full rounded-2xl bg-transparent pl-12 pr-4 pt-4 text-base font-normal text-[var(--clay-primary)] outline-none"
+          className="peer h-full w-full rounded-xl bg-transparent pl-12 pr-4 pt-4 text-base font-medium text-[#0a1628] outline-none"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
           {...props}
@@ -72,8 +72,8 @@ export const AuthInput = forwardRef(function AuthInput(
           className={cn(
             'pointer-events-none absolute left-12 transition-all duration-200',
             focused || filled
-              ? 'top-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--clay-teal)]'
-              : 'top-1/2 -translate-y-1/2 text-sm font-normal text-[var(--clay-primary-soft)]',
+              ? 'top-2 text-[11px] font-bold uppercase tracking-wide text-[#2563eb]'
+              : 'top-1/2 -translate-y-1/2 text-sm font-medium text-[#64748b]',
           )}
         >
           {label}
@@ -99,7 +99,7 @@ export const AuthInput = forwardRef(function AuthInput(
 })
 
 export const AuthPasswordInput = forwardRef(function AuthPasswordInput(
-  { label, icon: Icon, error, className, id, ...props },
+  { label, icon: Icon, error, className, id, showTextToggle = false, ...props },
   ref,
 ) {
   const [visible, setVisible] = useState(false)
@@ -112,7 +112,7 @@ export const AuthPasswordInput = forwardRef(function AuthPasswordInput(
           <Icon
             className={cn(
               'pointer-events-none absolute left-4 h-5 w-5 transition-colors duration-200',
-              focused ? 'text-[var(--clay-teal)]' : 'text-[var(--clay-primary-soft)]',
+              focused ? 'text-[#2563eb]' : 'text-[#475569]',
             )}
             aria-hidden
           />
@@ -122,7 +122,10 @@ export const AuthPasswordInput = forwardRef(function AuthPasswordInput(
           id={id}
           type={visible ? 'text' : 'password'}
           placeholder=" "
-          className="h-full w-full rounded-2xl bg-transparent pl-12 pr-14 pt-4 text-base font-normal text-[var(--clay-primary)] outline-none"
+          className={cn(
+            'h-full w-full rounded-xl bg-transparent pl-12 pt-4 text-base font-medium text-[#0a1628] outline-none',
+            showTextToggle ? 'pr-16' : 'pr-14',
+          )}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
           {...props}
@@ -133,8 +136,8 @@ export const AuthPasswordInput = forwardRef(function AuthPasswordInput(
           className={cn(
             'pointer-events-none absolute left-12 transition-all duration-200',
             focused || filled
-              ? 'top-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--clay-teal)]'
-              : 'top-1/2 -translate-y-1/2 text-sm font-normal text-[var(--clay-primary-soft)]',
+              ? 'top-2 text-[11px] font-bold uppercase tracking-wide text-[#2563eb]'
+              : 'top-1/2 -translate-y-1/2 text-sm font-medium text-[#64748b]',
           )}
         >
           {label}
@@ -143,10 +146,13 @@ export const AuthPasswordInput = forwardRef(function AuthPasswordInput(
           type="button"
           tabIndex={-1}
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-3 flex h-10 w-10 items-center justify-center rounded-xl text-[var(--clay-primary-soft)] transition hover:bg-[var(--clay-mint-light)] hover:text-[var(--clay-teal)]"
+          className={cn(
+            'absolute right-3 flex items-center justify-center text-xs font-bold uppercase tracking-wide text-[#2563eb] transition hover:text-[#1d4ed8]',
+            showTextToggle ? 'h-10 px-1' : 'h-10 w-10 rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#2563eb]',
+          )}
           aria-label={visible ? 'Hide password' : 'Show password'}
         >
-          {visible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+          {showTextToggle ? (visible ? 'Hide' : 'Show') : visible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
         </button>
       </div>
       <AnimatePresence mode="wait">

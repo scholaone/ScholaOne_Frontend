@@ -18,7 +18,7 @@ export async function runAutomationActions(automation, { navigate, mailComposeSt
       }
       case 'compose_mail':
         if (navigate) {
-          navigate('/edu-nexus-post', {
+          navigate('/scholaone-post', {
             state: {
               compose: true,
               draft: {

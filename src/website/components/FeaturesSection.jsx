@@ -20,7 +20,7 @@ const ICONS = {
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="relative w-full py-24 sm:py-32">
+    <section id="features" className="landing-section-glass relative w-full py-24 sm:py-32">
       <div className="landing-wrap">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -34,7 +34,7 @@ export default function FeaturesSection() {
             <span className="landing-gradient-text">scale learning</span>
           </h2>
           <p className="mt-5 max-w-2xl text-lg font-semibold landing-text-muted">
-            From course authoring to certificates — a complete EduNexus LMS layered on institutional-grade admin.
+            From course authoring to certificates — a complete ScholaOne LMS layered on institutional-grade admin.
           </p>
         </motion.div>
 

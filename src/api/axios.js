@@ -3,7 +3,7 @@ import { API_BASE_URL, API_TIMEOUT, TENANT_STORAGE_KEY } from '@/config/constant
 import { getStoredAccessToken, getStoredRefreshToken, getStoredUser } from '@/utils/storage'
 
 if (import.meta.env.DEV) {
-  console.info('[EduNexus] API base:', API_BASE_URL || '(vite proxy → /api)')
+  console.info('[ScholaOne] API base:', API_BASE_URL || '(vite proxy → /api)')
 }
 
 export const axiosInstance = axios.create({

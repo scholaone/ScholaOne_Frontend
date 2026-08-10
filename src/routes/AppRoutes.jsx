@@ -163,7 +163,7 @@ import AuditLogDetail from '@/pages/audit-logs/AuditLogDetail'
 import SettingsPage from '@/pages/settings/SettingsPage'
 import SchoolSettingsPage from '@/pages/school-settings/SchoolSettingsPage'
 import NotificationsPage from '@/pages/notifications/NotificationsPage'
-import EduNexusPostPage from '@/pages/edu-nexus-post/EduNexusPostPage'
+import ScholaOnePostPage from '@/pages/scholaone-post/ScholaOnePostPage'
 import AiHubPage from '@/pages/ai-hub/AiHubPage'
 import AiAssistantPage from '@/pages/ai-hub/AiAssistantPage'
 import AutomationsPage from '@/pages/ai-hub/AutomationsPage'
@@ -189,7 +189,8 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/edu-nexus-post" element={<EduNexusPostPage />} />
+          <Route path="/scholaone-post" element={<ScholaOnePostPage />} />
+          <Route path="/edu-nexus-post" element={<Navigate to="/scholaone-post" replace />} />
           <Route path="/ai-hub" element={<AiHubPage />} />
           <Route path="/ai-hub/assistant" element={<AiAssistantPage />} />
           <Route path="/ai-hub/automations" element={<AutomationsPage />} />

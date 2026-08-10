@@ -1,4 +1,4 @@
-/** Shared client-side field validation for EduNexus forms (India-focused). */
+/** Shared client-side field validation for ScholaOne forms (India-focused). */
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i
 const MOBILE_RE = /^[6-9]\d{9}$/

@@ -8,7 +8,7 @@ function mockAssistantReply(messages) {
   const q = lastUserMessage(messages).toLowerCase()
 
   if (/organization|org|tenant/.test(q)) {
-    return `To manage organizations in EduNexus:
+    return `To manage organizations in ScholaOne:
 1. Go to **Management → Organizations**
 2. Click **Add New** for the guided wizard (Identity → Contact → Location → Review)
 3. Enable **Organization details are same for school** to create a matching school in one step
@@ -30,7 +30,7 @@ Use the permission matrix for a bird's-eye view.`
   }
 
   if (/mail|email|post/.test(q)) {
-    return `Use **EduNexus Post** (mail icon in the top bar or System → EduNexus Post).
+    return `Use **ScholaOne Post** (mail icon in the top bar or System → ScholaOne Post).
 Compose sends from sharanreddy26372@gmail.com. With EmailJS configured in \`.env\`, delivery is one-click; otherwise your mail app opens pre-filled.`
   }
 
@@ -50,16 +50,16 @@ Click the eye icon to see old/new JSON data. Filter and export from the list pag
   }
 
   if (/welcome|email template/.test(q)) {
-    return `Subject: Welcome to EduNexus LMS
+    return `Subject: Welcome to ScholaOne LMS
 
 Dear {{name}},
 
-Your organization has been onboarded to EduNexus. You can now add schools, users, and roles.
+Your organization has been onboarded to ScholaOne. You can now add schools, users, and roles.
 
 Login: use the credentials provided by your administrator.
 
 Best regards,
-EduNexus Team`
+ScholaOne Team`
   }
 
   return 'Ask about organizations, schools, roles, permissions, masters, audit logs, or automations.'
@@ -117,9 +117,9 @@ export async function generateAiTip(context = 'dashboard') {
   }
 
   const prompts = {
-    dashboard: 'Give one short actionable tip for an EduNexus LMS super admin reviewing their dashboard today.',
+    dashboard: 'Give one short actionable tip for an ScholaOne LMS super admin reviewing their dashboard today.',
     audit: 'Give one sentence about why reviewing audit logs matters in a school ERP.',
-    onboarding: 'Give one tip for onboarding a new organization in EduNexus.',
+    onboarding: 'Give one tip for onboarding a new organization in ScholaOne.',
   }
   return chatWithNexusAi([{ role: 'user', content: prompts[context] || prompts.dashboard }])
 }

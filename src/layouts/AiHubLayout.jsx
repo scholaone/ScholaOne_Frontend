@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
+import { BRAND_AI_NAME } from '@/config/brand'
 import { FiArrowLeft, FiCpu, FiMessageSquare, FiZap } from 'react-icons/fi'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import { cn } from '@/lib/utils'
 
 const NAV = [
   { path: '/ai-hub', label: 'Overview', icon: FiCpu, end: true },
-  { path: '/ai-hub/assistant', label: 'Nexus AI', icon: FiMessageSquare },
+  { path: '/ai-hub/assistant', label: BRAND_AI_NAME, icon: FiMessageSquare },
   { path: '/ai-hub/automations', label: 'Automations', icon: FiZap },
 ]
 
@@ -23,13 +24,13 @@ export default function AiHubLayout({ title, subtitle, children, actions }) {
           Dashboard
         </NavLink>
         <span className="inline-flex items-center rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-700">
-          Nexus AI
+          {BRAND_AI_NAME}
         </span>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">EduNexus AI Hub</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">ScholaOne AI Hub</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
           {subtitle ? <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p> : null}
         </div>

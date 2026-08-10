@@ -48,5 +48,5 @@
  * @property {string} submittedAt
  */
 
-export const FORM_STORAGE_KEY = 'edunexus-form-builder-forms'
-export const SUBMISSION_STORAGE_KEY = 'edunexus-form-builder-submissions'
+export const FORM_STORAGE_KEY = 'scholaone-form-builder-forms'
+export const SUBMISSION_STORAGE_KEY = 'scholaone-form-builder-submissions'

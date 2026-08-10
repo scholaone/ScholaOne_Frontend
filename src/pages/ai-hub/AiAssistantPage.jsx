@@ -6,10 +6,11 @@ import AiHubLayout from '@/layouts/AiHubLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { AI_QUICK_PROMPTS } from '@/config/ai'
+import { BRAND_AI_NAME } from '@/config/brand'
 import { chatWithNexusAi } from '@/services/nexusAiService'
 import { cn } from '@/utils/format'
 
-const STORAGE_KEY = 'edunexus-ai-chat'
+const STORAGE_KEY = 'scholaone-ai-chat'
 
 function loadHistory() {
   try {
@@ -62,8 +63,8 @@ export default function AiAssistantPage() {
 
   return (
     <AiHubLayout
-      title="Nexus AI Assistant"
-      subtitle="Your intelligent assistant for EduNexus LMS."
+      title="ScholaOne AI Assistant"
+      subtitle="Your intelligent assistant for ScholaOne LMS."
       actions={
         <Button variant="secondary" size="sm" onClick={() => { setMessages([]); localStorage.removeItem(STORAGE_KEY) }}>
           <FiTrash2 className="h-4 w-4" /> Clear chat
@@ -77,7 +78,7 @@ export default function AiAssistantPage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary text-white text-xl font-bold">
                 AI
               </div>
-              <h3 className="text-lg font-semibold">How can Nexus AI help?</h3>
+              <h3 className="text-lg font-semibold">How can {BRAND_AI_NAME} help?</h3>
               <p className="mt-2 text-sm text-muted">Ask about onboarding, roles, mail, or automations.</p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {AI_QUICK_PROMPTS.slice(0, 3).map((p) => (
@@ -144,7 +145,7 @@ export default function AiAssistantPage() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Nexus AI anything about EduNexus..."
+              placeholder={`Ask ${BRAND_AI_NAME} anything about ScholaOne...`}
               className="flex-1 rounded-xl border border-border px-4 py-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
             />
             <Button type="submit" loading={chatMutation.isPending} disabled={!input.trim()}>

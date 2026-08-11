@@ -8,8 +8,7 @@ import { isInputField } from '../utils/fieldFactory'
 import { getErrorMessage } from '@/api/client'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { validateByKind } from '@/utils/validation'
-import { SEO_ROBOTS_NOINDEX } from '@/config/seo'
-import usePageMeta from '@/hooks/usePageMeta'
+import SEO from '@/components/seo/SEO'
 
 function buildInitialValues(fields) {
   const initial = {}
@@ -49,11 +48,6 @@ export default function PublicFormPage() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  usePageMeta({
-    title: form?.title ? `${form.title} | ScholaOne` : 'Form | ScholaOne',
-    robots: SEO_ROBOTS_NOINDEX,
-  })
-
   useEffect(() => {
     let active = true
     ;(async () => {
@@ -82,9 +76,12 @@ export default function PublicFormPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-sm text-muted-foreground">
-        Loading form…
-      </div>
+      <>
+        <SEO title="Form | ScholaOne" noIndex />
+        <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-sm text-muted-foreground">
+          Loading form…
+        </div>
+      </>
     )
   }
 
@@ -146,7 +143,9 @@ export default function PublicFormPage() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] p-4">
+      <>
+        <SEO title={`${form.title} | ScholaOne`} noIndex />
+        <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] p-4">
         <div className="w-full max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-lg">
           <FiCheckCircle className="mx-auto h-14 w-14 text-green-500" />
           <h1 className="mt-4 text-xl font-bold">Submission received</h1>
@@ -158,11 +157,14 @@ export default function PublicFormPage() {
           />
         </div>
       </div>
+      </>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] py-8 px-4">
+    <>
+      <SEO title={`${form.title} | ScholaOne`} noIndex />
+      <div className="min-h-screen bg-[#f8fafc] py-8 px-4">
       <div className="mx-auto max-w-xl">
         <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8">
           {errors._form ? (
@@ -236,5 +238,6 @@ export default function PublicFormPage() {
         ) : null}
       </div>
     </div>
+    </>
   )
 }

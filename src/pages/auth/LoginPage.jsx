@@ -43,6 +43,7 @@ export default function LoginPage() {
     try {
       await login({ email: data.email, password: data.password }, data.rememberMe)
       toast.success('Welcome back!')
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       toast.error(getErrorMessage(error, 'Invalid credentials'))
     }

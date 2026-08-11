@@ -17,7 +17,16 @@ export const authService = {
   login: (payload) => apiPost(API_ENDPOINTS.AUTH.LOGIN, payload, { skipAuthRefresh: true }),
   refresh: (refreshToken) =>
     apiPost(API_ENDPOINTS.AUTH.REFRESH, { refresh: refreshToken }, { skipAuthRefresh: true }),
-  logout: (refresh) => apiPost(API_ENDPOINTS.AUTH.LOGOUT, { refresh }),
+  logout: (refresh, accessToken) =>
+    apiPost(
+      API_ENDPOINTS.AUTH.LOGOUT,
+      { refresh },
+      {
+        skipAuthRefresh: true,
+        timeout: 8000,
+        ...(accessToken ? { headers: { Authorization: `Bearer ${accessToken}` } } : {}),
+      },
+    ),
   profile: () => apiGet(API_ENDPOINTS.AUTH.PROFILE),
   changePassword: (payload) => apiPost(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, payload),
 }

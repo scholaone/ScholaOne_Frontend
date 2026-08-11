@@ -18,6 +18,7 @@ export default function Header() {
   const queryClient = useQueryClient()
   const [profileOpen, setProfileOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread-count'],
@@ -43,9 +44,19 @@ export default function Header() {
   const notifications = notifData?.results ?? notifData?.data?.results ?? []
 
   const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-    toast.success('Logged out successfully')
+    if (isLoggingOut) return
+
+    setProfileOpen(false)
+    setIsLoggingOut(true)
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+      toast.success('Logged out successfully')
+    } catch {
+      navigate('/login', { replace: true })
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   const displayName = user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
@@ -164,9 +175,19 @@ export default function Header() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-red-50"
+                    disabled={isLoggingOut}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    <FiLogOut className="h-4 w-4" /> Logout
+                    {isLoggingOut ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-destructive/30 border-t-destructive" />
+                        Logging out…
+                      </>
+                    ) : (
+                      <>
+                        <FiLogOut className="h-4 w-4" /> Logout
+                      </>
+                    )}
                   </button>
                 </div>
               </>

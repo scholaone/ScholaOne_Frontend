@@ -26,7 +26,7 @@ const AuthContext = createContext(null)
 
 const TOKEN_CHECK_MS = 30_000
 
-function buildAuthState(saved, { isHydrated = true, isLoading = false } = {}) {
+function buildAuthState(saved, { isHydrated = true, isLoading = false, isLoggingOut = false } = {}) {
   if (!saved?.accessToken) {
     return {
       user: null,
@@ -35,6 +35,7 @@ function buildAuthState(saved, { isHydrated = true, isLoading = false } = {}) {
       rememberMe: false,
       isAuthenticated: false,
       isLoading,
+      isLoggingOut,
       isHydrated,
     }
   }
@@ -46,6 +47,7 @@ function buildAuthState(saved, { isHydrated = true, isLoading = false } = {}) {
     rememberMe: saved.rememberMe || false,
     isAuthenticated: true,
     isLoading,
+    isLoggingOut,
     isHydrated,
   }
 }
@@ -176,15 +178,21 @@ export function AuthProvider({ children }) {
   }, [applyAuthFromStorage, handleRemoteLogout])
 
   const logout = useCallback(async () => {
-    try {
-      const refreshToken = stateRef.current.refreshToken || getStoredRefreshToken()
-      if (refreshToken) {
-        await authService.logout(refreshToken)
-      }
-    } catch {
-      // ignore logout errors
-    }
+    if (stateRef.current.isLoggingOut) return
+
+    const refreshToken = stateRef.current.refreshToken || getStoredRefreshToken()
+    const accessToken = stateRef.current.accessToken || getStoredAccessToken()
+
+    setState((prev) => ({ ...prev, isLoggingOut: true }))
+
+    // Clear local session immediately so the UI responds without waiting on the network.
     forceLogoutLocal({ broadcast: true })
+
+    if (refreshToken) {
+      void authService.logout(refreshToken, accessToken).catch(() => {
+        // Server revoke is best-effort after local sign-out.
+      })
+    }
   }, [forceLogoutLocal])
 
   const updateTokens = useCallback(
@@ -234,12 +242,12 @@ export function AuthProvider({ children }) {
           rememberMe,
           isAuthenticated: true,
           isLoading: false,
+          isLoggingOut: false,
           isHydrated: true,
         }
 
         persistAuthSession(next, rememberMe)
         setState(next)
-        queryClient.clear()
         notifyAuthSync(AuthSyncEvent.LOGIN)
 
         setAuthHandlers({
@@ -249,6 +257,10 @@ export function AuthProvider({ children }) {
           isSuperAdmin: () => Boolean(user?.is_super_admin),
           onTokensUpdated: updateTokens,
           onUnauthorized: () => forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
+        })
+
+        queueMicrotask(() => {
+          queryClient.clear()
         })
 
         return next

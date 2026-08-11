@@ -21,7 +21,7 @@ import {
   loadAuth,
 } from '@/utils/storage'
 import { isTokenExpired } from '@/utils/jwt'
-import { prefetchDashboardForUser } from '@/utils/prefetchDashboard'
+import { prefetchPostLoginData } from '@/utils/prefetchDashboard'
 
 const AuthContext = createContext(null)
 
@@ -248,7 +248,6 @@ export function AuthProvider({ children }) {
         }
 
         persistAuthSession(next, rememberMe)
-        setState(next)
 
         setAuthHandlers({
           getAccessToken: () => accessToken,
@@ -260,8 +259,13 @@ export function AuthProvider({ children }) {
         })
 
         queryClient.clear()
-        void prefetchDashboardForUser(queryClient, user)
+        try {
+          await prefetchPostLoginData(queryClient, user)
+        } catch {
+          // Dashboard prefetch is best-effort; the page will refetch on mount.
+        }
 
+        setState(next)
         notifyAuthSync(AuthSyncEvent.LOGIN)
 
         return next

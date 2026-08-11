@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { dashboardService } from '@/api/services'
 import { unwrapData } from '@/api/client'
-import { PageLoader } from '@/components/ui/Feedback'
 import { formatNumber } from '@/utils/format'
+import { cn } from '@/lib/utils'
 import {
   ClayInsightBanner,
   ClayStatGrid,
@@ -101,29 +101,23 @@ export default function SchoolDashboardView() {
     <div className="clay-app w-full min-w-0 max-w-full pb-4">
       <ClayInsightBanner userName={userName} message={schoolLabel} />
 
-      {showDashboardLoading ? (
-        <div className="flex items-center justify-center py-10">
-          <PageLoader />
-        </div>
-      ) : (
-        <>
-      <ClayStatGrid stats={stats} />
+      <div className={cn(showDashboardLoading && 'animate-pulse opacity-70')}>
+        <ClayStatGrid stats={stats} />
 
-      <ClayAnalyticsSection title="Analytics">
-        <div className="lms-grid-charts">
-          <ClayBarChartPanel title="Enrollment by Role" data={barData} />
-          <ClayDonutPanel title="Population Mix" data={barData} />
-          <ClayLineChartPanel title="Headcount Summary" data={lineData} />
-        </div>
-      </ClayAnalyticsSection>
+        <ClayAnalyticsSection title="Analytics">
+          <div className="lms-grid-charts">
+            <ClayBarChartPanel title="Enrollment by Role" data={barData} />
+            <ClayDonutPanel title="Population Mix" data={barData} />
+            <ClayLineChartPanel title="Headcount Summary" data={lineData} />
+          </div>
+        </ClayAnalyticsSection>
 
-      <ClayRecentList
-        title="Recent Activity"
-        items={recentItems}
-        emptyMessage="No data found"
-      />
-        </>
-      )}
+        <ClayRecentList
+          title="Recent Activity"
+          items={recentItems}
+          emptyMessage="No data found"
+        />
+      </div>
 
       {isFetching && data ? (
         <p className="text-center text-xs text-muted-foreground">Refreshing dashboard…</p>

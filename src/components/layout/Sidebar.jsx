@@ -464,7 +464,7 @@ export default function Sidebar({ mobile, onClose }) {
         const items = modulesToNavItems(modules)
         if (items.length) return items
       }
-      if (dynamicMenusQuery.isLoading) return []
+      if (dynamicMenusQuery.isLoading) return schoolAdminNav
       if (dynamicMenusQuery.isError) return schoolAdminNav
       return schoolAdminNav
     }

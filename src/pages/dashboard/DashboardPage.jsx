@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { dashboardService } from '@/api/services'
 import { unwrapData } from '@/api/client'
-import { PageLoader } from '@/components/ui/Feedback'
 import { Card, PageHeader } from '@/components/ui/Card'
+import { cn } from '@/lib/utils'
 import { formatNumber } from '@/utils/format'
 import SchoolDashboardView from '@/pages/dashboard/SchoolDashboardView'
 import {
@@ -103,28 +103,22 @@ function SuperAdminDashboardView() {
         message="Welcome back — here is your latest overview"
       />
 
-      {showDashboardLoading ? (
-        <div className="flex items-center justify-center py-10">
-          <PageLoader />
-        </div>
-      ) : (
-        <>
-      <ClayStatGrid stats={stats} />
+      <div className={cn(showDashboardLoading && 'animate-pulse opacity-70')}>
+        <ClayStatGrid stats={stats} />
 
-      <ClayAnalyticsSection title="Analytics">
-        <div className="lms-grid-charts">
-          <ClayBarChartPanel
-            title="Platform Snapshot"
-            data={platformBarData.length ? platformBarData : growthData}
-          />
-          <ClayDonutPanel title="User Distribution" data={donutData} />
-          <ClayLineChartPanel title="Growth Trend" data={growthData} />
-        </div>
-      </ClayAnalyticsSection>
+        <ClayAnalyticsSection title="Analytics">
+          <div className="lms-grid-charts">
+            <ClayBarChartPanel
+              title="Platform Snapshot"
+              data={platformBarData.length ? platformBarData : growthData}
+            />
+            <ClayDonutPanel title="User Distribution" data={donutData} />
+            <ClayLineChartPanel title="Growth Trend" data={growthData} />
+          </div>
+        </ClayAnalyticsSection>
 
-      <ClayRecentList title="Recent Activity" items={recentItems} emptyMessage="No data found" />
-        </>
-      )}
+        <ClayRecentList title="Recent Activity" items={recentItems} emptyMessage="No data found" />
+      </div>
 
       {isFetching && data ? (
         <p className="text-center text-xs text-muted-foreground">Refreshing dashboard…</p>

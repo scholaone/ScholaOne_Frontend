@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook } from 'react-icons/fi'
@@ -19,11 +19,19 @@ export default function Header() {
   const [profileOpen, setProfileOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [deferSecondaryQueries, setDeferSecondaryQueries] = useState(false)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDeferSecondaryQueries(true), 1500)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread-count'],
     queryFn: () => notificationService.unreadCount(),
+    enabled: deferSecondaryQueries && Boolean(user?.id),
     refetchInterval: 30000,
+    staleTime: 60_000,
   })
 
   const { data: notifData } = useQuery({

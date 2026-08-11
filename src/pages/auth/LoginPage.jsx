@@ -11,7 +11,7 @@ import SEO from '@/components/seo/SEO'
 import '@/components/auth/auth.css'
 
 export default function LoginPage() {
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
   const {
     register,
@@ -42,8 +42,8 @@ export default function LoginPage() {
   const onSubmit = async (data) => {
     try {
       await login({ email: data.email, password: data.password }, data.rememberMe)
-      toast.success('Welcome back!')
       navigate('/dashboard', { replace: true })
+      toast.success('Welcome back!')
     } catch (error) {
       toast.error(getErrorMessage(error, 'Invalid credentials'))
     }
@@ -58,7 +58,7 @@ export default function LoginPage() {
           handleSubmit={handleSubmit}
           onSubmit={onSubmit}
           errors={errors}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isLoading}
         />
       </AuthLayout>
     </>

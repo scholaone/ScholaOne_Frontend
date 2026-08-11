@@ -21,6 +21,7 @@ import {
   loadAuth,
 } from '@/utils/storage'
 import { isTokenExpired } from '@/utils/jwt'
+import { prefetchDashboardForUser } from '@/utils/prefetchDashboard'
 
 const AuthContext = createContext(null)
 
@@ -248,7 +249,6 @@ export function AuthProvider({ children }) {
 
         persistAuthSession(next, rememberMe)
         setState(next)
-        notifyAuthSync(AuthSyncEvent.LOGIN)
 
         setAuthHandlers({
           getAccessToken: () => accessToken,
@@ -259,9 +259,10 @@ export function AuthProvider({ children }) {
           onUnauthorized: () => forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
         })
 
-        queueMicrotask(() => {
-          queryClient.clear()
-        })
+        queryClient.clear()
+        void prefetchDashboardForUser(queryClient, user)
+
+        notifyAuthSync(AuthSyncEvent.LOGIN)
 
         return next
       } catch (error) {

@@ -23,22 +23,21 @@ import '@/styles/dashboard-clay.css'
 
 export default function SchoolDashboardView() {
   const { user } = useAuth()
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['dashboard', 'school-admin'],
     queryFn: () => dashboardService.schoolAdmin({ limit: 10 }),
     refetchInterval: 60000,
-    // Empty / failed API → still render dashboard with zeros
+    staleTime: 60_000,
     retry: 1,
     throwOnError: false,
   })
-
-  if (isLoading) return <PageLoader />
 
   const dashboard = unwrapData(data) || {}
   const school = dashboard.school || {}
   const statistics = dashboard.statistics || {}
   const recentActivities = dashboard.recent_activities || []
   const recentAdmissions = dashboard.recent_admissions || []
+  const showDashboardLoading = isLoading && !data
 
   const userName =
     user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
@@ -101,6 +100,13 @@ export default function SchoolDashboardView() {
   return (
     <div className="clay-app w-full min-w-0 max-w-full pb-4">
       <ClayInsightBanner userName={userName} message={schoolLabel} />
+
+      {showDashboardLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <PageLoader />
+        </div>
+      ) : (
+        <>
       <ClayStatGrid stats={stats} />
 
       <ClayAnalyticsSection title="Analytics">
@@ -116,6 +122,12 @@ export default function SchoolDashboardView() {
         items={recentItems}
         emptyMessage="No data found"
       />
+        </>
+      )}
+
+      {isFetching && data ? (
+        <p className="text-center text-xs text-muted-foreground">Refreshing dashboard…</p>
+      ) : null}
     </div>
   )
 }

@@ -25,22 +25,21 @@ import {
 
 function SuperAdminDashboardView() {
   const { user } = useAuth()
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['dashboard', 'super-admin'],
     queryFn: () => dashboardService.superAdmin({ limit: 10, months: 6 }),
     refetchInterval: 60000,
-    // Empty / failed API → still render dashboard with zeros
+    staleTime: 60_000,
     retry: 1,
     throwOnError: false,
   })
-
-  if (isLoading) return <PageLoader />
 
   const dashboard = unwrapData(data) || {}
   const statistics = dashboard.statistics || {}
   const charts = dashboard.charts || {}
   const recentActivity = dashboard.live_activities || dashboard.recent_activity || []
   const recentOrgs = dashboard.recent_organizations || []
+  const showDashboardLoading = isLoading && !data
 
   const userName =
     user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
@@ -104,6 +103,12 @@ function SuperAdminDashboardView() {
         message="Welcome back — here is your latest overview"
       />
 
+      {showDashboardLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <PageLoader />
+        </div>
+      ) : (
+        <>
       <ClayStatGrid stats={stats} />
 
       <ClayAnalyticsSection title="Analytics">
@@ -118,6 +123,12 @@ function SuperAdminDashboardView() {
       </ClayAnalyticsSection>
 
       <ClayRecentList title="Recent Activity" items={recentItems} emptyMessage="No data found" />
+        </>
+      )}
+
+      {isFetching && data ? (
+        <p className="text-center text-xs text-muted-foreground">Refreshing dashboard…</p>
+      ) : null}
     </div>
   )
 }

@@ -207,7 +207,7 @@ export function AuthProvider({ children }) {
         const next = {
           ...prev,
           accessToken,
-          refreshToken,
+          refreshToken: refreshToken || prev.refreshToken,
           isAuthenticated: Boolean(accessToken),
         }
         persistAuthSession(next, prev.rememberMe)
@@ -259,14 +259,11 @@ export function AuthProvider({ children }) {
         })
 
         queryClient.clear()
-        try {
-          await prefetchPostLoginData(queryClient, user)
-        } catch {
-          // Dashboard prefetch is best-effort; the page will refetch on mount.
-        }
-
         setState(next)
         notifyAuthSync(AuthSyncEvent.LOGIN)
+
+        // Warm dashboard/menus in background — do not block navigation.
+        void prefetchPostLoginData(queryClient, user).catch(() => {})
 
         return next
       } catch (error) {
@@ -300,6 +297,12 @@ export function AuthProvider({ children }) {
         forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
     })
   }, [state.accessToken, state.refreshToken, state.user, updateTokens, forceLogoutLocal])
+
+  useEffect(() => {
+    if (!state.isHydrated || !state.isAuthenticated || !state.user) return undefined
+    void prefetchPostLoginData(queryClient, state.user).catch(() => {})
+    return undefined
+  }, [state.isHydrated, state.isAuthenticated, state.user?.id, queryClient])
 
   useEffect(() => {
     if (state.isHydrated) return undefined

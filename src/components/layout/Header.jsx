@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook } from 'react-icons/fi'
+import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
 import { notificationService } from '@/api/services'
 import { Drawer } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Feedback'
 import { formatDateTime, fromNow } from '@/utils/format'
+import { getAuthenticatedTenantLabel } from '@/utils/tenantDisplay'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
@@ -68,40 +70,64 @@ export default function Header() {
   }
 
   const displayName = user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
+  const tenantLabel = getAuthenticatedTenantLabel(user)
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-4 border-b border-border bg-card/80 px-4 backdrop-blur-md lg:px-6">
-        <button
-          type="button"
-          onClick={() => setMobileSidebarOpen(true)}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
-          aria-label="Open menu"
-        >
-          <FiMenu className="h-5 w-5" />
-        </button>
+      <header className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border bg-card/80 px-4 backdrop-blur-md lg:px-6">
+        <div className="flex min-w-0 items-center gap-2 justify-self-start">
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
+            aria-label="Open menu"
+          >
+            <FiMenu className="h-5 w-5" />
+          </button>
 
-        <div className="hidden flex-1 md:block">
-          <div className="flex max-w-md items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
-            <FiSearch className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Search modules, users, schools..."
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
+          <Link
+            to="/dashboard"
+            className="hidden min-w-0 items-center gap-2 rounded-lg py-1 pr-2 transition-colors hover:bg-muted/60 lg:inline-flex"
+            title="ScholaOne"
+          >
+            <ScholaOneLogo size="sm" />
+            <span className="truncate text-sm font-semibold text-foreground">ScholaOne</span>
+          </Link>
+
+          <div className="hidden min-w-0 flex-1 md:block lg:max-w-xs xl:max-w-md">
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+              <FiSearch className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <input
+                type="search"
+                placeholder="Search modules, users, schools..."
+                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {}}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
-          aria-label="Search"
-        >
-          <FiSearch className="h-5 w-5" />
-        </button>
+        {tenantLabel ? (
+          <div className="min-w-0 max-w-[min(100vw-12rem,28rem)] justify-self-center px-1 text-center">
+            <p
+              className="truncate text-sm font-semibold text-foreground sm:text-base"
+              title={tenantLabel}
+            >
+              {tenantLabel}
+            </p>
+          </div>
+        ) : (
+          <span className="justify-self-center" aria-hidden />
+        )}
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="flex min-w-0 items-center justify-end gap-1 justify-self-end">
+          <button
+            type="button"
+            onClick={() => {}}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+            aria-label="Search"
+          >
+            <FiSearch className="h-5 w-5" />
+          </button>
           {!isSchoolAdmin ? (
             <>
               <Link

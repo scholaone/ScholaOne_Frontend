@@ -42,9 +42,11 @@ export default function SchoolDashboardView() {
   const userName =
     user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
 
-  const schoolLabel = school.school_name
-    ? `${school.school_name} — enrollment and activity overview`
-    : 'School enrollment and activity overview'
+  const schoolLabel = user?.school_name
+    ? `${user.school_name} — enrollment and activity overview`
+    : school.school_name
+      ? `${school.school_name} — enrollment and activity overview`
+      : 'School enrollment and activity overview'
 
   const stats = [
     {

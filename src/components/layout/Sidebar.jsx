@@ -451,7 +451,7 @@ export default function Sidebar({ mobile, onClose }) {
     queryFn: () => menuService.myMenus(),
     enabled: Boolean(usesDynamicSchoolNav && user?.id),
     staleTime: 30_000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     retry: 2,
   })
 

@@ -157,7 +157,7 @@ axiosInstance.interceptors.response.use(
       const body = response.data
       const inner = body?.data || body
       const accessToken = inner.access_token || inner.access
-      const newRefresh = inner.refresh_token || inner.refresh
+      const newRefresh = inner.refresh_token || inner.refresh || refreshToken
       if (!accessToken) throw new Error('Refresh failed')
 
       authHandlers?.onTokensUpdated?.({ accessToken, refreshToken: newRefresh })

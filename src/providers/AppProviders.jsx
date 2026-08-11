@@ -9,9 +9,11 @@ import AppRoutes from '@/routes/AppRoutes'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30000,
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
       retry: 1,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
       // Prefer empty UI over hard crash screens for failed list/dashboard loads
       throwOnError: false,
     },

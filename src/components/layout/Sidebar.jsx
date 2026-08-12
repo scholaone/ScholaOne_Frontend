@@ -35,6 +35,7 @@ import {
   FiCheckCircle,
 } from 'react-icons/fi'
 import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
+import { BRAND_NAME } from '@/config/brand'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
 import { Avatar } from '@/components/ui/Feedback'
@@ -497,10 +498,10 @@ export default function Sidebar({ mobile, onClose }) {
           collapsed ? 'flex flex-col items-center gap-2 px-2 py-3' : 'flex h-16 items-center gap-3 px-4',
         )}
       >
-        <ScholaOneLogo size={collapsed ? 'xs' : 'sm'} variant={collapsed ? 'icon' : 'full'} className={collapsed ? 'mx-auto' : undefined} />
+        <ScholaOneLogo size={collapsed ? 'xs' : 'sm'} variant="icon" className={collapsed ? 'mx-auto' : undefined} />
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs text-muted-foreground">School ERP + LMS</p>
+            <p className="truncate text-sm font-semibold text-foreground">{BRAND_NAME}</p>
           </div>
         )}
         {!mobile && (

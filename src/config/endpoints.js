@@ -8,7 +8,9 @@ export const API_ENDPOINTS = {
   },
   DASHBOARD: {
     SUPER_ADMIN: '/api/v1/dashboard/super-admin/',
+    SUPER_ADMIN_SUMMARY: '/api/v1/dashboard/super-admin/summary/',
     SCHOOL_ADMIN: '/api/v1/dashboard/school-admin/',
+    SCHOOL_ADMIN_SUMMARY: '/api/v1/dashboard/school-admin/summary/',
   },
   HEALTH: '/api/v1/health/',
   REGISTER: '/api/v1/accounts/register/',

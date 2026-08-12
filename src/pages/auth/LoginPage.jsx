@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/contexts/AuthContext'
 import { getErrorMessage } from '@/api/client'
+import { API_BASE_URL } from '@/config/constants'
 import AuthLayout from '@/components/auth/layout/AuthLayout'
 import SignInHero from '@/components/auth/sign-in/SignInHero'
 import SignInCard from '@/components/auth/sign-in/SignInCard'
@@ -18,6 +19,14 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({ defaultValues: { email: '', password: '', rememberMe: false } })
+
+  useEffect(() => {
+    if (!API_BASE_URL) return undefined
+    void fetch(`${API_BASE_URL}/api/v1/health/`, { method: 'GET', mode: 'cors', keepalive: true }).catch(
+      () => {},
+    )
+    return undefined
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -43,7 +52,7 @@ export default function LoginPage() {
     try {
       await login({ email: data.email, password: data.password }, data.rememberMe)
       navigate('/dashboard', { replace: true })
-      toast.success('Welcome back!')
+      window.setTimeout(() => toast.success('Welcome back!', { duration: 2000 }), 0)
     } catch (error) {
       toast.error(getErrorMessage(error, 'Invalid credentials'))
     }

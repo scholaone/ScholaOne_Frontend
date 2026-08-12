@@ -6,23 +6,23 @@ function usesDynamicSchoolNav(user) {
   )
 }
 
-/** Warm the dashboard query for the signed-in user so /dashboard renders faster. */
+/** Warm the fast summary query so /dashboard stat cards render quickly. */
 export function prefetchDashboardForUser(queryClient, user) {
   if (!queryClient || !user) return Promise.resolve()
 
   if (user.is_super_admin) {
     return queryClient.prefetchQuery({
-      queryKey: ['dashboard', 'super-admin'],
-      queryFn: () => dashboardService.superAdmin({ limit: 10, months: 6 }),
-      staleTime: 60_000,
+      queryKey: ['dashboard', 'super-admin', 'summary'],
+      queryFn: () => dashboardService.superAdminSummary(),
+      staleTime: 90_000,
     })
   }
 
   if (user.is_school_admin) {
     return queryClient.prefetchQuery({
-      queryKey: ['dashboard', 'school-admin'],
-      queryFn: () => dashboardService.schoolAdmin({ limit: 10 }),
-      staleTime: 60_000,
+      queryKey: ['dashboard', 'school-admin', 'summary'],
+      queryFn: () => dashboardService.schoolAdminSummary(),
+      staleTime: 90_000,
     })
   }
 
@@ -43,10 +43,9 @@ export function prefetchMenusForUser(queryClient, user) {
   })
 }
 
-/** Prefetch dashboard + sidebar data in parallel before leaving the login screen. */
-export async function prefetchPostLoginData(queryClient, user) {
-  await Promise.all([
-    prefetchDashboardForUser(queryClient, user),
-    prefetchMenusForUser(queryClient, user),
-  ])
+/** Prefetch summary + sidebar in parallel — non-blocking after login. */
+export function prefetchPostLoginData(queryClient, user) {
+  void prefetchDashboardForUser(queryClient, user)
+  void prefetchMenusForUser(queryClient, user)
+  return Promise.resolve()
 }

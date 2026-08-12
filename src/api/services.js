@@ -33,7 +33,9 @@ export const authService = {
 
 export const dashboardService = {
   superAdmin: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SUPER_ADMIN, params),
+  superAdminSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.SUPER_ADMIN_SUMMARY),
   schoolAdmin: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN, params),
+  schoolAdminSummary: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN_SUMMARY, params),
 }
 
 export const organizationService = {

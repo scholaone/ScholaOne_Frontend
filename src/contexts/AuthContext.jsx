@@ -258,12 +258,13 @@ export function AuthProvider({ children }) {
           onUnauthorized: () => forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
         })
 
-        queryClient.clear()
         setState(next)
-        notifyAuthSync(AuthSyncEvent.LOGIN)
 
-        // Warm dashboard/menus in background — do not block navigation.
-        void prefetchPostLoginData(queryClient, user).catch(() => {})
+        window.setTimeout(() => {
+          queryClient.clear()
+          notifyAuthSync(AuthSyncEvent.LOGIN)
+          void prefetchPostLoginData(queryClient, user).catch(() => {})
+        }, 0)
 
         return next
       } catch (error) {
@@ -297,12 +298,6 @@ export function AuthProvider({ children }) {
         forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
     })
   }, [state.accessToken, state.refreshToken, state.user, updateTokens, forceLogoutLocal])
-
-  useEffect(() => {
-    if (!state.isHydrated || !state.isAuthenticated || !state.user) return undefined
-    void prefetchPostLoginData(queryClient, state.user).catch(() => {})
-    return undefined
-  }, [state.isHydrated, state.isAuthenticated, state.user?.id, queryClient])
 
   useEffect(() => {
     if (state.isHydrated) return undefined

@@ -37,7 +37,17 @@ const SCHOOL_TYPE_OPTIONS = [
 ]
 
 const SCHOOL_FIELDS = [
-  { name: 'school_name', label: 'School Name', type: 'text', required: true },
+  {
+    name: 'school_name',
+    label: 'School Name',
+    type: 'text',
+    required: true,
+    validate: (value) => {
+      const trimmed = String(value ?? '').trim()
+      if (trimmed.length < 2) return 'School name must be at least 2 characters'
+      return true
+    },
+  },
   { name: 'school_code', label: 'School Code', type: 'text', required: true, readOnlyOnEdit: true },
   { name: 'short_name', label: 'Short Name', type: 'text' },
   { name: 'legal_name', label: 'Legal Name', type: 'text' },
@@ -83,7 +93,14 @@ const SCHOOL_FIELDS = [
   { name: 'established_date', label: 'Established Date', type: 'date' },
   { name: 'recognition_details', label: 'Recognition Details', type: 'textarea', fullWidth: true },
   { name: 'registration_details', label: 'Registration Details', type: 'textarea', fullWidth: true },
-  { name: 'academic_start_month', label: 'Academic Start Month', type: 'number' },
+  { name: 'academic_start_month', label: 'Academic Start Month', type: 'number', validate: (value) => {
+    if (value === '' || value == null || Number.isNaN(Number(value))) return true
+    const month = Number(value)
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+      return 'Academic start month must be between 1 and 12'
+    }
+    return true
+  } },
   { name: 'academic_calendar', label: 'Academic Calendar', type: 'text' },
   { name: 'language', label: 'Language', type: 'text', placeholder: 'en' },
   { name: 'timezone', label: 'Timezone', type: 'text', placeholder: 'Asia/Kolkata' },
@@ -435,6 +452,27 @@ export default function SchoolForm() {
     [logoFile, bannerFile],
   )
 
+  const validateBeforeSubmit = useCallback(() => {
+    const errors = {}
+    if (logoFile) {
+      const err = validateImageFile(logoFile)
+      if (err) {
+        setLogoError(err)
+        errors.logo = err
+      }
+    }
+    if (bannerFile) {
+      const err = validateImageFile(bannerFile)
+      if (err) {
+        setBannerError(err)
+        errors.banner = err
+      }
+    }
+    if (logoError) errors.logo = logoError
+    if (bannerError) errors.banner = bannerError
+    return errors
+  }, [logoFile, bannerFile, logoError, bannerError])
+
   useEffect(() => {
     return () => {
       revokeBlob(logoPreviewRef.current)
@@ -473,6 +511,7 @@ export default function SchoolForm() {
         fields={fields}
         transformLoad={transformSchoolLoad}
         transformSubmit={transformSubmit}
+        validateBeforeSubmit={validateBeforeSubmit}
         renderTop={() => (
           <SchoolBrandingUploadSection
             logoPreview={logoPreview}

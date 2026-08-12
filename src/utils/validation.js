@@ -8,6 +8,7 @@ const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/
 const GST_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/
 const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/
 const URL_RE = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/[^\s]*)?$/i
+const SCHOOL_CODE_RE = /^[a-z][a-z0-9_]{1,48}$/
 
 export const FIELD_LIMITS = {
   mobile: 10,
@@ -32,12 +33,15 @@ export function alnumUpper(value) {
 
 /**
  * Infer validation kind from field name / input type.
- * @returns {'email'|'mobile'|'aadhaar'|'pincode'|'pan'|'gst'|'ifsc'|'website'|null}
+ * @returns {'email'|'mobile'|'aadhaar'|'pincode'|'pan'|'gst'|'ifsc'|'website'|'school_code'|null}
  */
 export function resolveFieldKind(fieldName = '', fieldType = '') {
   const name = String(fieldName).toLowerCase()
   const type = String(fieldType || '').toLowerCase()
 
+  if (name === 'school_code') {
+    return 'school_code'
+  }
   if (type === 'email' || name === 'email' || name.endsWith('_email') || name.includes('email')) {
     return 'email'
   }
@@ -96,6 +100,7 @@ function labelOr(kind, label) {
     gst: 'GST number',
     ifsc: 'IFSC',
     website: 'Website',
+    school_code: 'School code',
   }[kind] || 'Field'
 }
 
@@ -142,6 +147,13 @@ export function validateByKind(kind, value, { required = false, label } = {}) {
     }
     case 'website':
       return URL_RE.test(raw) ? true : 'Enter a valid website URL'
+    case 'school_code': {
+      const code = raw.toLowerCase()
+      if (!SCHOOL_CODE_RE.test(code)) {
+        return 'School code must start with a letter and use only lowercase letters, numbers, and underscores (2–49 characters)'
+      }
+      return true
+    }
     default:
       return true
   }
@@ -166,6 +178,11 @@ export function sanitizeByKind(kind, value) {
       return alnumUpper(value).slice(0, FIELD_LIMITS.ifsc)
     case 'email':
       return String(value ?? '').replace(/\s/g, '')
+    case 'school_code':
+      return String(value ?? '')
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '')
+        .slice(0, 49)
     default:
       return value
   }
@@ -227,6 +244,13 @@ export function getInputConstraints(fieldName, fieldType) {
       }
     case 'website':
       return { type: 'text', inputMode: 'url', placeholder: 'https://example.com' }
+    case 'school_code':
+      return {
+        type: 'text',
+        maxLength: 49,
+        placeholder: 'e.g. greenwood_high',
+        style: { textTransform: 'lowercase' },
+      }
     default:
       return {}
   }

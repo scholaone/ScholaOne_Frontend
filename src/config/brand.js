@@ -10,7 +10,7 @@ export const WEBSITE_TITLE = `${BRAND_NAME} — ${BRAND_TAGLINE}`
 
 export const LOGO_FULL_PATH = '/scholaone-logo.png'
 export const LOGO_PATH = LOGO_FULL_PATH
-export const FAVICON_PATH = '/scholaone-logo.png'
+export const FAVICON_PATH = '/favicon.png'
 
 export const BRAND_COLORS = {
   primary: '#4361EE',

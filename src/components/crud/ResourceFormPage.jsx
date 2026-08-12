@@ -39,6 +39,7 @@ export default function ResourceFormPage({
   renderTop,
   getCreateDefaults,
   applyScope = true,
+  validateBeforeSubmit,
 }) {
   const { id } = useParams()
   const isEdit = Boolean(id)
@@ -114,9 +115,31 @@ export default function ResourceFormPage({
         handleFormInvalid(apiErrors, { toastFn: toast.error })
         return
       }
+      if (err?.code === 'ECONNABORTED') {
+        toast.error(
+          isEdit
+            ? 'Request timed out. Your changes may still have been saved — refresh the list before trying again.'
+            : 'Request timed out. The record may already have been created — check the list before submitting again.',
+        )
+        return
+      }
       toast.error(getErrorMessage(err))
     },
   })
+
+  const onValid = (formData) => {
+    if (validateBeforeSubmit) {
+      const extraErrors = validateBeforeSubmit(formData)
+      if (extraErrors && Object.keys(extraErrors).length) {
+        Object.entries(extraErrors).forEach(([name, message]) => {
+          setError(name, { type: 'manual', message })
+        })
+        handleFormInvalid(extraErrors, { toastFn: toast.error })
+        return
+      }
+    }
+    mutation.mutate(formData)
+  }
 
   const onInvalid = (invalidErrors) => {
     handleFormInvalid(invalidErrors, { toastFn: toast.error })
@@ -131,6 +154,17 @@ export default function ResourceFormPage({
         type: field.type,
       }),
       valueAsNumber: field.type === 'number',
+    }
+    if (typeof field.validate === 'function') {
+      const customValidate = field.validate
+      const kindValidate = rules.validate
+      rules.validate = (value, formValues) => {
+        if (kindValidate) {
+          const kindResult = kindValidate(value, formValues)
+          if (kindResult !== true) return kindResult
+        }
+        return customValidate(value, formValues)
+      }
     }
     const { onChange, onBlur, name, ref } = register(field.name, rules)
     const constraints = getInputConstraints(field.name, field.type)
@@ -208,7 +242,7 @@ export default function ResourceFormPage({
       <Card className="w-full lms-form-card">
         <form
           noValidate
-          onSubmit={handleSubmit((d) => mutation.mutate(d), onInvalid)}
+          onSubmit={handleSubmit(onValid, onInvalid)}
           className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]"
         >
           <FormValidationSummaryRhf

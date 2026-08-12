@@ -6,22 +6,22 @@
 export const SITE_URL = 'https://scholaone.in/'
 export const SITE_ORIGIN = 'https://scholaone.in'
 
-export const SEO_HOME_TITLE = 'ScholaOne | School Management & Learning Management System'
+export const SEO_HOME_TITLE = 'ScholaOne — Smarter Learning. Simpler School Management.'
 
 export const SEO_HOME_DESCRIPTION =
-  'ScholaOne is a modern school management and learning management platform for schools, teachers, students, parents, and administrators—covering attendance, academics, fees, examinations, and daily operations.'
+  'ScholaOne is a modern school LMS and school management platform for schools, teachers, students, parents, and administrators—covering academics, attendance, examinations, fees, classrooms, and daily operations.'
 
 export const SEO_OG_TITLE = SEO_HOME_TITLE
 
 export const SEO_OG_DESCRIPTION =
-  'Modern school management and learning management software for schools, teachers, students, parents, and administrators.'
+  'A complete school LMS and management platform for modern schools.'
 
 export const SEO_TWITTER_DESCRIPTION = SEO_OG_DESCRIPTION
 
 /** Replace with /og-image.png (1200x630) when a dedicated social image is added. */
 export const SEO_OG_IMAGE = `${SITE_ORIGIN}/scholaone-logo.png`
 
-export const SEO_OG_IMAGE_ALT = 'ScholaOne — School Management & Learning Management System'
+export const SEO_OG_IMAGE_ALT = 'ScholaOne — Smarter Learning. Simpler School Management.'
 
 export const SEO_THEME_COLOR = '#2563EB'
 

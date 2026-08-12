@@ -1,10 +1,5 @@
 import { dashboardService, menuService } from '@/api/services'
-
-function usesDynamicSchoolNav(user) {
-  return Boolean(
-    user?.is_school_admin || (user?.school_id && !user?.is_super_admin && !user?.is_org_admin),
-  )
-}
+import { isStudentPortalUser, isTeacherPortalUser, usesDynamicSchoolMenus } from '@/utils/authRoles'
 
 /** Warm the fast summary query so /dashboard stat cards render quickly. */
 export function prefetchDashboardForUser(queryClient, user) {
@@ -26,12 +21,28 @@ export function prefetchDashboardForUser(queryClient, user) {
     })
   }
 
+  if (isStudentPortalUser(user)) {
+    return queryClient.prefetchQuery({
+      queryKey: ['dashboard', 'student', 'summary'],
+      queryFn: () => dashboardService.studentSummary(),
+      staleTime: 90_000,
+    })
+  }
+
+  if (isTeacherPortalUser(user)) {
+    return queryClient.prefetchQuery({
+      queryKey: ['dashboard', 'teacher', 'summary'],
+      queryFn: () => dashboardService.teacherSummary(),
+      staleTime: 90_000,
+    })
+  }
+
   return Promise.resolve()
 }
 
 /** Warm sidebar menus for school-scoped users. */
 export function prefetchMenusForUser(queryClient, user) {
-  if (!queryClient || !user?.id || !usesDynamicSchoolNav(user)) {
+  if (!queryClient || !user?.id || !usesDynamicSchoolMenus(user)) {
     return Promise.resolve()
   }
 

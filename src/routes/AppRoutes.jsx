@@ -9,6 +9,8 @@ import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
 import ChangePasswordPage from '@/pages/auth/ChangePasswordPage'
 import ProfilePage from '@/pages/auth/ProfilePage'
 import DashboardPage from '@/pages/dashboard/DashboardPage'
+import StudentDashboardView from '@/pages/dashboard/StudentDashboardView'
+import TeacherDashboardView from '@/pages/dashboard/TeacherDashboardView'
 
 import OrganizationList from '@/pages/organizations/OrganizationList'
 import OrganizationForm from '@/pages/organizations/OrganizationForm'
@@ -131,6 +133,7 @@ import PermissionForm from '@/pages/permissions/PermissionForm'
 import PermissionMatrix from '@/pages/permissions/PermissionMatrix'
 
 import MenuList from '@/pages/menus/MenuList'
+import RoleMenuMapping from '@/pages/menus/RoleMenuMapping'
 import MenuForm from '@/pages/menus/MenuForm'
 import ModuleList from '@/pages/modules/ModuleList'
 import ModuleForm from '@/pages/modules/ModuleForm'
@@ -189,6 +192,8 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/student" element={<StudentDashboardView />} />
+          <Route path="/dashboard/teacher" element={<TeacherDashboardView />} />
           <Route path="/scholaone-post" element={<ScholaOnePostPage />} />
           <Route path="/edu-nexus-post" element={<Navigate to="/scholaone-post" replace />} />
           <Route path="/ai-hub" element={<AiHubPage />} />
@@ -347,6 +352,10 @@ export default function AppRoutes() {
           <Route path="/menus" element={<MenuList />} />
           <Route path="/menus/new" element={<MenuForm />} />
           <Route path="/menus/:id/edit" element={<MenuForm />} />
+
+          <Route element={<ProtectedRoute requireSchoolAdmin />}>
+            <Route path="/menus/role-mapping" element={<RoleMenuMapping />} />
+          </Route>
 
           <Route path="/modules" element={<ModuleList />} />
           <Route path="/modules/new" element={<ModuleForm />} />

@@ -36,6 +36,9 @@ export const dashboardService = {
   superAdminSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.SUPER_ADMIN_SUMMARY),
   schoolAdmin: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN, params),
   schoolAdminSummary: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN_SUMMARY, params),
+  studentSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.STUDENT_SUMMARY),
+  teacherSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_SUMMARY),
+  teacherCalendar: (params) => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_CALENDAR, params),
 }
 
 export const organizationService = {
@@ -765,6 +768,24 @@ export const menuService = {
     const { organization, ...body } = data
     return apiPatch(
       API_ENDPOINTS.MENUS.SCHOOL_MODULE,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
+  portalRoles: (params) => apiGet(API_ENDPOINTS.MENUS.PORTAL_ROLES, params),
+  schoolRoleTree: (params) => apiGet(API_ENDPOINTS.MENUS.SCHOOL_ROLE_TREE, params),
+  updateSchoolRoleMapping: (data) => {
+    const { organization, ...body } = data
+    return apiPatch(
+      API_ENDPOINTS.MENUS.SCHOOL_ROLE_MAPPING,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
+  updateSchoolRoleModule: (data) => {
+    const { organization, ...body } = data
+    return apiPatch(
+      API_ENDPOINTS.MENUS.SCHOOL_ROLE_MODULE,
       body,
       organization ? { params: { organization } } : undefined,
     )

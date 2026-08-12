@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { getPostLoginPath } from '@/utils/authRoles'
 
-export default function ProtectedRoute({ requireSuperAdmin = false }) {
-  const { isAuthenticated, isSuperAdmin, isHydrated } = useAuth()
+export default function ProtectedRoute({ requireSuperAdmin = false, requireSchoolAdmin = false }) {
+  const { isAuthenticated, isSuperAdmin, isSchoolAdmin, isHydrated, user } = useAuth()
 
   if (!isHydrated) {
     return (
@@ -20,11 +21,15 @@ export default function ProtectedRoute({ requireSuperAdmin = false }) {
     return <Navigate to="/dashboard" replace />
   }
 
+  if (requireSchoolAdmin && !isSchoolAdmin) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   return <Outlet />
 }
 
 export function PublicRoute() {
-  const { isAuthenticated, isHydrated } = useAuth()
+  const { isAuthenticated, isHydrated, user, getDashboardPath } = useAuth()
 
   if (!isHydrated) {
     return (
@@ -35,7 +40,7 @@ export function PublicRoute() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={getDashboardPath?.() || getPostLoginPath(user) || '/dashboard'} replace />
   }
 
   return <Outlet />

@@ -26,6 +26,7 @@ const USER_ROLE_FILTER_OPTIONS = [
 ]
 
 function formatRoleType(item) {
+  if (item.role_name) return item.role_name
   if (item.role_type) return ROLE_LABELS[item.role_type] || item.role_type
   if (item.is_super_admin) return 'Super Admin'
   if (item.is_org_admin) return 'Organization Admin'

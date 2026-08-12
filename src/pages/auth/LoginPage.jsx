@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/contexts/AuthContext'
+import { getPostLoginPath } from '@/utils/authRoles'
 import { getErrorMessage } from '@/api/client'
 import { API_BASE_URL } from '@/config/constants'
 import AuthLayout from '@/components/auth/layout/AuthLayout'
@@ -12,7 +13,7 @@ import SEO from '@/components/seo/SEO'
 import '@/components/auth/auth.css'
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuth()
+  const { login, isAuthenticated, isLoading, user, getDashboardPath } = useAuth()
   const navigate = useNavigate()
   const {
     register,
@@ -30,9 +31,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard', { replace: true })
+      navigate(getDashboardPath?.() || getPostLoginPath(user) || '/dashboard', { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, user, getDashboardPath])
 
   useEffect(() => {
     const html = document.documentElement
@@ -50,8 +51,9 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     try {
-      await login({ email: data.email, password: data.password }, data.rememberMe)
-      navigate('/dashboard', { replace: true })
+      const session = await login({ email: data.email, password: data.password }, data.rememberMe)
+      const path = getPostLoginPath(session?.user) || '/dashboard'
+      navigate(path, { replace: true })
       window.setTimeout(() => toast.success('Welcome back!', { duration: 2000 }), 0)
     } catch (error) {
       toast.error(getErrorMessage(error, 'Invalid credentials'))

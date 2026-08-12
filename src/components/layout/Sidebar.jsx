@@ -37,6 +37,7 @@ import {
 import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 import { BRAND_NAME } from '@/config/brand'
 import { useAuth } from '@/contexts/AuthContext'
+import { usesDynamicSchoolMenus } from '@/utils/authRoles'
 import { useUI } from '@/contexts/UIContext'
 import { Avatar } from '@/components/ui/Feedback'
 import { menuService } from '@/api/services'
@@ -389,9 +390,7 @@ export default function Sidebar({ mobile, onClose }) {
   const { user, isSuperAdmin, isOrgAdmin, isSchoolAdmin } = useAuth()
   const { sidebarCollapsed, toggleSidebar } = useUI()
 
-  const usesDynamicSchoolNav = Boolean(
-    isSchoolAdmin || (user?.school_id && !isSuperAdmin && !isOrgAdmin),
-  )
+  const usesDynamicSchoolNav = usesDynamicSchoolMenus(user)
 
   const dynamicMenusQuery = useQuery({
     queryKey: ['menus', 'my-menus', user?.id, user?.school_id || user?.school],
@@ -416,6 +415,7 @@ export default function Sidebar({ mobile, onClose }) {
     usesDynamicSchoolNav,
     dynamicMenusQuery.isSuccess,
     dynamicMenusQuery.data,
+    user,
   ])
 
   const showDynamicMenuState = usesDynamicSchoolNav && !isSuperAdmin && !isOrgAdmin

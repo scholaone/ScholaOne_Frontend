@@ -18,6 +18,7 @@ import {
   sanitizeByKind,
   RHF_VALIDATION_MODE,
   applyApiFieldErrors,
+  formatErrorMessage,
   handleFormInvalid,
   formFieldId,
 } from '@/utils/validation'
@@ -194,7 +195,7 @@ export default function ResourceFormPage({
     const common = {
       key: field.name,
       label: field.label,
-      error: errors[field.name]?.message,
+      error: formatErrorMessage(errors[field.name]?.message || errors[field.name]),
       required: field.required,
       disabled: isDisabled,
       ...registerField(field),

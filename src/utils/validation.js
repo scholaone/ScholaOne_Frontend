@@ -389,20 +389,67 @@ export function focusFormField(nameOrId) {
   return true
 }
 
+/** Normalize API / RHF / DRF error values into a single human-readable string. */
+export function formatErrorMessage(value) {
+  if (value == null || value === false) return ''
+  if (typeof value === 'string') return value.trim()
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const msg = formatErrorMessage(item)
+      if (msg) return msg
+    }
+    return ''
+  }
+  if (typeof value === 'object') {
+    if (typeof value.message === 'string') return value.message.trim()
+    if (typeof value.detail === 'string') return value.detail.trim()
+    if (Array.isArray(value.detail)) return formatErrorMessage(value.detail)
+    if (Array.isArray(value.messages)) return formatErrorMessage(value.messages)
+  }
+  return ''
+}
+
+const ERROR_META_KEYS = new Set(['message', 'status', 'success', 'error', 'errors', 'detail', 'code', 'timestamp', 'request_id', 'correlation_id', 'pagination', 'data'])
+
 /** Flatten react-hook-form errors into { name, message }[]. */
 export function collectRhfErrors(errors = {}) {
   const items = []
+  const seen = new Set()
+
+  const push = (name, message) => {
+    const text = formatErrorMessage(message)
+    if (!text) return
+    const key = `${name}:${text}`
+    if (seen.has(key)) return
+    seen.add(key)
+    items.push({ name, message: text })
+  }
+
   const walk = (node, prefix = '') => {
-    if (!node || typeof node !== 'object') return
+    if (node == null) return
+
+    const direct = formatErrorMessage(node)
+    if (typeof node !== 'object' || Array.isArray(node)) {
+      if (direct) push(prefix, direct)
+      return
+    }
+
+    if (typeof node.message === 'string' && node.message.trim()) {
+      push(prefix, node.message)
+    }
+
     Object.entries(node).forEach(([key, value]) => {
+      if (key === 'ref' || key === 'types' || key === 'type') return
       const path = prefix ? `${prefix}.${key}` : key
-      if (value?.message) {
-        items.push({ name: path, message: String(value.message) })
+      if (key === 'message' && typeof value === 'string') {
+        push(prefix, value)
         return
       }
       walk(value, path)
     })
   }
+
   walk(errors)
   return items
 }
@@ -416,16 +463,18 @@ export function extractApiFieldErrors(error) {
   const absorb = (source) => {
     if (!source || typeof source !== 'object' || Array.isArray(source)) return
     Object.entries(source).forEach(([key, val]) => {
-      if (['message', 'status', 'success', 'error', 'errors', 'detail'].includes(key)) return
-      if (Array.isArray(val) && val[0]) out[key] = String(val[0])
-      else if (typeof val === 'string' && val.trim()) out[key] = val
+      if (ERROR_META_KEYS.has(key)) return
+      const msg = formatErrorMessage(val)
+      if (msg) out[key] = msg
     })
   }
 
   absorb(data)
   absorb(data.data)
+  absorb(data.error?.details)
   if (data.errors && typeof data.errors === 'object' && !Array.isArray(data.errors)) {
     absorb(data.errors)
+    absorb(data.errors.details)
   }
 
   return out
@@ -451,17 +500,13 @@ export function handleFormInvalid(errors, options = {}) {
   } = options
 
   const items = Array.isArray(errors)
-    ? errors
-    : errors?.message
-      ? [{ name: '', message: errors.message }]
-      : typeof errors === 'object' && errors !== null && !errors.root
-        ? Object.entries(errors).some(([, v]) => v?.message)
-          ? collectRhfErrors(errors)
-          : Object.entries(errors).map(([name, message]) => ({
-              name,
-              message: typeof message === 'string' ? message : String(message),
-            }))
-        : collectRhfErrors(errors)
+    ? errors.map((entry, index) => ({
+        name: entry?.name || String(index),
+        message: formatErrorMessage(entry?.message ?? entry),
+      })).filter((item) => item.message)
+    : typeof errors === 'object' && errors !== null
+      ? collectRhfErrors(errors)
+      : []
 
   if (!items.length) {
     toastFn?.('Please check the form for errors')

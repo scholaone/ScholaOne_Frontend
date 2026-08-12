@@ -1,11 +1,15 @@
 import { lazy, Suspense } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { dashboardService } from '@/api/services'
 import { unwrapData } from '@/api/client'
 import { Card, PageHeader } from '@/components/ui/Card'
 import { formatNumber } from '@/utils/format'
 import SchoolDashboardView from '@/pages/dashboard/SchoolDashboardView'
+import StudentDashboardView from '@/pages/dashboard/StudentDashboardView'
+import TeacherDashboardView from '@/pages/dashboard/TeacherDashboardView'
+import { getPostLoginPath, isStudentPortalUser, isTeacherPortalUser } from '@/utils/authRoles'
 import {
   ClayInsightBanner,
   ClayStatGrid,
@@ -108,7 +112,15 @@ function DefaultDashboardView() {
 }
 
 export default function DashboardPage() {
-  const { isSuperAdmin, isSchoolAdmin } = useAuth()
+  const { user, isSuperAdmin, isSchoolAdmin } = useAuth()
+
+  if (isStudentPortalUser(user)) {
+    return <Navigate to="/dashboard/student" replace />
+  }
+
+  if (isTeacherPortalUser(user)) {
+    return <Navigate to="/dashboard/teacher" replace />
+  }
 
   if (isSuperAdmin) {
     return <SuperAdminDashboardView />
@@ -120,3 +132,5 @@ export default function DashboardPage() {
 
   return <DefaultDashboardView />
 }
+
+export { StudentDashboardView, TeacherDashboardView }

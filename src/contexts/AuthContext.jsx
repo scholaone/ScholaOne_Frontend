@@ -22,6 +22,7 @@ import {
 } from '@/utils/storage'
 import { isTokenExpired } from '@/utils/jwt'
 import { prefetchPostLoginData } from '@/utils/prefetchDashboard'
+import { getPostLoginPath, getUserPrimaryRole, isStudentPortalUser, isTeacherPortalUser } from '@/utils/authRoles'
 
 const AuthContext = createContext(null)
 
@@ -383,6 +384,10 @@ export function AuthProvider({ children }) {
       isSuperAdmin: Boolean(state.user?.is_super_admin),
       isOrgAdmin: Boolean(state.user?.is_org_admin),
       isSchoolAdmin: Boolean(state.user?.is_school_admin),
+      isStudent: isStudentPortalUser(state.user),
+      isTeacher: isTeacherPortalUser(state.user),
+      primaryRole: getUserPrimaryRole(state.user),
+      getDashboardPath: () => getPostLoginPath(state.user),
     }),
     [state, login, logout, updateTokens, refreshProfile],
   )

@@ -17,7 +17,11 @@ import {
   resolveFieldKind,
   sanitizeByKind,
   RHF_VALIDATION_MODE,
+  applyApiFieldErrors,
+  handleFormInvalid,
+  formFieldId,
 } from '@/utils/validation'
+import FormValidationSummaryRhf from '@/components/ui/FormValidationSummary'
 
 export default function ResourceFormPage({
   title,
@@ -49,7 +53,7 @@ export default function ResourceFormPage({
     return { ...auto, ...custom }
   }, [applyScope, isEdit, user, fields, isSuperAdmin, getCreateDefaults])
 
-  const { register, handleSubmit, reset, formState: { errors }, setValue, watch } = useForm({
+  const { register, handleSubmit, reset, formState: { errors }, setValue, watch, setError } = useForm({
     ...RHF_VALIDATION_MODE,
     defaultValues: scopeDefaults,
   })
@@ -104,8 +108,19 @@ export default function ResourceFormPage({
       toast.success(isEdit ? 'Updated successfully' : 'Created successfully')
       navigate(basePath)
     },
-    onError: (err) => toast.error(getErrorMessage(err)),
+    onError: (err) => {
+      const apiErrors = applyApiFieldErrors(setError, err)
+      if (Object.keys(apiErrors).length) {
+        handleFormInvalid(apiErrors, { toastFn: toast.error })
+        return
+      }
+      toast.error(getErrorMessage(err))
+    },
   })
+
+  const onInvalid = (invalidErrors) => {
+    handleFormInvalid(invalidErrors, { toastFn: toast.error })
+  }
 
   const registerField = (field) => {
     const kind = resolveFieldKind(field.name, field.type)
@@ -121,6 +136,7 @@ export default function ResourceFormPage({
     const constraints = getInputConstraints(field.name, field.type)
 
     return {
+      id: formFieldId(field.name),
       name,
       ref,
       onBlur,
@@ -190,7 +206,15 @@ export default function ResourceFormPage({
       <PageHeader title={isEdit ? `Edit ${title}` : `New ${title}`} />
 
       <Card className="w-full lms-form-card">
-        <form noValidate onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]">
+        <form
+          noValidate
+          onSubmit={handleSubmit((d) => mutation.mutate(d), onInvalid)}
+          className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]"
+        >
+          <FormValidationSummaryRhf
+            errors={errors}
+            className="sm:col-span-2 lg:col-span-3"
+          />
           {renderTop ? (
             <div className="sm:col-span-2 lg:col-span-3">
               {renderTop({

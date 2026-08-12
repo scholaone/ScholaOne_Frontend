@@ -12,7 +12,10 @@ import {
   sanitizeByKind,
   validateByKind,
   getFieldError,
+  handleFormInvalid,
+  focusFormField,
 } from '@/utils/validation'
+import FormValidationSummary from '@/components/ui/FormValidationSummary'
 import {
   ENQUIRY_SOURCE_LABELS,
   ENQUIRY_STATUS_LABELS,
@@ -156,13 +159,15 @@ export function EnquiryFormSheet({
     if (emailResult !== true) next.email = emailResult
 
     setErrors(next)
-    return Object.keys(next).length === 0
+    return next
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!validate()) {
-      toast.error('Please fix the highlighted fields')
+    const validationErrors = validate()
+    if (Object.keys(validationErrors).length) {
+      handleFormInvalid(validationErrors, { toastFn: toast.error })
+      focusFormField(Object.keys(validationErrors)[0])
       return
     }
     await onSubmit({ ...form, enquiryStatus: trackingStatus })
@@ -190,6 +195,8 @@ export function EnquiryFormSheet({
               : null}
           </p>
         </div>
+
+        <FormValidationSummary errors={errors} />
 
         <FormBlock title="Student Information">
           <Grid>

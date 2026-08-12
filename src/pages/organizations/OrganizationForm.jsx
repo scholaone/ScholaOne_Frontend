@@ -28,7 +28,8 @@ import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { organizationService, schoolService } from '@/api/services'
 import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import { cn, getInitials, resolveMediaUrl } from '@/utils/format'
-import { registerValidated } from '@/utils/validation'
+import { registerValidated, RHF_VALIDATION_MODE, handleFormInvalid } from '@/utils/validation'
+import FormValidationSummaryRhf from '@/components/ui/FormValidationSummary'
 import {
   OrganizationDocumentsList,
   OrganizationDocumentsUploader,
@@ -547,9 +548,7 @@ export default function OrganizationForm() {
     formState: { errors },
   } = useForm({
     defaultValues: DEFAULT_VALUES,
-    mode: 'onBlur',
-    reValidateMode: 'onChange',
-    shouldFocusError: true,
+    ...RHF_VALIDATION_MODE,
   })
 
   const values = watch()
@@ -1137,7 +1136,15 @@ export default function OrganizationForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="w-full space-y-6">
+      <form
+        noValidate
+        onSubmit={handleSubmit(
+          (d) => mutation.mutate(d),
+          (invalidErrors) => handleFormInvalid(invalidErrors, { toastFn: toast.error }),
+        )}
+        className="w-full space-y-6"
+      >
+        <FormValidationSummaryRhf errors={errors} />
         {!isEdit && (
           <Card>
             <div className="mb-4 flex items-center justify-between gap-4">

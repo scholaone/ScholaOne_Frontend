@@ -695,6 +695,13 @@
 
 .lms-input--error {
   border-color: #e57373;
+  box-shadow: 0 0 0 2px rgba(229, 115, 115, 0.15);
+}
+
+.lms-select.lms-input--error,
+.lms-textarea.lms-input--error {
+  border-color: #e57373;
+  box-shadow: 0 0 0 2px rgba(229, 115, 115, 0.15);
 }
 
 .lms-form-card {

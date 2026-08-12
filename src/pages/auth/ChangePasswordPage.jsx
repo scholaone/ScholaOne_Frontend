@@ -8,9 +8,13 @@ import { PageHeader, Card } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import FormValidationSummaryRhf from '@/components/ui/FormValidationSummary'
+import { RHF_VALIDATION_MODE, handleFormInvalid } from '@/utils/validation'
 
 export default function ChangePasswordPage() {
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm()
+  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm({
+    ...RHF_VALIDATION_MODE,
+  })
 
   const mutation = useMutation({
     mutationFn: (data) =>
@@ -33,19 +37,29 @@ export default function ChangePasswordPage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card>
-          <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="grid gap-5 sm:grid-cols-2">
+          <form
+            noValidate
+            onSubmit={handleSubmit(
+              (d) => mutation.mutate(d),
+              (invalidErrors) => handleFormInvalid(invalidErrors, { toastFn: toast.error }),
+            )}
+            className="grid gap-5 sm:grid-cols-2"
+          >
+            <FormValidationSummaryRhf errors={errors} className="sm:col-span-2" />
             <Input
               label="Current Password"
               type="password"
+              required
               error={errors.oldPassword?.message}
-              {...register('oldPassword', { required: 'Required' })}
+              {...register('oldPassword', { required: 'Current password is required' })}
             />
             <Input
               label="New Password"
               type="password"
+              required
               error={errors.newPassword?.message}
               {...register('newPassword', {
-                required: 'Required',
+                required: 'New password is required',
                 minLength: { value: 8, message: 'Min 8 characters' },
               })}
             />
@@ -53,9 +67,10 @@ export default function ChangePasswordPage() {
               <Input
                 label="Confirm Password"
                 type="password"
+                required
                 error={errors.confirmPassword?.message}
                 {...register('confirmPassword', {
-                  required: 'Required',
+                  required: 'Confirm password is required',
                   validate: (v) => v === watch('newPassword') || 'Passwords do not match',
                 })}
               />

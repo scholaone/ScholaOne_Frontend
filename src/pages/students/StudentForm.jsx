@@ -16,7 +16,8 @@ import { getErrorMessage, unwrapData, unwrapList } from '@/api/client'
 import { STUDENT_STATUS_OPTIONS } from '@/config/constants'
 import ProfilePhotoFrame from '@/components/common/ProfilePhotoFrame'
 import { compressImageFile } from '@/utils/imageCompress'
-import { registerValidated, RHF_VALIDATION_MODE } from '@/utils/validation'
+import { registerValidated, RHF_VALIDATION_MODE, handleFormInvalid } from '@/utils/validation'
+import FormValidationSummaryRhf from '@/components/ui/FormValidationSummary'
 import { useSchoolScopedSelection } from '@/hooks/useSchoolScopedSelection'
 
 const GENDER_OPTIONS = [
@@ -321,9 +322,14 @@ export default function StudentForm() {
 
       <Card className="w-full lms-form-card">
         <form
-          onSubmit={handleSubmit((values) => mutation.mutate(values))}
+          noValidate
+          onSubmit={handleSubmit(
+            (values) => mutation.mutate(values),
+            (invalidErrors) => handleFormInvalid(invalidErrors, { toastFn: toast.error }),
+          )}
           className="grid gap-4 p-1 [grid-template-columns:minmax(0,1fr)] sm:[grid-template-columns:repeat(2,minmax(0,1fr))] lg:[grid-template-columns:repeat(3,minmax(0,1fr))]"
         >
+          <FormValidationSummaryRhf errors={errors} className="sm:col-span-2 lg:col-span-3" />
           <StudentPhotoField
             currentUrl={photoUrl}
             pendingFile={pendingPhotoFile}
@@ -347,7 +353,9 @@ export default function StudentForm() {
           />
           <SelectField
             label="Class & Section"
+            required
             options={classSectionOptions}
+            error={errors.class_section?.message}
             placeholder={
               classSectionsQuery.isLoading
                 ? 'Loading classes…'
@@ -355,14 +363,14 @@ export default function StudentForm() {
                   ? 'Select class section'
                   : 'Select academic year first'
             }
-            {...register('class_section')}
+            {...register('class_section', { required: 'Class & section is required' })}
           />
           <Input label="Roll Number" {...register('roll_number')} />
 
           <Input label="First Name" required error={errors.first_name?.message} {...register('first_name', { required: 'First name is required' })} />
-          <Input label="Last Name" {...register('last_name')} />
+          <Input label="Last Name" error={errors.last_name?.message} {...register('last_name')} />
           <Input label="Email" error={errors.email?.message} {...registerValidated(register, 'email', { label: 'Email', type: 'email' })} />
-          <Input label="Mobile" required error={errors.mobile_number?.message} {...registerValidated(register, 'mobile_number', { required: true, label: 'Mobile' })} />
+          <Input label="Mobile" required error={errors.mobile_number?.message} {...registerValidated(register, 'mobile_number', { required: true, label: 'Mobile number' })} />
           <Input
             label="Admission Number"
             readOnly={!isEdit}

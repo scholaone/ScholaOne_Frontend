@@ -12,7 +12,8 @@ import Input, { SelectField, Textarea } from '@/components/ui/Input'
 import { PageHeader, Card } from '@/components/ui/Card'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { resolveMediaUrl } from '@/utils/format'
-import { sanitizeByKind, validateFields, getFieldError } from '@/utils/validation'
+import { sanitizeByKind, validateFields, getFieldError, handleFormInvalid } from '@/utils/validation'
+import FormValidationSummary from '@/components/ui/FormValidationSummary'
 
 const LANGUAGE_OPTIONS = [
   { label: 'English', value: 'en' },
@@ -189,14 +190,21 @@ export default function SchoolProfilePage() {
     })
   }
 
-  const blurProfileField = (name) => {
+  const blurProfileField = (name, meta = {}) => {
     const kind = ['email', 'phone', 'pincode', 'website'].includes(name)
       ? (name === 'phone' ? 'mobile' : name)
       : null
-    if (!kind) return
-    const message = getFieldError(kind, form[name], {
-      label: name === 'phone' ? 'Phone' : name.charAt(0).toUpperCase() + name.slice(1),
-    })
+    const label =
+      meta.label ||
+      (name === 'phone' ? 'Phone' : name === 'school_name' ? 'School name' : name.charAt(0).toUpperCase() + name.slice(1))
+
+    let message = null
+    if (kind) {
+      message = getFieldError(kind, form[name], { ...meta, label })
+    } else if (meta.required && !String(form[name] || '').trim()) {
+      message = `${label} is required`
+    }
+
     setFieldErrors((prev) => {
       if (!message) {
         if (!prev[name]) return prev
@@ -210,14 +218,15 @@ export default function SchoolProfilePage() {
 
   const handleSaveProfile = () => {
     const errors = validateFields(form, [
+      { name: 'school_name', label: 'School name', required: true },
       { name: 'email', label: 'Email', type: 'email' },
-      { name: 'phone', label: 'Phone' },
-      { name: 'pincode', label: 'Pincode' },
-      { name: 'website', label: 'Website' },
+      { name: 'phone', label: 'Phone', type: 'mobile', required: true },
+      { name: 'pincode', label: 'Pincode', type: 'pincode' },
+      { name: 'website', label: 'Website', type: 'website' },
     ])
     setFieldErrors(errors)
     if (Object.keys(errors).length) {
-      toast.error('Please fix invalid profile fields')
+      handleFormInvalid(errors, { toastFn: toast.error })
       return
     }
 
@@ -307,11 +316,12 @@ export default function SchoolProfilePage() {
 
       {tab === 'profile' && (
         <Card>
+          <FormValidationSummary errors={fieldErrors} className="mb-5" />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <Input label="School Name" value={form.school_name} onChange={(e) => setField('school_name', e.target.value)} />
-            <Input label="Pincode" inputMode="numeric" maxLength={6} error={fieldErrors.pincode} value={form.pincode} onChange={(e) => setField('pincode', e.target.value)} onBlur={() => blurProfileField('pincode')} />
-            <Input label="Email" type="email" error={fieldErrors.email} value={form.email} onChange={(e) => setField('email', e.target.value)} onBlur={() => blurProfileField('email')} />
-            <Input label="Phone" type="tel" inputMode="numeric" maxLength={10} error={fieldErrors.phone} value={form.phone} onChange={(e) => setField('phone', e.target.value)} onBlur={() => blurProfileField('phone')} />
+            <Input label="School Name" required error={fieldErrors.school_name} value={form.school_name} onChange={(e) => setField('school_name', e.target.value)} onBlur={() => blurProfileField('school_name', { required: true, label: 'School name' })} />
+            <Input label="Pincode" required={false} inputMode="numeric" maxLength={6} error={fieldErrors.pincode} value={form.pincode} onChange={(e) => setField('pincode', e.target.value)} onBlur={() => blurProfileField('pincode')} />
+            <Input label="Email" required type="email" error={fieldErrors.email} value={form.email} onChange={(e) => setField('email', e.target.value)} onBlur={() => blurProfileField('email')} />
+            <Input label="Phone" required type="tel" inputMode="numeric" maxLength={10} error={fieldErrors.phone} value={form.phone} onChange={(e) => setField('phone', e.target.value)} onBlur={() => blurProfileField('phone')} />
             <Input label="Website" error={fieldErrors.website} value={form.website} onChange={(e) => setField('website', e.target.value)} onBlur={() => blurProfileField('website')} />
             <Input label="Principal Name" value={form.principal_name} onChange={(e) => setField('principal_name', e.target.value)} />
             <Input label="Affiliation Number" value={form.affiliation_number} onChange={(e) => setField('affiliation_number', e.target.value)} />

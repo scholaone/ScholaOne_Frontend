@@ -22,7 +22,14 @@ import {
 } from '@/features/admissions/utils/applicationFormDraft'
 import { cn } from '@/lib/utils'
 import PhotoUploadField from '@/components/common/PhotoUploadField'
-import { sanitizeByKind, validateByKind, getFieldError } from '@/utils/validation'
+import {
+  sanitizeByKind,
+  validateByKind,
+  getFieldError,
+  handleFormInvalid,
+  focusFormField,
+} from '@/utils/validation'
+import FormValidationSummary from '@/components/ui/FormValidationSummary'
 
 function Field({ label, required, children, className, error }) {
   return (
@@ -186,11 +193,8 @@ export default function AdmissionApplicationForm() {
     }
     setFieldErrors(errors)
     if (Object.keys(errors).length) {
-      toast.error('Please fix invalid fields before continuing')
-      const firstKey = Object.keys(errors)[0]
-      const el = document.querySelector(`[data-field-path="${firstKey}"]`)
-      el?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
-      el?.focus?.()
+      handleFormInvalid(errors, { toastFn: toast.error })
+      focusFormField(Object.keys(errors)[0])
       return false
     }
     return true
@@ -311,6 +315,8 @@ export default function AdmissionApplicationForm() {
           {meta.status ? <span>Status: <span className="font-normal text-black" style={{ fontWeight: 500 }}>{meta.status}</span></span> : null}
         </div>
       )}
+
+      <FormValidationSummary errors={fieldErrors} className="mb-2" />
 
       {prefillSummary.length > 0 ? (
         <div className="rounded-xl border border-brand-200 bg-brand-50/60 px-4 py-3">

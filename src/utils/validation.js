@@ -344,3 +344,112 @@ export const RHF_VALIDATION_MODE = {
   reValidateMode: 'onChange',
   shouldFocusError: true,
 }
+
+/** Stable DOM id for scrolling/focusing invalid fields. */
+export function formFieldId(name) {
+  if (!name) return undefined
+  return `field-${String(name).replace(/\./g, '-')}`
+}
+
+/** Focus and scroll to a form field by name or id. */
+export function focusFormField(nameOrId) {
+  if (!nameOrId) return false
+  const id = String(nameOrId).startsWith('field-') ? nameOrId : formFieldId(nameOrId)
+  const el =
+    document.getElementById(id) ||
+    document.querySelector(`[name="${nameOrId}"]`) ||
+    document.querySelector(`[data-field-path="${nameOrId}"]`)
+  if (!el) return false
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  if (typeof el.focus === 'function') el.focus({ preventScroll: true })
+  return true
+}
+
+/** Flatten react-hook-form errors into { name, message }[]. */
+export function collectRhfErrors(errors = {}) {
+  const items = []
+  const walk = (node, prefix = '') => {
+    if (!node || typeof node !== 'object') return
+    Object.entries(node).forEach(([key, value]) => {
+      const path = prefix ? `${prefix}.${key}` : key
+      if (value?.message) {
+        items.push({ name: path, message: String(value.message) })
+        return
+      }
+      walk(value, path)
+    })
+  }
+  walk(errors)
+  return items
+}
+
+/** Extract serializer field errors from an API error response. */
+export function extractApiFieldErrors(error) {
+  const data = error?.response?.data
+  if (!data || typeof data !== 'object') return {}
+
+  const out = {}
+  const absorb = (source) => {
+    if (!source || typeof source !== 'object' || Array.isArray(source)) return
+    Object.entries(source).forEach(([key, val]) => {
+      if (['message', 'status', 'success', 'error', 'errors', 'detail'].includes(key)) return
+      if (Array.isArray(val) && val[0]) out[key] = String(val[0])
+      else if (typeof val === 'string' && val.trim()) out[key] = val
+    })
+  }
+
+  absorb(data)
+  absorb(data.data)
+  if (data.errors && typeof data.errors === 'object' && !Array.isArray(data.errors)) {
+    absorb(data.errors)
+  }
+
+  return out
+}
+
+/** Apply API field errors to react-hook-form via setError. */
+export function applyApiFieldErrors(setError, error) {
+  const fieldErrors = extractApiFieldErrors(error)
+  Object.entries(fieldErrors).forEach(([name, message]) => {
+    setError(name, { type: 'server', message })
+  })
+  return fieldErrors
+}
+
+/**
+ * RHF onInvalid handler — toast + scroll to first invalid field.
+ * Works with plain error maps too: handleFormInvalid({ email: 'Email is required' })
+ */
+export function handleFormInvalid(errors, options = {}) {
+  const {
+    toastFn,
+    toastPrefix = 'Please fix the highlighted fields below',
+  } = options
+
+  const items = Array.isArray(errors)
+    ? errors
+    : errors?.message
+      ? [{ name: '', message: errors.message }]
+      : typeof errors === 'object' && errors !== null && !errors.root
+        ? Object.entries(errors).some(([, v]) => v?.message)
+          ? collectRhfErrors(errors)
+          : Object.entries(errors).map(([name, message]) => ({
+              name,
+              message: typeof message === 'string' ? message : String(message),
+            }))
+        : collectRhfErrors(errors)
+
+  if (!items.length) {
+    toastFn?.('Please check the form for errors')
+    return
+  }
+
+  const preview = items
+    .slice(0, 3)
+    .map((item) => item.message)
+    .join(' · ')
+  const suffix = items.length > 3 ? ` (+${items.length - 3} more)` : ''
+  toastFn?.(`${toastPrefix}: ${preview}${suffix}`)
+
+  focusFormField(items[0].name)
+}

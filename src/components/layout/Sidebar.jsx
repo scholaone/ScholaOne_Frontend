@@ -43,21 +43,6 @@ import { menuService } from '@/api/services'
 import { unwrapData } from '@/api/client'
 import { modulesToNavItems, unwrapMenuModules } from '@/utils/navFromApi'
 import { cn } from '@/lib/utils'
-import { REPORT_MENU_ITEMS } from '@/config/reportDefinitions'
-
-const reportIconMap = {
-  'reports-overview': FiGrid,
-  'staff-children': FiUsers,
-  'class-wise-students': FiUsers,
-  'attendance-reports': FiCalendar,
-}
-
-const reportNavChildren = REPORT_MENU_ITEMS.map((item) => ({
-  id: item.id,
-  label: item.label,
-  path: item.path,
-  icon: reportIconMap[item.id] || (item.id.startsWith('fee-') ? FiCreditCard : FiBarChart2),
-}))
 
 const iconMap = {
   dashboard: FiGrid,
@@ -174,92 +159,6 @@ const orgAdminNav = [
   },
 ]
 
-const schoolAdminNav = [
-  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: FiGrid },
-  {
-    id: 'admissions',
-    label: 'Admissions',
-    icon: FiClipboard,
-    children: [
-      { id: 'adm-overview', label: 'Overview', path: '/admissions', icon: FiGrid },
-      { id: 'adm-setup', label: 'Setup', path: '/admissions/setup', icon: FiSettings },
-      { id: 'adm-enquiries', label: 'Enquiries', path: '/admissions/enquiries', icon: FiMessageSquare },
-      { id: 'adm-pipeline', label: 'Pipeline', path: '/admissions/pipeline', icon: FiGitBranch },
-      { id: 'adm-followups', label: 'Follow-ups', path: '/admissions/follow-ups', icon: FiClock },
-      { id: 'adm-internal', label: 'Applications', path: '/admissions/applications/internal', icon: FiFileText },
-      { id: 'adm-external', label: 'External Apps', path: '/admissions/applications/external', icon: FiGlobe },
-      { id: 'adm-confirmed', label: 'Confirmed', path: '/admissions/confirmed', icon: FiCheckCircle },
-      { id: 'adm-conversion', label: 'Conversion', path: '/admissions/conversion', icon: FiUserCheck },
-      { id: 'adm-forms', label: 'Form Builder', path: '/form-builder', icon: FiLayout },
-    ],
-  },
-  { id: 'students', label: 'Students', path: '/students', icon: FiUsers },
-  { id: 'teachers', label: 'Teachers', path: '/teachers', icon: FiUserCheck },
-  { id: 'parents', label: 'Parents', path: '/parents', icon: FiUsers },
-  {
-    id: 'lms',
-    label: 'LMS',
-    icon: FiBookOpen,
-    children: [
-      { id: 'lms-courses', label: 'Courses', path: '/lms/courses', icon: FiBookOpen },
-      { id: 'lms-assignments', label: 'Assignments', path: '/lms/assignments', icon: FiClipboard },
-    ],
-  },
-  { id: 'attendance', label: 'Attendance', path: '/attendance', icon: FiCalendar },
-  { id: 'timetable', label: 'Timetable', path: '/timetable', icon: FiCalendar },
-  { id: 'homework', label: 'Homework', path: '/homework', icon: FiClipboard },
-  { id: 'announcements', label: 'Announcements', path: '/announcements', icon: FiRadio },
-  { id: 'examinations', label: 'Exams', path: '/examinations', icon: FiFileText },
-  { id: 'fees', label: 'Fees', path: '/fees', icon: FiCreditCard },
-  { id: 'transport', label: 'Transport', path: '/transport', icon: FiTruck },
-  { id: 'library', label: 'Library', path: '/library', icon: FiBook },
-  { id: 'documents', label: 'Documents', path: '/documents', icon: FiFileText },
-  {
-    id: 'reports',
-    label: 'Reports',
-    icon: FiBarChart2,
-    children: reportNavChildren,
-  },
-  {
-    id: 'school',
-    label: 'School Admin',
-    icon: FiBook,
-    children: [
-      { id: 'school-profile', label: 'School Profile', path: '/school-profile', icon: FiBook },
-      { id: 'school-settings', label: 'School Settings', path: '/school-settings', icon: FiSettings },
-      { id: 'school-masters', label: 'School Masters', path: '/school-masters', icon: FiDatabase },
-      { id: 'staff', label: 'HRMS', path: '/staff', icon: FiUserCheck },
-      { id: 'communications', label: 'Communications', path: '/communications', icon: FiMail },
-      { id: 'school-users', label: 'School Users', path: '/school-users', icon: FiUsers },
-    ],
-  },
-  {
-    id: 'masters',
-    label: 'Master Data',
-    icon: FiDatabase,
-    children: [
-      { id: 'masters-hub', label: 'Masters Hub', path: '/masters', icon: FiDatabase },
-      { id: 'academics', label: 'Academic Structure', path: '/academics', icon: FiBook },
-    ],
-  },
-  {
-    id: 'system',
-    label: 'System',
-    icon: FiSettings,
-    children: [
-      { id: 'audit', label: 'Audit Logs', path: '/audit-logs', icon: FiFileText },
-      { id: 'notifications', label: 'Notifications', path: '/notifications', icon: FiBell },
-    ],
-  },
-]
-
-function resolveNav({ isSuperAdmin, isOrgAdmin, isSchoolAdmin }) {
-  if (isSuperAdmin) return superAdminNav
-  if (isSchoolAdmin) return schoolAdminNav
-  if (isOrgAdmin) return orgAdminNav
-  return schoolAdminNav
-}
-
 function isNavItemActive(pathname, itemPath) {
   if (itemPath === '/ai-hub') return pathname === '/ai-hub'
   if (itemPath === '/admissions') {
@@ -344,7 +243,54 @@ function groupHasActiveChild(pathname, item) {
   return item.children.some((child) => isNavItemActive(pathname, child.path))
 }
 
-function SidebarNav({ items, collapsed, onNavigate }) {
+function SidebarNavSkeleton({ collapsed }) {
+  return (
+    <nav className="flex flex-col gap-2 px-3 py-4" aria-hidden="true">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div
+          key={index}
+          className={cn(
+            'animate-pulse rounded-lg bg-muted',
+            collapsed ? 'mx-auto h-9 w-9' : 'h-10 w-full',
+          )}
+        />
+      ))}
+    </nav>
+  )
+}
+
+function SidebarNavEmpty({ collapsed }) {
+  if (collapsed) return null
+  return (
+    <div className="px-4 py-6 text-center text-xs text-muted-foreground">
+      No menus assigned yet. Ask your administrator to enable modules for your school.
+    </div>
+  )
+}
+
+function SidebarNavError({ collapsed, onRetry }) {
+  if (collapsed) return null
+  return (
+    <div className="space-y-2 px-4 py-6 text-center">
+      <p className="text-xs text-muted-foreground">Could not load menus.</p>
+      {onRetry ? (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="text-xs font-medium text-brand-600 hover:underline"
+        >
+          Try again
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
+function SidebarNav({ items, collapsed, onNavigate, isLoading, isError, onRetry }) {
+  if (isLoading) return <SidebarNavSkeleton collapsed={collapsed} />
+  if (isError) return <SidebarNavError collapsed={collapsed} onRetry={onRetry} />
+  if (!items.length) return <SidebarNavEmpty collapsed={collapsed} />
+
   const location = useLocation()
   const [expanded, setExpanded] = useState(() =>
     items.filter((item) => item.children && groupHasActiveChild(location.pathname, item)).map((item) => item.id),
@@ -459,26 +405,20 @@ export default function Sidebar({ mobile, onClose }) {
   const navItems = useMemo(() => {
     if (isSuperAdmin) return superAdminNav
     if (isOrgAdmin) return orgAdminNav
-    if (usesDynamicSchoolNav) {
-      if (dynamicMenusQuery.isSuccess) {
-        const modules = unwrapMenuModules(unwrapData(dynamicMenusQuery.data))
-        const items = modulesToNavItems(modules)
-        if (items.length) return items
-      }
-      if (dynamicMenusQuery.isLoading) return schoolAdminNav
-      if (dynamicMenusQuery.isError) return schoolAdminNav
-      return schoolAdminNav
+    if (usesDynamicSchoolNav && dynamicMenusQuery.isSuccess) {
+      const modules = unwrapMenuModules(unwrapData(dynamicMenusQuery.data))
+      return modulesToNavItems(modules)
     }
-    return schoolAdminNav
+    return []
   }, [
     isSuperAdmin,
     isOrgAdmin,
     usesDynamicSchoolNav,
     dynamicMenusQuery.isSuccess,
-    dynamicMenusQuery.isLoading,
-    dynamicMenusQuery.isError,
     dynamicMenusQuery.data,
   ])
+
+  const showDynamicMenuState = usesDynamicSchoolNav && !isSuperAdmin && !isOrgAdmin
 
   const collapsed = !mobile && sidebarCollapsed
 
@@ -517,7 +457,14 @@ export default function Sidebar({ mobile, onClose }) {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
-        <SidebarNav items={navItems} collapsed={collapsed} onNavigate={onClose} />
+        <SidebarNav
+          items={navItems}
+          collapsed={collapsed}
+          onNavigate={onClose}
+          isLoading={showDynamicMenuState && dynamicMenusQuery.isLoading}
+          isError={showDynamicMenuState && dynamicMenusQuery.isError}
+          onRetry={showDynamicMenuState ? () => dynamicMenusQuery.refetch() : undefined}
+        />
       </div>
 
       {!collapsed && (

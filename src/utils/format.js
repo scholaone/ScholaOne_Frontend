@@ -13,6 +13,20 @@ export function formatDateTime(value) {
   return dayjs(value).format('DD MMM YYYY, hh:mm A')
 }
 
+/** datetime-local input → ISO UTC string for API (avoids treating local time as UTC). */
+export function datetimeLocalToISO(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toISOString()
+}
+
+/** API ISO datetime → datetime-local input value in user's local timezone. */
+export function isoToDatetimeLocal(value) {
+  if (!value) return ''
+  return dayjs(value).format('YYYY-MM-DDTHH:mm')
+}
+
 export function fromNow(value) {
   if (!value) return ''
   return dayjs(value).fromNow()

@@ -7,9 +7,9 @@ import { HubPageShell, HubLinkCard, HubSectionTitle, HubInfoCard } from '@/compo
 import Card from '@/components/ui/Card'
 
 const QUICK_LINKS = [
-  { label: 'Announcements', path: '/communications/messages?category=announcement', icon: FiBell, desc: 'School-wide announcements' },
-  { label: 'Circulars', path: '/communications/messages?category=circular', icon: FiFileText, desc: 'Official circulars & notices' },
-  { label: 'Notifications', path: '/communications/messages?category=notification', icon: FiMessageSquare, desc: 'Targeted notifications' },
+  { label: 'Announcements', path: '/announcements', icon: FiBell, desc: 'School-wide announcements' },
+  { label: 'Circulars', path: '/circulars', icon: FiFileText, desc: 'Official circulars & notices' },
+  { label: 'Notifications', path: '/communications/notifications', icon: FiMessageSquare, desc: 'Targeted notifications' },
   { label: 'Templates', path: '/communications/templates', icon: FiMail, desc: 'Reusable email, SMS & push templates' },
   { label: 'All Messages', path: '/communications/messages', icon: FiSend, desc: 'Schedule, send & track delivery' },
 ]

@@ -844,7 +844,7 @@ export const notificationService = {
   list: (params) => apiGetPaginated(API_ENDPOINTS.NOTIFICATIONS.LIST, params),
   get: (id) => apiGet(API_ENDPOINTS.NOTIFICATIONS.DETAIL(id)),
   markRead: (id) => apiPost(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id)),
-  markAllRead: () => apiPost(API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ),
+  markAllRead: () => apiPost(API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {}),
   unreadCount: () => apiGet(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT),
 }
 

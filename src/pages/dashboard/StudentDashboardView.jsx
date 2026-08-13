@@ -13,6 +13,8 @@ import {
   StudentTimetablePanel,
 } from '@/components/dashboard/student/StudentDashboardPanels'
 import { DashboardWelcomeHeader } from '@/components/dashboard/clay/ClayWidgets'
+import DashboardNotificationsPanel from '@/components/notifications/DashboardNotificationsPanel'
+import { Card } from '@/components/ui/Card'
 import '@/styles/teacher-dashboard.css'
 import '@/styles/student-dashboard.css'
 
@@ -65,6 +67,10 @@ export default function StudentDashboardView() {
       {isFetching && data ? (
         <p className="mb-4 text-center text-xs text-[var(--td-muted)]">Refreshing dashboard…</p>
       ) : null}
+
+      <Card className="mb-5 overflow-hidden p-0">
+        <DashboardNotificationsPanel title="Notifications" className="p-5" />
+      </Card>
 
       <div className="teacher-dash__grid student-dash__grid">
         <div className="space-y-5">

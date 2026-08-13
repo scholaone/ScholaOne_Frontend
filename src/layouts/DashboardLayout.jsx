@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import useAutomationRunner from '@/hooks/useAutomationRunner'
+import { NotificationProvider } from '@/contexts/NotificationContext'
 import { useUI } from '@/contexts/UIContext'
 import { cn } from '@/lib/utils'
 import '@/styles/dashboard-clay.css'
@@ -11,7 +12,8 @@ export default function DashboardLayout() {
   const { mobileSidebarOpen, setMobileSidebarOpen } = useUI()
 
   return (
-    <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
+    <NotificationProvider>
+      <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
       <div className="hidden h-full min-h-0 shrink-0 lg:block">
         <Sidebar />
       </div>
@@ -37,6 +39,7 @@ export default function DashboardLayout() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+    </NotificationProvider>
   )
 }

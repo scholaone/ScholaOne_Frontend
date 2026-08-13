@@ -49,6 +49,8 @@ const ROUTE_TITLES = [
   { pattern: /^\/timetable/, title: 'Timetable' },
   { pattern: /^\/homework/, title: 'Homework' },
   { pattern: /^\/announcements/, title: 'Announcements' },
+  { pattern: /^\/circulars/, title: 'Circulars' },
+  { pattern: /^\/communications\/notifications/, title: 'Targeted Notifications' },
   { pattern: /^\/examinations/, title: 'Examinations' },
   { pattern: /^\/fees/, title: 'Fees' },
   { pattern: /^\/transport/, title: 'Transport' },

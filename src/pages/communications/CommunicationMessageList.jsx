@@ -53,6 +53,7 @@ export default function CommunicationMessageList() {
 
   return (
     <ResourceListPage
+      key={`${category || 'all'}-${status || 'all'}`}
       title={title}
       subtitle="Compose, schedule, and track multi-channel communications"
       queryKey={['communication-messages', category, status]}
@@ -60,29 +61,32 @@ export default function CommunicationMessageList() {
       listParams={listParams}
       deleteFn={communicationService.messages.delete}
       basePath="/communications/messages"
+      hideCreate
       columns={columns}
       filters={
         <>
           <SelectField
             value={category}
+            placeholder="All types"
             onChange={(e) => {
               const next = new URLSearchParams(searchParams)
               if (e.target.value) next.set('category', e.target.value)
               else next.delete('category')
               setSearchParams(next)
             }}
-            options={[{ label: 'All types', value: '' }, ...COMMUNICATION_CATEGORY_OPTIONS]}
+            options={COMMUNICATION_CATEGORY_OPTIONS}
             className="min-w-[140px]"
           />
           <SelectField
             value={status}
+            placeholder="All statuses"
             onChange={(e) => {
               const next = new URLSearchParams(searchParams)
               if (e.target.value) next.set('status', e.target.value)
               else next.delete('status')
               setSearchParams(next)
             }}
-            options={[{ label: 'All statuses', value: '' }, ...COMMUNICATION_STATUS_OPTIONS]}
+            options={COMMUNICATION_STATUS_OPTIONS}
             className="min-w-[140px]"
           />
         </>

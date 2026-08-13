@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { dashboardService } from '@/api/services'
 import { unwrapData } from '@/api/client'
 import { getPostLoginPath, isTeacherPortalUser } from '@/utils/authRoles'
+import DashboardNotificationsPanel from '@/components/notifications/DashboardNotificationsPanel'
 import {
   TeacherActivitiesPanel,
   TeacherCalendarPanel,
@@ -73,6 +74,7 @@ export default function TeacherDashboardView() {
 
       <div className="teacher-dash__grid">
         <div className="space-y-5">
+          <DashboardNotificationsPanel title="Notifications" variant="teacher" />
           <TeacherCalendarPanel enabled={isTeacherPortalUser(user)} />
           <TeacherActivitiesPanel activities={recentActivities} quickLinks={quickLinks} />
         </div>

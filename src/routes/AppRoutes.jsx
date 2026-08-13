@@ -71,6 +71,8 @@ import {
   TransportPage,
 } from '@/pages/school-ops/SchoolOpsPages'
 import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage'
+import CircularsPage from '@/pages/communications/CircularsPage'
+import CommunicationNotificationsPage from '@/pages/communications/CommunicationNotificationsPage'
 import LibraryPage from '@/pages/library/LibraryPage'
 import LibraryBookForm from '@/pages/library/LibraryBookForm'
 import AttendanceHubPage, { AttendanceReportsPage } from '@/pages/attendance/AttendanceHubPage'
@@ -252,6 +254,7 @@ export default function AppRoutes() {
           <Route path="/staff/:id/edit" element={<StaffForm />} />
 
           <Route path="/communications" element={<CommunicationsHubPage />} />
+          <Route path="/communications/notifications" element={<CommunicationNotificationsPage />} />
           <Route path="/communications/templates" element={<CommunicationTemplateList />} />
           <Route path="/communications/templates/new" element={<CommunicationTemplateForm />} />
           <Route path="/communications/templates/:id/edit" element={<CommunicationTemplateForm />} />
@@ -290,6 +293,7 @@ export default function AppRoutes() {
           <Route path="/timetable/substitutions" element={<TimetableSubstitutionsPage />} />
           <Route path="/homework" element={<Navigate to="/lms/assignments?kind=homework" replace />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/circulars" element={<CircularsPage />} />
           <Route path="/examinations" element={<AssessmentsHubPage />} />
           <Route path="/examinations/marks" element={<AssessmentsMarksPage />} />
           <Route path="/examinations/results" element={<AssessmentsResultsPage />} />

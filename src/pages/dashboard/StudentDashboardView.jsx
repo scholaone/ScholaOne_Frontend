@@ -12,6 +12,7 @@ import {
   ClayStatGrid,
   formatStatValue,
 } from '@/components/dashboard/clay/ClayWidgets'
+import DashboardNotificationsPanel from '@/components/notifications/DashboardNotificationsPanel'
 import '@/styles/dashboard-clay.css'
 
 export default function StudentDashboardView() {
@@ -86,6 +87,10 @@ export default function StudentDashboardView() {
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="p-0 overflow-hidden lg:col-span-2">
+          <DashboardNotificationsPanel title="Notifications" className="p-5" />
+        </Card>
+
         <Card className="p-5">
           <h3 className="mb-3 text-sm font-semibold text-text">Pending assignments</h3>
           {pendingAssignments.length ? (

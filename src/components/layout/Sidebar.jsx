@@ -217,6 +217,12 @@ function isNavItemActive(pathname, itemPath) {
   if (itemPath === '/communications') {
     return pathname === '/communications' || pathname.startsWith('/communications/')
   }
+  if (itemPath === '/announcements') {
+    return pathname === '/announcements' || pathname.startsWith('/announcements/')
+  }
+  if (itemPath === '/circulars') {
+    return pathname === '/circulars' || pathname.startsWith('/circulars/')
+  }
   if (itemPath === '/documents') {
     return pathname === '/documents' || pathname.startsWith('/documents/')
   }

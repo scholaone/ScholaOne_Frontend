@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook } from 'react-icons/fi'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
-import { notificationService, schoolService } from '@/api/services'
+import { schoolService } from '@/api/services'
 import { unwrapData } from '@/api/client'
 import { Drawer } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Feedback'
-import { formatDateTime, fromNow, resolveMediaUrl } from '@/utils/format'
+import { resolveMediaUrl, fromNow } from '@/utils/format'
 import { getAuthenticatedTenantLabel } from '@/utils/tenantDisplay'
 import { getUserSchoolId } from '@/utils/schoolScope'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import { useNotificationContext } from '@/contexts/NotificationContext'
 
 export default function Header() {
   const { user, logout, isSchoolAdmin } = useAuth()
   const { setMobileSidebarOpen } = useUI()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [profileOpen, setProfileOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -29,30 +29,14 @@ export default function Header() {
     return () => window.clearTimeout(timer)
   }, [])
 
-  const { data: unreadData } = useQuery({
-    queryKey: ['notifications', 'unread-count'],
-    queryFn: () => notificationService.unreadCount(),
-    enabled: deferSecondaryQueries && Boolean(user?.id),
-    refetchInterval: 30000,
-    staleTime: 60_000,
-  })
-
-  const { data: notifData } = useQuery({
-    queryKey: ['notifications', 'list'],
-    queryFn: () => notificationService.list({ page_size: 20 }),
-    enabled: notifOpen,
-  })
-
-  const markAllMutation = useMutation({
-    mutationFn: () => notificationService.markAllRead(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
-      toast.success('All notifications marked as read')
-    },
-  })
-
-  const unreadCount = unreadData?.data?.count ?? unreadData?.count ?? 0
-  const notifications = notifData?.results ?? notifData?.data?.results ?? []
+  const {
+    unreadCount,
+    notifications,
+    markAllRead,
+    isMarkingAllRead,
+    openNotification,
+    requestBrowserPermission,
+  } = useNotificationContext()
 
   const handleLogout = async () => {
     if (isLoggingOut) return
@@ -89,6 +73,11 @@ export default function Header() {
     schoolProfile?.logo_url || schoolProfile?.logo || user?.school_logo_url || user?.school?.logo_url,
   )
   const showTenantLogo = Boolean(tenantLabel && hasSchoolContext)
+
+  const handleOpenDrawer = () => {
+    setNotifOpen(true)
+    requestBrowserPermission()
+  }
 
   return (
     <>
@@ -171,7 +160,7 @@ export default function Header() {
 
           <button
             type="button"
-            onClick={() => setNotifOpen(true)}
+            onClick={handleOpenDrawer}
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             title="Notifications"
           >
@@ -255,32 +244,43 @@ export default function Header() {
       <Drawer open={notifOpen} onClose={() => setNotifOpen(false)} title="Notifications">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{unreadCount} unread</p>
-          {unreadCount > 0 ? (
-            <button
-              type="button"
-              onClick={() => markAllMutation.mutate()}
-              className="text-sm font-medium text-brand-600 hover:underline"
-            >
-              Mark all read
-            </button>
-          ) : null}
+          <div className="flex items-center gap-3">
+            {unreadCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => markAllRead()}
+                disabled={isMarkingAllRead}
+                className="text-sm font-medium text-brand-600 hover:underline disabled:opacity-50"
+              >
+                Mark all read
+              </button>
+            ) : null}
+            <Link to="/notifications" onClick={() => setNotifOpen(false)} className="text-sm font-medium text-brand-600 hover:underline">
+              View all
+            </Link>
+          </div>
         </div>
         <div className="space-y-3">
           {notifications.length === 0 ? (
             <p className="py-8 text-center text-muted-foreground">No notifications</p>
           ) : (
             notifications.map((n) => (
-              <div
+              <button
                 key={n.id}
+                type="button"
+                onClick={() => {
+                  setNotifOpen(false)
+                  openNotification(n)
+                }}
                 className={cn(
-                  'rounded-xl border p-4',
+                  'w-full rounded-xl border p-4 text-left transition hover:border-brand-200 hover:bg-brand-50/40',
                   n.is_read ? 'border-border bg-card' : 'border-brand-200 bg-brand-50/50',
                 )}
               >
                 <p className="text-sm font-medium text-foreground">{n.title}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{n.message}</p>
                 <p className="mt-2 text-xs text-muted-foreground">{fromNow(n.created_at)}</p>
-              </div>
+              </button>
             ))
           )}
         </div>

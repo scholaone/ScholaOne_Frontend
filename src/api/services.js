@@ -14,7 +14,8 @@ import {
 } from './client'
 
 export const authService = {
-  login: (payload) => apiPost(API_ENDPOINTS.AUTH.LOGIN, payload, { skipAuthRefresh: true }),
+  login: (payload) =>
+    apiPost(API_ENDPOINTS.AUTH.LOGIN, payload, { skipAuthRefresh: true, timeout: 15000 }),
   refresh: (refreshToken) =>
     apiPost(API_ENDPOINTS.AUTH.REFRESH, { refresh: refreshToken }, { skipAuthRefresh: true }),
   logout: (refresh, accessToken) =>

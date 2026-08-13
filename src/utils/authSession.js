@@ -1,8 +1,14 @@
 import axios from 'axios'
 import { API_BASE_URL } from '@/config/constants'
 import { unwrapData } from '@/api/client'
-import { clearAuth, loadAuth, saveAuth } from '@/utils/storage'
+import { clearAuth, getStoredAccessToken, loadAuth, saveAuth } from '@/utils/storage'
 import { isRefreshTokenExpired, isTokenExpired } from '@/utils/jwt'
+
+/** Sync token check for route guards — avoids a context/state timing gap right after login. */
+export function hasValidStoredAccessToken() {
+  const token = getStoredAccessToken()
+  return Boolean(token && !isTokenExpired(token))
+}
 
 /** Validate persisted session when access token is still valid. */
 export function validateStoredSession(saved) {

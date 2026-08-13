@@ -4,6 +4,19 @@
 
 const TEACHER_ROLES = new Set(['teacher', 'class_teacher', 'academic_coordinator', 'vice_principal', 'sports_coach'])
 
+const ROLE_DISPLAY_LABELS = {
+  super_admin: 'Super Admin',
+  org_admin: 'Organization Admin',
+  school_admin: 'School Admin',
+  teacher: 'Teacher',
+  class_teacher: 'Class Teacher',
+  academic_coordinator: 'Academic Coordinator',
+  vice_principal: 'Vice Principal',
+  sports_coach: 'Sports Coach',
+  student: 'Student',
+  parent: 'Parent',
+}
+
 export function getUserPrimaryRole(user) {
   if (!user) return null
   if (user.primary_role) return user.primary_role
@@ -14,6 +27,28 @@ export function getUserPrimaryRole(user) {
   if (roles.some((r) => TEACHER_ROLES.has(r)) || user.teacher_profile_id) return 'teacher'
   if (roles.includes('student') || user.student_profile_id) return 'student'
   return roles[0] || null
+}
+
+export function getUserRoleDisplayLabel(user) {
+  if (!user) return 'User'
+
+  const primary = getUserPrimaryRole(user)
+  if (primary && ROLE_DISPLAY_LABELS[primary]) {
+    return ROLE_DISPLAY_LABELS[primary]
+  }
+
+  const roles = user.roles || []
+  for (const code of roles) {
+    if (ROLE_DISPLAY_LABELS[code]) return ROLE_DISPLAY_LABELS[code]
+  }
+
+  if (primary) {
+    return String(primary)
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+  }
+
+  return 'User'
 }
 
 export function isStudentPortalUser(user) {

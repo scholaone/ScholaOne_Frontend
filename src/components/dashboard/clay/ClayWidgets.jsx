@@ -13,7 +13,7 @@ import {
   FiBarChart2,
 } from 'react-icons/fi'
 import { formatNumber } from '@/utils/format'
-import { formatDashboardDate, getFirstName, getTimeGreeting } from '@/utils/greeting'
+import { formatDashboardDate, getDisplayName, getTimeGreeting } from '@/utils/greeting'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
 import { resolveActionIcon } from '@/utils/dashboardIcons'
@@ -33,7 +33,7 @@ export function ClayStatSkeletonGrid({ count = 4 }) {
 
 export function ClayInsightBanner({ userName, message }) {
   const { text: greeting, period, emoji } = getTimeGreeting()
-  const firstName = getFirstName(userName)
+  const displayName = getDisplayName(userName)
   const dates = formatDashboardDate()
 
   return (
@@ -53,8 +53,8 @@ export function ClayInsightBanner({ userName, message }) {
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{greeting}</p>
-            <h2 className="mt-1 truncate text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              {firstName}
+            <h2 className="mt-1 break-words text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              {displayName}
             </h2>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
               {message || 'Here is your analytics overview for today.'}
@@ -72,7 +72,7 @@ export function ClayInsightBanner({ userName, message }) {
 
 export function DashboardWelcomeHeader({ userName, subtitle, fallbackName = 'there' }) {
   const { text: greeting, period, emoji } = getTimeGreeting()
-  const firstName = getFirstName(userName, fallbackName)
+  const displayName = getDisplayName(userName, fallbackName)
   const dates = formatDashboardDate()
 
   return (
@@ -91,7 +91,7 @@ export function DashboardWelcomeHeader({ userName, subtitle, fallbackName = 'the
         </div>
         <div className="min-w-0">
           <p className="teacher-dash__greeting-label">{greeting}</p>
-          <h1>{firstName}</h1>
+          <h1 className="break-words">{displayName}</h1>
           <p>{subtitle}</p>
         </div>
       </div>

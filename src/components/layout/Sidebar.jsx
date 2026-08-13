@@ -160,6 +160,20 @@ const orgAdminNav = [
   },
 ]
 
+/** Class Allocation menus reuse /academics/* URLs — exclude from Academic Structure highlight. */
+const CLASS_ALLOCATION_ACADEMIC_PREFIXES = [
+  '/academics/class-section-subjects',
+  '/academics/class-teachers',
+  '/academics/class-sections',
+  '/academics/rooms',
+]
+
+function isClassAllocationAcademicRoute(pathname) {
+  return CLASS_ALLOCATION_ACADEMIC_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  )
+}
+
 function isNavItemActive(pathname, itemPath) {
   if (itemPath === '/ai-hub') return pathname === '/ai-hub'
   if (itemPath === '/admissions') {
@@ -181,6 +195,7 @@ function isNavItemActive(pathname, itemPath) {
     return pathname.startsWith('/schools') && !/^\/schools\/[^/]+\/profile/.test(pathname)
   }
   if (itemPath === '/academics') {
+    if (isClassAllocationAcademicRoute(pathname)) return false
     return pathname === '/academics' || pathname.startsWith('/academics/')
   }
   if (itemPath === '/school-users') {

@@ -165,6 +165,12 @@ export function getErrorMessage(error, fallback = 'Something went wrong') {
 
   // Backend custom handler: { success: false, error: { message, details } }
   if (typeof data?.error?.message === 'string' && data.error.message) {
+    const details = data?.error?.details ?? data?.errors
+    if (details && typeof details === 'object' && !Array.isArray(details)) {
+      const fileMsg = details.file
+      if (Array.isArray(fileMsg) && fileMsg[0]) return String(fileMsg[0])
+      if (typeof fileMsg === 'string' && fileMsg) return fileMsg
+    }
     return data.error.message
   }
 

@@ -198,8 +198,8 @@ export const ACADEMIC_DEFINITIONS = {
   },
   'class-teachers': {
     key: 'class-teachers',
-    label: 'Class Teacher',
-    labelPlural: 'Class Teachers',
+    label: 'Class Teacher Mapping',
+    labelPlural: 'Class Teacher Mappings',
     serviceKey: 'classTeachers',
     scope: 'school',
     fields: [
@@ -555,14 +555,6 @@ export const ACADEMIC_HUB_GROUPS = [
       { key: 'curriculums', label: 'Curriculum', path: '/academics/curriculums' },
       { key: 'curriculum-subjects', label: 'Curriculum Subjects', path: '/academics/curriculum-subjects' },
       { key: 'elective-subjects', label: 'Elective Subjects', path: '/academics/elective-subjects' },
-    ],
-  },
-  {
-    title: 'Class Allocation',
-    items: [
-      { key: 'class-teachers', label: 'Class Teachers', path: '/academics/class-teachers' },
-      { key: 'class-section-subjects', label: 'Class Subjects', path: '/academics/class-section-subjects' },
-      { key: 'rooms', label: 'Rooms', path: '/academics/rooms' },
     ],
   },
   {

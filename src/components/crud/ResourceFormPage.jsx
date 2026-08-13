@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -67,13 +67,17 @@ export default function ResourceFormPage({
     enabled: isEdit,
   })
 
+  const transformLoadRef = useRef(transformLoad)
+  transformLoadRef.current = transformLoad
+
   useEffect(() => {
     if (data && isEdit) {
       const item = unwrapData(data)
-      const values = transformLoad ? transformLoad(item) : item
+      const loader = transformLoadRef.current
+      const values = loader ? loader(item) : item
       reset(values)
     }
-  }, [data, isEdit, reset, transformLoad])
+  }, [data, isEdit, reset])
 
   // Clear dependent fields when their parent select changes
   useEffect(() => {

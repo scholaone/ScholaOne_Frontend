@@ -14,6 +14,7 @@ import {
   FiGlobe,
   FiGrid,
   FiLayout,
+  FiLayers,
   FiMail,
   FiMessageSquare,
   FiRadio,
@@ -45,6 +46,7 @@ const ICON_MAP = {
   globe: FiGlobe,
   'check-circle': FiCheckCircle,
   layout: FiLayout,
+  layers: FiLayers,
   mail: FiMail,
   bell: FiBell,
 }

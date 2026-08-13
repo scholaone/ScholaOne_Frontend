@@ -7,11 +7,14 @@ import Breadcrumb from '@/components/layout/Breadcrumb'
 import { PageHeader, Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input, { SelectField } from '@/components/ui/Input'
-import { PageLoader, ErrorState, Avatar } from '@/components/ui/Feedback'
+import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { teacherService } from '@/api/services'
 import { getErrorMessage, unwrapData } from '@/api/client'
 import { TEACHER_LEAVE_TYPE_OPTIONS, TEACHER_STATUS_OPTIONS } from '@/config/constants'
 import { resolveMediaUrl } from '@/utils/format'
+import TeacherPhotoField from '@/components/teachers/TeacherPhotoField'
+import TeacherCredentialsModal from '@/components/teachers/TeacherCredentialsModal'
+import { useTeacherPhotoUpload } from '@/components/teachers/useTeacherPhotoUpload'
 
 const TABS = [
   { key: 'profile', label: 'Profile' },
@@ -44,6 +47,7 @@ export default function TeacherDetail() {
   const { id } = useParams()
   const queryClient = useQueryClient()
   const [tab, setTab] = useState('profile')
+  const [credentialsOpen, setCredentialsOpen] = useState(false)
 
   const [qualForm, setQualForm] = useState({ degree: '', institution: '', year_completed: '' })
   const [expForm, setExpForm] = useState({ organization_name: '', role: '', start_date: '' })
@@ -192,10 +196,22 @@ export default function TeacherDetail() {
     onError: (e) => toast.error(getErrorMessage(e)),
   })
 
+  const teacher = data ? unwrapData(data) : null
+  const photoUpload = useTeacherPhotoUpload({
+    teacherId: id,
+    teacherName: teacher?.full_name,
+    initialUrl: resolveMediaUrl(teacher?.photo_url),
+    onUploaded: () => {
+      queryClient.invalidateQueries({ queryKey: ['teachers', id] })
+      queryClient.invalidateQueries({ queryKey: ['teachers'] })
+      refetch()
+    },
+  })
+
   if (isLoading) return <PageLoader />
   if (error) return <ErrorState message={getErrorMessage(error)} onRetry={refetch} />
+  if (!teacher) return <ErrorState message="Teacher not found" onRetry={refetch} />
 
-  const teacher = unwrapData(data)
   const payroll = teacher.payroll_reference || {}
 
   return (
@@ -210,6 +226,9 @@ export default function TeacherDetail() {
         actions={
           <>
             <Link to={`/teachers/${id}/edit`}><Button variant="edit">Edit</Button></Link>
+            <Button variant="outline" onClick={() => setCredentialsOpen(true)}>
+              <FiKey className="h-4 w-4" /> View Creds
+            </Button>
             <Button variant="outline" onClick={() => credentialsMut.mutate()} loading={credentialsMut.isPending}>
               <FiSend className="h-4 w-4" /> Send Credentials
             </Button>
@@ -232,14 +251,11 @@ export default function TeacherDetail() {
 
       {tab === 'profile' && (
         <Card>
-          <div className="mb-6 flex items-center gap-4">
-            <Avatar name={teacher.full_name} src={resolveMediaUrl(teacher.photo_url)} size="lg" />
-            <div>
-              <p className="text-sm text-muted">Status</p>
-              <p className="font-medium">{teacher.status_display || teacher.status}</p>
-            </div>
+          <div className="mb-6">
+            <TeacherPhotoField {...photoUpload.photoFieldProps} name={teacher.full_name} />
           </div>
           <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label="Status" value={teacher.status_display || teacher.status} />
             <Field label="Employee ID" value={teacher.employee_id} />
             <Field label="Teacher Code" value={teacher.teacher_code} />
             <Field label="Academic Role" value={teacher.academic_role_display || teacher.academic_role} />
@@ -504,17 +520,17 @@ export default function TeacherDetail() {
 
       {tab === 'credentials' && (
         <Card>
-          <div className="flex items-center gap-3 rounded-xl border border-border bg-slate-50 p-4 max-w-md">
-            <FiKey className="h-8 w-8 text-primary" />
-            <div>
-              <p className="text-sm font-medium">Login credentials</p>
-              <p className="font-mono text-sm">Username: {teacher.username || '—'}</p>
-              <p className="font-mono text-sm">Password: {teacher.viewable_password || '—'}</p>
-            </div>
+          <p className="mb-4 text-sm text-muted">
+            Portal login details for this academic staff member. Use View Creds to see email and password.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setCredentialsOpen(true)}>
+              <FiKey className="h-4 w-4" /> View Creds
+            </Button>
+            <Button loading={credentialsMut.isPending} onClick={() => credentialsMut.mutate()}>
+              <FiSend className="h-4 w-4" /> Send credentials via email/SMS
+            </Button>
           </div>
-          <Button className="mt-4" loading={credentialsMut.isPending} onClick={() => credentialsMut.mutate()}>
-            <FiSend className="h-4 w-4" /> Send credentials via email/SMS
-          </Button>
         </Card>
       )}
 
@@ -602,6 +618,13 @@ export default function TeacherDetail() {
           </ul>
         </Card>
       )}
+
+      <TeacherCredentialsModal
+        teacher={teacher}
+        open={credentialsOpen}
+        onClose={() => setCredentialsOpen(false)}
+        loading={isLoading}
+      />
     </div>
   )
 }

@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom'
-import { FiBook, FiCalendar, FiClock, FiGrid, FiLayers, FiUsers, FiToggleRight } from 'react-icons/fi'
+import { FiBook, FiCalendar, FiClock, FiGrid, FiLayers } from 'react-icons/fi'
 import { PageHeader } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import { ACADEMIC_HUB_GROUPS } from '@/config/academicDefinitions'
-import { HubPageShell, HubSectionTitle, HubLinkCard, HubTileCard } from '@/components/hub/HubWidgets'
+import { HubPageShell, HubSectionTitle, HubTileCard } from '@/components/hub/HubWidgets'
 
 const groupIcons = {
   'Academic Setup': FiBook,
   Curriculum: FiLayers,
-  'Class Allocation': FiUsers,
   'Calendar & Timetable Foundation': FiCalendar,
   'Assessment & Policies Foundation': FiBook,
 }
@@ -19,7 +18,7 @@ export default function AcademicsHubPage() {
       <Breadcrumb items={[{ label: 'Academic Structure' }]} />
       <PageHeader
         title="Academic Structure"
-        subtitle="School-year operations: activate classes, curriculum mapping, calendar, and assessment rules. Organization catalogs (boards, subjects, STD/section setup) live under Masters Hub."
+        subtitle="Curriculum, calendar, and assessment rules for the academic year. Class, subject, teacher, and room mapping live under the Class Allocation module (enable via Menus)."
         actions={
           <Link
             to="/masters"
@@ -31,22 +30,6 @@ export default function AcademicsHubPage() {
       />
 
       <div className="space-y-8">
-        <div>
-          <HubSectionTitle
-            icon={FiToggleRight}
-            title="Year Class Activation"
-            subtitle="Create standards, sections, and maps in Masters Hub first — then activate them here for the academic year."
-          />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <HubLinkCard
-              to="/academics/class-sections"
-              icon={FiToggleRight}
-              label="Active / Inactive Classes"
-              description="Enable or disable mapped class sections for the selected academic year."
-            />
-          </div>
-        </div>
-
         {ACADEMIC_HUB_GROUPS.map((group) => {
           const Icon = groupIcons[group.title] || FiGrid
           const sectionSubtitle =

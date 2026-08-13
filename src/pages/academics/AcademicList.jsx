@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
-import ClassSectionActivationPage from '@/pages/academics/ClassSectionActivationPage'
 import AcademicBulkActions from '@/pages/academics/AcademicBulkActions'
 import SchoolScopeField from '@/components/forms/SchoolScopeField'
 import { ACADEMIC_DEFINITIONS } from '@/config/academicDefinitions'
@@ -181,21 +180,8 @@ export function AcademicList() {
     return [...def.columns, yearLifecycleColumn]
   }, [def?.columns, yearLifecycleColumn])
 
-  if (!def) return <div className="p-8 text-center text-muted">Academic entity not found</div>
-  if (def.masterKey) return <Navigate to={`/masters/${def.masterKey}`} replace />
-
-  // Academic years are managed in Admissions → Setup; show read-only view here
-  if (entityKey === 'academic-years') {
-    return <Navigate to="/academics/admission-setup" replace />
-  }
-
-  // Year activation UI — STD/Section/Map live under Masters
-  if (entityKey === 'class-sections') {
-    return <ClassSectionActivationPage />
-  }
-
-  const service = resolveService(def)
-  const detailFields = buildDetailFields(def, { formatDate: formatDateTime })
+  const service = def ? resolveService(def) : null
+  const detailFields = def ? buildDetailFields(def, { formatDate: formatDateTime }) : []
 
   const listParams = useMemo(
     () => ({
@@ -206,9 +192,17 @@ export function AcademicList() {
   )
 
   const listFn = useMemo(
-    () => (params) => service.list(params, schoolScope.listRequestConfig),
+    () => (params) => service?.list(params, schoolScope.listRequestConfig),
     [service, schoolScope.listRequestConfig],
   )
+
+  if (!def) return <div className="p-8 text-center text-muted">Academic entity not found</div>
+  if (def.masterKey) return <Navigate to={`/masters/${def.masterKey}`} replace />
+
+  // Academic years are managed in Admissions → Setup; show read-only view here
+  if (entityKey === 'academic-years') {
+    return <Navigate to="/academics/admission-setup" replace />
+  }
 
   const schoolFilter = def.scope === 'school' ? (
     <SchoolScopeField

@@ -8,6 +8,7 @@ import DashboardNotificationsPanel from '@/components/notifications/DashboardNot
 import {
   TeacherActivitiesPanel,
   TeacherCalendarPanel,
+  TeacherMyClassPanel,
   TeacherPerformancePanel,
   TeacherQuickAccessPanel,
   TeacherStatCards,
@@ -35,6 +36,7 @@ export default function TeacherDashboardView() {
   const dashboard = unwrapData(data) || {}
   const profile = dashboard.profile || {}
   const statistics = dashboard.statistics || {}
+  const classTeacher = dashboard.class_teacher || {}
   const quickLinks = dashboard.quick_links || []
   const classPerformance = dashboard.class_performance || []
   const recentActivities = dashboard.recent_activities || []
@@ -58,7 +60,11 @@ export default function TeacherDashboardView() {
         fallbackName="Teacher"
       />
 
-      <TeacherStatCards statistics={statistics} loading={isLoading && !data} />
+      <TeacherStatCards
+        statistics={statistics}
+        classTeacher={classTeacher}
+        loading={isLoading && !data}
+      />
 
       {isFetching && data ? (
         <p className="mb-4 text-center text-xs text-[var(--td-muted)]">Refreshing dashboard…</p>
@@ -72,6 +78,7 @@ export default function TeacherDashboardView() {
         </div>
 
         <div className="space-y-5">
+          <TeacherMyClassPanel classTeacher={classTeacher} loading={isLoading && !data} />
           <TeacherPerformancePanel data={classPerformance} />
           <TeacherTopScorersPanel scorers={topScorers} schoolName={profile.school_name} />
         </div>

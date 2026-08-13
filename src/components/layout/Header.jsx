@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook, FiShield } from 'react-icons/fi'
+import { FiMenu, FiBell, FiMail, FiSearch, FiUser, FiLogOut, FiKey, FiChevronDown, FiZap, FiBook } from 'react-icons/fi'
 import { useAuth } from '@/contexts/AuthContext'
 import { useUI } from '@/contexts/UIContext'
 import { schoolService } from '@/api/services'
@@ -58,6 +58,12 @@ export default function Header() {
 
   const displayName = user?.full_name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email
   const roleLabel = getUserRoleDisplayLabel(user)
+
+  const roleBadge = (
+    <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-brand-700 ring-1 ring-brand-100">
+      {roleLabel}
+    </span>
+  )
   const tenantLabel = getAuthenticatedTenantLabel(user)
   const schoolId = getUserSchoolId(user)
   const hasSchoolContext = Boolean(
@@ -76,9 +82,6 @@ export default function Header() {
     schoolProfile?.logo_url || schoolProfile?.logo || user?.school_logo_url || user?.school?.logo_url,
   )
   const showTenantLogo = Boolean(tenantLabel && hasSchoolContext)
-  const orgSubtitle = user?.organization_name && tenantLabel !== user.organization_name
-    ? user.organization_name
-    : null
 
   const handleOpenDrawer = () => {
     setNotifOpen(true)
@@ -114,24 +117,16 @@ export default function Header() {
                 )
               ) : null}
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-foreground sm:text-base" title={tenantLabel}>
+                <p className="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl" title={tenantLabel}>
                   {tenantLabel}
                 </p>
-                {orgSubtitle ? (
-                  <p className="truncate text-[11px] text-muted-foreground sm:text-xs" title={orgSubtitle}>
-                    {orgSubtitle}
-                  </p>
-                ) : (
-                  <p className="hidden text-[11px] text-muted-foreground sm:block sm:text-xs">School portal</p>
-                )}
               </div>
             </div>
           ) : user?.organization_name ? (
             <div className="min-w-0 border-l border-border/70 pl-2 sm:pl-3 lg:pl-4">
-              <p className="truncate text-sm font-semibold text-foreground sm:text-base" title={user.organization_name}>
+              <p className="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl" title={user.organization_name}>
                 {user.organization_name}
               </p>
-              <p className="text-[11px] text-muted-foreground sm:text-xs">Organization portal</p>
             </div>
           ) : null}
         </div>
@@ -203,7 +198,6 @@ export default function Header() {
               <Avatar name={displayName} src={user?.profile_image} size="sm" />
               <div className="hidden text-left lg:block">
                 <p className="max-w-[108px] truncate text-sm font-medium leading-none text-foreground">{displayName}</p>
-                <p className="mt-0.5 max-w-[108px] truncate text-[11px] text-muted-foreground">{roleLabel}</p>
               </div>
               <FiChevronDown className={cn('hidden h-4 w-4 text-muted-foreground transition-transform sm:block', profileOpen && 'rotate-180')} />
             </button>
@@ -216,7 +210,10 @@ export default function Header() {
                     <div className="flex items-center gap-3">
                       <Avatar name={displayName} src={user?.profile_image} size="md" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+                          {roleBadge}
+                        </div>
                         <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
                       </div>
                     </div>
@@ -245,18 +242,6 @@ export default function Header() {
                   >
                     <FiKey className="h-4 w-4" /> Change Password
                   </Link>
-
-                  <div className="mx-3 my-2 flex items-center gap-2.5 rounded-xl bg-brand-50/80 px-3 py-2.5 ring-1 ring-brand-100">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-brand-600 shadow-sm">
-                      <FiShield className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-brand-700/80">
-                        User type
-                      </p>
-                      <p className="truncate text-sm font-semibold text-foreground">{roleLabel}</p>
-                    </div>
-                  </div>
 
                   <div className="mt-1 border-t border-border pt-1">
                     <button

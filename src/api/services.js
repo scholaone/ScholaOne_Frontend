@@ -41,6 +41,7 @@ export const dashboardService = {
   studentCalendar: (params) => apiGet(API_ENDPOINTS.DASHBOARD.STUDENT_CALENDAR, params),
   teacherSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_SUMMARY),
   teacherCalendar: (params) => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_CALENDAR, params),
+  teacherClassStudents: (params) => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_CLASS_STUDENTS, params),
 }
 
 export const organizationService = {
@@ -281,6 +282,7 @@ export const teacherService = {
   getTeacherSettings: (params) => apiGet(API_ENDPOINTS.TEACHERS.TEACHER_SETTINGS, params),
   updateTeacherSettings: (data, params) => apiPatch(API_ENDPOINTS.TEACHERS.TEACHER_SETTINGS, data, { params }),
   sendCredentials: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.SEND_CREDENTIALS(id), data),
+  uploadPhoto: (id, formData) => apiPostForm(API_ENDPOINTS.TEACHERS.UPLOAD_PHOTO(id), formData),
   addQualification: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.QUALIFICATIONS(id), data),
   addExperience: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.EXPERIENCE(id), data),
   assignSubject: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.ASSIGN_SUBJECT(id), data),
@@ -604,12 +606,59 @@ export const documentsService = {
 }
 
 export const libraryService = {
+  dashboard: (params) => apiGet(API_ENDPOINTS.LIBRARY.DASHBOARD, params),
   books: {
     list: (params) => apiGetPaginated(API_ENDPOINTS.LIBRARY.BOOKS, params),
     get: (id) => apiGet(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id)),
     create: (data) => apiPost(API_ENDPOINTS.LIBRARY.BOOKS, data),
     update: (id, data) => apiPatch(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id), data),
     delete: (id) => apiDelete(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id)),
+    bulkImport: (items, config) => apiPost(API_ENDPOINTS.LIBRARY.BOOKS_BULK_IMPORT, { items }, config),
+  },
+  issues: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.LIBRARY.ISSUES, params),
+    get: (id) => apiGet(API_ENDPOINTS.LIBRARY.ISSUE_DETAIL(id)),
+    lookup: (params) => apiGet(API_ENDPOINTS.LIBRARY.LOOKUP_BORROWER, params),
+    report: (params) => apiGet(API_ENDPOINTS.LIBRARY.ISSUES_REPORT, params),
+    issue: (data) => apiPost(API_ENDPOINTS.LIBRARY.ISSUE_BOOK, data),
+    return: (id, data) => apiPost(API_ENDPOINTS.LIBRARY.RETURN_BOOK(id), data),
+  },
+  members: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.LIBRARY.MEMBERS, params),
+    get: (id) => apiGet(API_ENDPOINTS.LIBRARY.MEMBER_DETAIL(id)),
+    update: (id, data) => apiPatch(API_ENDPOINTS.LIBRARY.MEMBER_DETAIL(id), data),
+  },
+}
+
+export const transportService = {
+  dashboard: (params) => apiGet(API_ENDPOINTS.TRANSPORT.DASHBOARD, params),
+  routes: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.ROUTES, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.ROUTE_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.ROUTES, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.ROUTE_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.ROUTE_DETAIL(id)),
+  },
+  vehicles: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.VEHICLES, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.VEHICLE_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.VEHICLES, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.VEHICLE_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.VEHICLE_DETAIL(id)),
+  },
+  stops: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.STOPS, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.STOP_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.STOPS, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.STOP_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.STOP_DETAIL(id)),
+  },
+  assignments: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.ASSIGNMENTS, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.ASSIGNMENT_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.ASSIGNMENTS, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.ASSIGNMENT_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.ASSIGNMENT_DETAIL(id)),
   },
 }
 

@@ -24,6 +24,12 @@ export function formatDashboardDate(date = new Date()) {
   }
 }
 
+export function getDisplayName(userName, fallback = 'there') {
+  const trimmed = String(userName || '').trim()
+  return trimmed || fallback
+}
+
+/** @deprecated Prefer getDisplayName when the full name should be shown. */
 export function getFirstName(userName, fallback = 'there') {
   const trimmed = String(userName || '').trim()
   if (!trimmed) return fallback

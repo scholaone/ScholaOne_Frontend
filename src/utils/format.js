@@ -83,8 +83,18 @@ export function resolveMediaUrl(path) {
   const value = String(path).trim()
   if (!value) return null
   if (/^https?:\/\//i.test(value)) return value
+  if (value.startsWith('blob:')) return value
   const base = API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
   return `${base.replace(/\/+$/, '')}${value.startsWith('/') ? value : `/${value}`}`
+}
+
+/** Append a cache-busting query param so CDN/browser shows a freshly uploaded image. */
+export function withCacheBust(url, version = Date.now()) {
+  if (!url || String(url).startsWith('blob:')) return url
+  const value = String(url).trim()
+  if (!value) return url
+  const sep = value.includes('?') ? '&' : '?'
+  return `${value}${sep}v=${version}`
 }
 
 export { cn } from '@/lib/utils'

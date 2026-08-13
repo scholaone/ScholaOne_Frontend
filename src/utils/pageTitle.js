@@ -54,6 +54,7 @@ const ROUTE_TITLES = [
   { pattern: /^\/examinations/, title: 'Examinations' },
   { pattern: /^\/fees/, title: 'Fees' },
   { pattern: /^\/transport/, title: 'Transport' },
+  { pattern: /^\/library\/reports\/issued-returned$/, title: 'Library Issued & Returned Report' },
   { pattern: /^\/library/, title: 'Library' },
   { pattern: /^\/documents/, title: 'Documents' },
   { pattern: /^\/reports\/staff-children$/, title: 'Staff Children Report' },

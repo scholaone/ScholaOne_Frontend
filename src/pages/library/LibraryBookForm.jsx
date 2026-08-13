@@ -30,12 +30,13 @@ export default function LibraryBookForm() {
       title="Book"
       breadcrumb={[
         { label: 'Library', href: '/library' },
+        { label: 'Book' },
       ]}
       queryKey="library-books"
       getFn={libraryService.books.get}
       createFn={libraryService.books.create}
       updateFn={libraryService.books.update}
-      basePath="/library"
+      basePath="/library/books"
       fields={FIELDS}
       transformLoad={(item) => ({
         title: item.title || '',

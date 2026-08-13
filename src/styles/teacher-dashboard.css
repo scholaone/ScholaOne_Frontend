@@ -51,6 +51,60 @@
   color: var(--td-muted);
 }
 
+.teacher-dash__greeting-badge {
+  display: flex;
+  height: 3rem;
+  width: 3rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  font-size: 1.35rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.teacher-dash__greeting-badge--morning {
+  background: #fff8e1;
+}
+
+.teacher-dash__greeting-badge--afternoon {
+  background: #e0f2fe;
+}
+
+.teacher-dash__greeting-badge--evening {
+  background: #ede9fe;
+}
+
+.teacher-dash__greeting-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--td-muted);
+}
+
+.teacher-dash__date-chip {
+  flex-shrink: 0;
+  border-radius: 0.875rem;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.65rem 0.9rem;
+  text-align: right;
+  box-shadow: inset 0 0 0 1px var(--td-border);
+}
+
+.teacher-dash__date-weekday {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--td-text);
+}
+
+.teacher-dash__date-short {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--td-muted);
+}
+
 .teacher-dash__stats {
   display: grid;
   gap: 1rem;

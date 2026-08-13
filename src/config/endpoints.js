@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     SCHOOL_ADMIN: '/api/v1/dashboard/school-admin/',
     SCHOOL_ADMIN_SUMMARY: '/api/v1/dashboard/school-admin/summary/',
     STUDENT_SUMMARY: '/api/v1/dashboard/student/summary/',
+    STUDENT_CALENDAR: '/api/v1/dashboard/student/calendar/',
     TEACHER_SUMMARY: '/api/v1/dashboard/teacher/summary/',
     TEACHER_CALENDAR: '/api/v1/dashboard/teacher/calendar/',
   },

@@ -1,12 +1,24 @@
 {
-  "name": "ScholaOne",
+  "name": "ScholaOne - Smarter Learning. Simpler School Management.",
   "short_name": "ScholaOne",
-  "description": "ScholaOne — school management and learning management platform for schools, teachers, students, parents, and administrators.",
+  "description": "ScholaOne is a modern school LMS and school management platform for schools, teachers, students, parents, and administrators.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "icons": [
+    {
+      "src": "/favicon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/favicon.png",
       "sizes": "512x512",

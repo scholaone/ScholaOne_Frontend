@@ -37,6 +37,7 @@ export const dashboardService = {
   schoolAdmin: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN, params),
   schoolAdminSummary: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN_SUMMARY, params),
   studentSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.STUDENT_SUMMARY),
+  studentCalendar: (params) => apiGet(API_ENDPOINTS.DASHBOARD.STUDENT_CALENDAR, params),
   teacherSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_SUMMARY),
   teacherCalendar: (params) => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_CALENDAR, params),
 }

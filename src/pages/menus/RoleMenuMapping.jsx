@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { menuService } from '@/api/services'
 import { unwrapData, getErrorMessage } from '@/api/client'
@@ -18,24 +18,82 @@ import {
   SequenceStepper,
   SequenceInput,
   EmptyNavState,
-  Button,
   SelectField,
   FiChevronDown,
   FiChevronUp,
   FiLink,
 } from '@/components/navigation/NavAdminUi'
 
+const ROLE_TREE_STALE_MS = 5 * 60_000
+
 function countMenus(menus = []) {
   return menus.reduce((acc, menu) => acc + 1 + countMenus(menu.children), 0)
 }
 
-function MenuTreeRows({
+function patchModulesInResponse(response, updater) {
+  if (!response || typeof response !== 'object') return response
+  const data = unwrapData(response)
+  if (!data?.modules) return response
+  const nextModules = updater(data.modules)
+  if (response.data !== undefined) {
+    return { ...response, data: { ...data, modules: nextModules } }
+  }
+  return { ...data, modules: nextModules }
+}
+
+function updateMenuInModules(modules, menuId, patch) {
+  const patchMenus = (menus) => {
+    if (!menus?.length) return menus
+    return menus.map((menu) => {
+      const id = menu.menu_id || menu.id
+      let next = menu
+      if (String(id) === String(menuId)) {
+        next = { ...menu, ...patch }
+      }
+      if (menu.children?.length) {
+        next = { ...next, children: patchMenus(menu.children) }
+      }
+      return next
+    })
+  }
+  return modules.map((module) => ({
+    ...module,
+    menus: patchMenus(module.menus),
+  }))
+}
+
+function updateModuleInModules(modules, moduleId, patch) {
+  return modules.map((module) => {
+    const id = module.module_id || module.id
+    if (String(id) !== String(moduleId)) return module
+    return { ...module, ...patch }
+  })
+}
+
+function swapModuleSequences(modules, moduleId, direction) {
+  const sorted = [...modules].sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+  const index = sorted.findIndex((item) => String(item.module_id || item.id) === String(moduleId))
+  const swapIndex = direction === 'up' ? index - 1 : index + 1
+  if (index < 0 || swapIndex < 0 || swapIndex >= sorted.length) return modules
+
+  const current = sorted[index]
+  const other = sorted[swapIndex]
+  const currentSeq = current.sequence ?? index + 1
+  const otherSeq = other.sequence ?? swapIndex + 1
+
+  return updateModuleInModules(
+    updateModuleInModules(modules, current.module_id || current.id, { sequence: otherSeq }),
+    other.module_id || other.id,
+    { sequence: currentSeq },
+  )
+}
+
+const MenuTreeRows = memo(function MenuTreeRows({
   menus,
   depth = 0,
   showRoleControls,
   onToggle,
   onSequenceChange,
-  togglingMenuId,
   savingMenuId,
 }) {
   if (!menus?.length) return null
@@ -44,7 +102,6 @@ function MenuTreeRows({
     <div className="relative">
       {menus.map((menu) => {
         const menuId = menu.menu_id || menu.id
-        const isToggling = togglingMenuId === menuId
         const isSaving = savingMenuId === menuId
         const disabled = showRoleControls && !menu.school_role_menu_id
         const active = menu.is_enabled !== false
@@ -95,7 +152,7 @@ function MenuTreeRows({
                   <div className="flex items-center gap-2 rounded-lg bg-background px-2 py-1 ring-1 ring-border/60">
                     <ToggleSwitch
                       checked={Boolean(menu.is_enabled)}
-                      disabled={disabled || isToggling}
+                      disabled={disabled}
                       onChange={(checked) => onToggle(menu, checked)}
                       label={`Toggle ${menu.menu_name}`}
                     />
@@ -111,7 +168,6 @@ function MenuTreeRows({
               showRoleControls={showRoleControls}
               onToggle={onToggle}
               onSequenceChange={onSequenceChange}
-              togglingMenuId={togglingMenuId}
               savingMenuId={savingMenuId}
             />
           </div>
@@ -119,9 +175,9 @@ function MenuTreeRows({
       })}
     </div>
   )
-}
+})
 
-function ModuleAccordion({
+const ModuleAccordion = memo(function ModuleAccordion({
   module,
   moduleIndex,
   modulesLength,
@@ -133,16 +189,13 @@ function ModuleAccordion({
   onModuleMove,
   onMenuToggle,
   onMenuSequenceChange,
-  togglingModuleId,
   savingModuleId,
-  togglingMenuId,
   savingMenuId,
 }) {
   const Icon = resolveNavIcon(module.icon)
   const moduleId = module.module_id || module.id
   const moduleDisabled = showRoleControls && !module.school_role_module_id
   const moduleSaving = savingModuleId === moduleId
-  const moduleToggling = togglingModuleId === moduleId
   const active = module.is_enabled !== false
   const menuCount = countMenus(module.menus)
 
@@ -209,7 +262,7 @@ function ModuleAccordion({
             <div className="flex items-center gap-2 rounded-lg bg-background px-2 py-1 ring-1 ring-border/60">
               <ToggleSwitch
                 checked={Boolean(module.is_enabled)}
-                disabled={moduleDisabled || moduleToggling}
+                disabled={moduleDisabled}
                 onChange={(checked) => onModuleToggle(module, checked)}
                 label={`Toggle ${module.module_name}`}
               />
@@ -241,7 +294,6 @@ function ModuleAccordion({
               showRoleControls={showRoleControls}
               onToggle={onMenuToggle}
               onSequenceChange={onMenuSequenceChange}
-              togglingMenuId={togglingMenuId}
               savingMenuId={savingMenuId}
             />
           ) : (
@@ -253,7 +305,7 @@ function ModuleAccordion({
       )}
     </Card>
   )
-}
+})
 
 export default function RoleMenuMapping() {
   const queryClient = useQueryClient()
@@ -264,8 +316,6 @@ export default function RoleMenuMapping() {
   const [schoolId, setSchoolId] = useState(userSchoolId)
   const [roleId, setRoleId] = useState('')
   const [expandedModules, setExpandedModules] = useState({})
-  const [togglingMenuId, setTogglingMenuId] = useState(null)
-  const [togglingModuleId, setTogglingModuleId] = useState(null)
   const [savingMenuId, setSavingMenuId] = useState(null)
   const [savingModuleId, setSavingModuleId] = useState(null)
 
@@ -278,6 +328,7 @@ export default function RoleMenuMapping() {
     queryKey: ['menus', 'portal-roles', organizationId],
     queryFn: () => menuService.portalRoles({ organization: organizationId }),
     enabled: Boolean(organizationId),
+    staleTime: ROLE_TREE_STALE_MS,
   })
 
   const roleOptions = useMemo(() => {
@@ -298,8 +349,13 @@ export default function RoleMenuMapping() {
     if (roleOptions.length === 1) setRoleId(roleOptions[0].value)
   }, [roleId, roleOptions])
 
+  const treeQueryKey = useMemo(
+    () => ['menus', 'school-role-tree', organizationId, schoolId, roleId],
+    [organizationId, schoolId, roleId],
+  )
+
   const treeQuery = useQuery({
-    queryKey: ['menus', 'school-role-tree', organizationId, schoolId, roleId],
+    queryKey: treeQueryKey,
     queryFn: () =>
       menuService.schoolRoleTree({
         organization: organizationId,
@@ -307,36 +363,81 @@ export default function RoleMenuMapping() {
         role: roleId,
       }),
     enabled: Boolean(organizationId && schoolId && roleId),
+    staleTime: ROLE_TREE_STALE_MS,
+    placeholderData: keepPreviousData,
   })
 
-  const invalidateRoleNav = () => {
-    queryClient.invalidateQueries({ queryKey: ['menus', 'school-role-tree'] })
-    queryClient.invalidateQueries({ queryKey: ['menus', 'my-menus'] })
-  }
+  useEffect(() => {
+    if (!organizationId || !schoolId || !roleOptions.length) return
+    roleOptions.forEach(({ value }) => {
+      if (!value) return
+      queryClient.prefetchQuery({
+        queryKey: ['menus', 'school-role-tree', organizationId, schoolId, value],
+        queryFn: () =>
+          menuService.schoolRoleTree({
+            organization: organizationId,
+            school: schoolId,
+            role: value,
+          }),
+        staleTime: ROLE_TREE_STALE_MS,
+      })
+    })
+  }, [organizationId, schoolId, roleOptions, queryClient])
 
   const menuMutation = useMutation({
     mutationFn: (payload) => menuService.updateSchoolRoleMapping(payload),
-    onSuccess: () => {
-      invalidateRoleNav()
-      toast.success('Menu updated for this user type')
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: treeQueryKey })
+      const previous = queryClient.getQueryData(treeQueryKey)
+      queryClient.setQueryData(treeQueryKey, (old) =>
+        patchModulesInResponse(old, (modules) =>
+          updateMenuInModules(modules, payload.menu, {
+            ...(payload.is_enabled !== undefined ? { is_enabled: payload.is_enabled } : {}),
+            ...(payload.sequence !== undefined ? { sequence: payload.sequence } : {}),
+          }),
+        ),
+      )
+      return { previous }
     },
-    onError: (error) => toast.error(getErrorMessage(error, 'Failed to update menu')),
+    onError: (error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(treeQueryKey, context.previous)
+      }
+      toast.error(getErrorMessage(error, 'Failed to update menu'))
+    },
     onSettled: () => {
-      setTogglingMenuId(null)
       setSavingMenuId(null)
+      queryClient.invalidateQueries({ queryKey: ['menus', 'my-menus'] })
     },
   })
 
   const moduleMutation = useMutation({
     mutationFn: (payload) => menuService.updateSchoolRoleModule(payload),
-    onSuccess: () => {
-      invalidateRoleNav()
-      toast.success('Module updated for this user type')
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: treeQueryKey })
+      const previous = queryClient.getQueryData(treeQueryKey)
+      queryClient.setQueryData(treeQueryKey, (old) =>
+        patchModulesInResponse(old, (modules) => {
+          if (payload.is_enabled !== undefined || payload.sequence !== undefined) {
+            return updateModuleInModules(modules, payload.module, {
+              ...(payload.is_enabled !== undefined ? { is_enabled: payload.is_enabled } : {}),
+              ...(payload.sequence !== undefined ? { sequence: payload.sequence } : {}),
+            })
+          }
+          return modules
+        }),
+      )
+      return { previous }
     },
-    onError: (error) => toast.error(getErrorMessage(error, 'Failed to update module')),
+    onError: (error, _payload, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(treeQueryKey, context.previous)
+      }
+      toast.error(getErrorMessage(error, 'Failed to update module'))
+    },
     onSettled: () => {
-      setTogglingModuleId(null)
       setSavingModuleId(null)
+      queryClient.invalidateQueries({ queryKey: ['menus', 'my-menus'] })
     },
   })
 
@@ -374,94 +475,115 @@ export default function RoleMenuMapping() {
     return { modules: modules.length, menus: totalMenus, activeMenus, activeModules }
   }, [modules])
 
-  const handleMenuToggle = (menu, isEnabled) => {
-    if (!schoolId || !roleId) return
-    setTogglingMenuId(menu.menu_id || menu.id)
-    menuMutation.mutate({
-      school: schoolId,
-      role: roleId,
-      menu: menu.menu_id || menu.id,
-      is_enabled: isEnabled,
-      organization: organizationId,
-    })
-  }
+  const handleMenuToggle = useCallback(
+    (menu, isEnabled) => {
+      if (!schoolId || !roleId) return
+      menuMutation.mutate({
+        school: schoolId,
+        role: roleId,
+        menu: menu.menu_id || menu.id,
+        is_enabled: isEnabled,
+        organization: organizationId,
+      })
+    },
+    [schoolId, roleId, organizationId, menuMutation],
+  )
 
-  const handleMenuUpdate = (menu, updates) => {
-    if (!schoolId || !roleId) return
-    setSavingMenuId(menu.menu_id || menu.id)
-    menuMutation.mutate({
-      school: schoolId,
-      role: roleId,
-      menu: menu.menu_id || menu.id,
-      organization: organizationId,
-      ...updates,
-    })
-  }
+  const handleMenuUpdate = useCallback(
+    (menu, updates) => {
+      if (!schoolId || !roleId) return
+      setSavingMenuId(menu.menu_id || menu.id)
+      menuMutation.mutate({
+        school: schoolId,
+        role: roleId,
+        menu: menu.menu_id || menu.id,
+        organization: organizationId,
+        ...updates,
+      })
+    },
+    [schoolId, roleId, organizationId, menuMutation],
+  )
 
-  const handleModuleToggle = (module, isEnabled) => {
-    if (!schoolId || !roleId) return
-    setTogglingModuleId(module.module_id || module.id)
-    moduleMutation.mutate({
-      school: schoolId,
-      role: roleId,
-      module: module.module_id || module.id,
-      is_enabled: isEnabled,
-      organization: organizationId,
-    })
-  }
+  const handleModuleToggle = useCallback(
+    (module, isEnabled) => {
+      if (!schoolId || !roleId) return
+      moduleMutation.mutate({
+        school: schoolId,
+        role: roleId,
+        module: module.module_id || module.id,
+        is_enabled: isEnabled,
+        organization: organizationId,
+      })
+    },
+    [schoolId, roleId, organizationId, moduleMutation],
+  )
 
-  const handleModuleUpdate = (module, updates) => {
-    if (!schoolId || !roleId) return
-    setSavingModuleId(module.module_id || module.id)
-    moduleMutation.mutate({
-      school: schoolId,
-      role: roleId,
-      module: module.module_id || module.id,
-      organization: organizationId,
-      ...updates,
-    })
-  }
+  const handleModuleUpdate = useCallback(
+    (module, updates) => {
+      if (!schoolId || !roleId) return
+      setSavingModuleId(module.module_id || module.id)
+      moduleMutation.mutate({
+        school: schoolId,
+        role: roleId,
+        module: module.module_id || module.id,
+        organization: organizationId,
+        ...updates,
+      })
+    },
+    [schoolId, roleId, organizationId, moduleMutation],
+  )
 
-  const handleModuleMove = (module, direction) => {
-    if (!schoolId || !roleId || !modules.length) return
-    const moduleId = module.module_id || module.id
-    const sorted = [...modules].sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
-    const index = sorted.findIndex((item) => (item.module_id || item.id) === moduleId)
-    const swapIndex = direction === 'up' ? index - 1 : index + 1
-    if (index < 0 || swapIndex < 0 || swapIndex >= sorted.length) return
+  const handleModuleMove = useCallback(
+    (module, direction) => {
+      if (!schoolId || !roleId || !modules.length) return
+      const moduleId = module.module_id || module.id
+      const sorted = [...modules].sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
+      const index = sorted.findIndex((item) => (item.module_id || item.id) === moduleId)
+      const swapIndex = direction === 'up' ? index - 1 : index + 1
+      if (index < 0 || swapIndex < 0 || swapIndex >= sorted.length) return
 
-    const other = sorted[swapIndex]
-    const moduleSeq = module.sequence ?? index + 1
-    const otherSeq = other.sequence ?? swapIndex + 1
+      const other = sorted[swapIndex]
+      const moduleSeq = module.sequence ?? index + 1
+      const otherSeq = other.sequence ?? swapIndex + 1
 
-    setSavingModuleId(moduleId)
-    moduleMutation.mutate({
-      school: schoolId,
-      role: roleId,
-      module: moduleId,
-      sequence: otherSeq,
-      organization: organizationId,
-    })
-    moduleMutation.mutate({
-      school: schoolId,
-      role: roleId,
-      module: other.module_id || other.id,
-      sequence: moduleSeq,
-      organization: organizationId,
-    })
-  }
+      queryClient.setQueryData(treeQueryKey, (old) =>
+        patchModulesInResponse(old, (current) => swapModuleSequences(current, moduleId, direction)),
+      )
 
-  const toggleModuleExpand = (moduleId) => {
+      setSavingModuleId(moduleId)
+      moduleMutation.mutate({
+        school: schoolId,
+        role: roleId,
+        module: moduleId,
+        sequence: otherSeq,
+        organization: organizationId,
+      })
+      moduleMutation.mutate({
+        school: schoolId,
+        role: roleId,
+        module: other.module_id || other.id,
+        sequence: moduleSeq,
+        organization: organizationId,
+      })
+    },
+    [schoolId, roleId, modules, organizationId, moduleMutation, queryClient, treeQueryKey],
+  )
+
+  const toggleModuleExpand = useCallback((moduleId) => {
     const key = String(moduleId)
     setExpandedModules((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+  }, [])
 
-  const isModuleExpanded = (moduleId) => Boolean(expandedModules[String(moduleId)])
+  const isModuleExpanded = useCallback(
+    (moduleId) => Boolean(expandedModules[String(moduleId)]),
+    [expandedModules],
+  )
 
   if (!organizationId || !schoolId) return <PageLoader />
 
   const selectedRoleLabel = roleOptions.find((r) => r.value === roleId)?.label
   const schoolLabel = user?.school_name || user?.school?.school_name || treePayload?.school_name || 'Your school'
+  const showInitialLoader = Boolean(roleId) && treeQuery.isLoading && !treeQuery.data
 
   return (
     <NavPageShell breadcrumb={[{ label: 'Role Menu Mapping' }]}>
@@ -500,7 +622,7 @@ export default function RoleMenuMapping() {
           title="Select a user type"
           description="Choose Teacher, Student, or Parent to map modules and menus for your school."
         />
-      ) : treeQuery.isLoading ? (
+      ) : showInitialLoader ? (
         <PageLoader />
       ) : treeQuery.isError ? (
         <ErrorState message={getErrorMessage(treeQuery.error)} onRetry={treeQuery.refetch} />
@@ -511,6 +633,10 @@ export default function RoleMenuMapping() {
         />
       ) : (
         <>
+          {treeQuery.isFetching && !showInitialLoader ? (
+            <p className="text-xs text-muted-foreground">Updating menu catalog…</p>
+          ) : null}
+
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-3xl">
             <NavStatPill label="Modules" value={stats.modules} />
             <NavStatPill label="Menus" value={stats.menus} />
@@ -535,9 +661,7 @@ export default function RoleMenuMapping() {
                   onModuleMove={handleModuleMove}
                   onMenuToggle={handleMenuToggle}
                   onMenuSequenceChange={handleMenuUpdate}
-                  togglingModuleId={togglingModuleId}
                   savingModuleId={savingModuleId}
-                  togglingMenuId={togglingMenuId}
                   savingMenuId={savingMenuId}
                 />
               )

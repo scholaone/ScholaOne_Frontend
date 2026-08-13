@@ -13,6 +13,7 @@ import {
   TeacherStatCards,
   TeacherTopScorersPanel,
 } from '@/components/dashboard/teacher/TeacherDashboardPanels'
+import { DashboardWelcomeHeader } from '@/components/dashboard/clay/ClayWidgets'
 import '@/styles/teacher-dashboard.css'
 
 export default function TeacherDashboardView() {
@@ -49,22 +50,13 @@ export default function TeacherDashboardView() {
     .filter(Boolean)
     .join(' · ')
 
-  const todayLabel = new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-
   return (
     <div className="teacher-dash w-full min-w-0 max-w-full pb-4">
-      <header className="teacher-dash__welcome">
-        <div>
-          <h1>Welcome, {userName?.split(' ')[0] || 'Teacher'}</h1>
-          <p>{subtitle || 'Your teaching dashboard at a glance'}</p>
-        </div>
-        <p className="text-sm text-[var(--td-muted)]">{todayLabel}</p>
-      </header>
+      <DashboardWelcomeHeader
+        userName={userName}
+        subtitle={subtitle || 'Your teaching dashboard at a glance'}
+        fallbackName="Teacher"
+      />
 
       <TeacherStatCards statistics={statistics} loading={isLoading && !data} />
 

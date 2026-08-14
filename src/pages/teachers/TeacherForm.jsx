@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ResourceFormPage from '@/components/crud/ResourceFormPage'
-import TeacherPhotoField from '@/components/teachers/TeacherPhotoField'
+import TeacherPhotoField, { formatClassTeacherLabel } from '@/components/teachers/TeacherPhotoField'
 import { useTeacherPhotoUpload } from '@/components/teachers/useTeacherPhotoUpload'
 import { teacherService } from '@/api/services'
 import { unwrapData } from '@/api/client'
@@ -28,7 +28,13 @@ const fields = [
   { name: 'department', label: 'Department', type: 'text' },
   { name: 'specialization', label: 'Specialization', type: 'text' },
   { name: 'qualification_summary', label: 'Qualification Summary', type: 'text' },
-  { name: 'total_experience_years', label: 'Experience (Years)', type: 'number' },
+  {
+    name: 'total_experience_years',
+    label: 'Total Experience (Years)',
+    type: 'number',
+    disabled: true,
+    help: 'Auto-calculated from experience records on the teacher profile Experience tab.',
+  },
   { name: 'joining_date', label: 'Joining Date', type: 'date' },
   { name: 'confirmation_date', label: 'Confirmation Date', type: 'date' },
   { name: 'date_of_birth', label: 'Date of Birth', type: 'date' },
@@ -131,16 +137,19 @@ export default function TeacherForm() {
         photoUpload.setPendingPhotoFile(null)
         return mapTeacherLoad(item)
       }}
-      transformSubmit={(values) => ({
-        ...values,
-        languages_known: typeof values.languages_known === 'string'
-          ? values.languages_known.split(',').map((s) => s.trim()).filter(Boolean)
-          : values.languages_known,
-        total_experience_years: values.total_experience_years === '' ? null : values.total_experience_years,
-        send_credentials: Boolean(values.send_credentials),
-        portal_access: Boolean(values.portal_access),
-        mobile_app_access: Boolean(values.mobile_app_access),
-      })}
+      transformSubmit={(values) => {
+        const payload = {
+          ...values,
+          languages_known: typeof values.languages_known === 'string'
+            ? values.languages_known.split(',').map((s) => s.trim()).filter(Boolean)
+            : values.languages_known,
+          send_credentials: Boolean(values.send_credentials),
+          portal_access: Boolean(values.portal_access),
+          mobile_app_access: Boolean(values.mobile_app_access),
+        }
+        delete payload.total_experience_years
+        return payload
+      }}
       onSuccess={async ({ response }) => {
         if (photoUpload.pendingPhotoFile) {
           const saved = unwrapData(response)
@@ -153,7 +162,12 @@ export default function TeacherForm() {
       renderTop={({ item }) => (
         <TeacherPhotoField
           {...photoUpload.photoFieldProps}
-          name={item?.full_name || 'Teacher'}
+          name={item?.full_name || photoUpload.photoFieldProps.name}
+          email={item?.email}
+          employeeId={item?.employee_id}
+          designation={item?.designation}
+          roleLabel={item?.academic_role_display || item?.academic_role}
+          classLabel={formatClassTeacherLabel(item?.class_teacher_mappings)}
         />
       )}
     />

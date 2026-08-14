@@ -272,6 +272,7 @@ export const studentService = {
 
 export const teacherService = {
   list: (params) => apiGetPaginated(API_ENDPOINTS.TEACHERS.LIST, params),
+  me: () => apiGet(API_ENDPOINTS.TEACHERS.ME),
   get: (id) => apiGet(API_ENDPOINTS.TEACHERS.DETAIL(id)),
   create: (data) => apiPost(API_ENDPOINTS.TEACHERS.LIST, data),
   update: (id, data) => apiPatch(API_ENDPOINTS.TEACHERS.DETAIL(id), data),
@@ -285,6 +286,10 @@ export const teacherService = {
   uploadPhoto: (id, formData) => apiPostForm(API_ENDPOINTS.TEACHERS.UPLOAD_PHOTO(id), formData),
   addQualification: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.QUALIFICATIONS(id), data),
   addExperience: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.EXPERIENCE(id), data),
+  updateExperience: (teacherId, experienceId, data) =>
+    apiPost(API_ENDPOINTS.TEACHERS.EXPERIENCE_UPDATE(teacherId, experienceId), data),
+  deleteExperience: (teacherId, experienceId) =>
+    apiPost(API_ENDPOINTS.TEACHERS.EXPERIENCE_DELETE(teacherId, experienceId)),
   assignSubject: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.ASSIGN_SUBJECT(id), data),
   academicAssign: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.ACADEMIC_ASSIGNMENTS(id), data),
   workload: (id, params) => apiGet(API_ENDPOINTS.TEACHERS.WORKLOAD(id), params),

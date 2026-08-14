@@ -14,22 +14,18 @@ import {
   FiSmartphone,
   FiUser,
 } from 'react-icons/fi'
-import { authService } from '@/api/services'
-import { unwrapData } from '@/api/client'
+import { authService, teacherService } from '@/api/services'
+import { getErrorMessage, unwrapData } from '@/api/client'
 import { useAuth } from '@/contexts/AuthContext'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import Button from '@/components/ui/Button'
 import { Card, PageHeader } from '@/components/ui/Card'
 import { Avatar, PageLoader, StatusBadge } from '@/components/ui/Feedback'
+import TeacherPortalProfile from '@/components/teachers/portal/TeacherPortalProfile'
+import { useTeacherPhotoUpload } from '@/components/teachers/useTeacherPhotoUpload'
+import '@/styles/teacher-profile.css'
 import { cn, formatDate, formatDateTime, fromNow, resolveMediaUrl } from '@/utils/format'
-
-function getRoleLabel(user) {
-  if (user?.is_super_admin) return 'Super Admin'
-  if (user?.is_org_admin) return 'Organization Admin'
-  if (user?.is_school_admin) return 'School Admin'
-  if (user?.is_staff) return 'Staff'
-  return 'User'
-}
+import { getUserRoleDisplayLabel, isTeacherPortalUser } from '@/utils/authRoles'
 
 function getRoleTone(user) {
   if (user?.is_super_admin) return 'bg-violet-100 text-violet-700 ring-violet-200'
@@ -90,10 +86,34 @@ export default function ProfilePage() {
   const displayName =
     profile?.full_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.email
   const profileImage = resolveMediaUrl(profile?.profile_image || profile?.profile_photo)
-  const roleLabel = getRoleLabel(profile)
+  const roleLabel = getUserRoleDisplayLabel(profile)
+  const isTeacher = isTeacherPortalUser(profile)
+  const teacherProfileIdHint = profile?.teacher_profile_id
+
+  const teacherQuery = useQuery({
+    queryKey: ['teachers', 'me', 'profile'],
+    queryFn: () => teacherService.me(),
+    enabled: isTeacher,
+    staleTime: 60_000,
+  })
+
+  const teacher = unwrapData(teacherQuery.data)
+  const teacherId = teacher?.teacher_id || teacher?.id || teacherProfileIdHint
+  const teacherPhotoUrl = resolveMediaUrl(teacher?.photo_url)
+
+  const photoUpload = useTeacherPhotoUpload({
+    teacherId: teacherId || null,
+    teacherName: teacher?.full_name || displayName,
+    initialUrl: teacherPhotoUrl,
+    onUploaded: async () => {
+      await teacherQuery.refetch()
+      await refreshProfile?.()
+    },
+  })
 
   const handleRefresh = async () => {
     await profileQuery.refetch()
+    if (teacherId) await teacherQuery.refetch()
     await refreshProfile?.()
   }
 
@@ -103,6 +123,25 @@ export default function ProfilePage() {
 
   return (
     <div className="w-full min-w-0 print:text-black">
+      {isTeacher ? (
+        teacherQuery.isLoading && !teacher ? (
+          <div className="teacher-profile-portal">
+            <div className="tp-skeleton" style={{ minHeight: 520 }} aria-hidden />
+          </div>
+        ) : (
+          <TeacherPortalProfile
+            teacher={teacher}
+            profile={profile}
+            roleLabel={roleLabel}
+            photoUpload={photoUpload}
+            onRefresh={handleRefresh}
+            refreshing={profileQuery.isFetching || teacherQuery.isFetching}
+            error={teacherQuery.error ? getErrorMessage(teacherQuery.error) : null}
+            onRetry={() => teacherQuery.refetch()}
+          />
+        )
+      ) : (
+        <>
       <div className="print:hidden">
         <Breadcrumb items={[{ label: 'Profile' }]} />
       </div>
@@ -144,67 +183,67 @@ export default function ProfilePage() {
           />
         </div>
 
-        <div className="relative bg-white px-6 pb-6 pt-0 sm:px-8">
-          <div className="-mt-12 flex flex-col gap-5 sm:-mt-14 sm:flex-row sm:items-end sm:justify-between print:mt-4 print:flex-row print:items-center">
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end">
-              <div className="relative shrink-0">
-                <div className="rounded-full bg-white p-1.5 shadow-md ring-4 ring-white print:shadow-none print:ring-0">
-                  <Avatar
-                    name={displayName}
-                    src={profileImage}
-                    size="2xl"
-                    className="!h-24 !w-24 sm:!h-28 sm:!w-28 print:!h-20 print:!w-20"
-                  />
-                </div>
-                <span
-                  className={cn(
-                    'absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white print:hidden',
-                    profile?.is_active ? 'bg-emerald-500' : 'bg-slate-400',
-                  )}
-                  title={profile?.is_active ? 'Active' : 'Inactive'}
-                />
-              </div>
-
-              <div className="text-center sm:pb-1 sm:text-left">
-                <h2 className="text-2xl font-bold tracking-tight text-text sm:text-3xl">{displayName}</h2>
-                <p className="mt-1 text-sm text-muted">{profile?.email}</p>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+        <div className="relative bg-white px-6 pb-6 pt-4 sm:px-8">
+            <div className="-mt-12 flex flex-col gap-5 sm:-mt-14 sm:flex-row sm:items-end sm:justify-between print:mt-4 print:flex-row print:items-center">
+              <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end">
+                <div className="relative shrink-0">
+                  <div className="rounded-full bg-white p-1.5 shadow-md ring-4 ring-white print:shadow-none print:ring-0">
+                    <Avatar
+                      name={displayName}
+                      src={profileImage}
+                      size="2xl"
+                      className="!h-24 !w-24 sm:!h-28 sm:!w-28 print:!h-20 print:!w-20"
+                    />
+                  </div>
                   <span
                     className={cn(
-                      'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset',
-                      getRoleTone(profile),
+                      'absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white print:hidden',
+                      profile?.is_active ? 'bg-emerald-500' : 'bg-slate-400',
                     )}
-                  >
-                    {roleLabel}
-                  </span>
-                  <StatusBadge active={profile?.is_active} />
-                  {profile?.email_verified ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
-                      <FiShield className="h-3 w-3" />
-                      Verified
+                    title={profile?.is_active ? 'Active' : 'Inactive'}
+                  />
+                </div>
+
+                <div className="text-center sm:pb-1 sm:text-left">
+                  <h2 className="text-2xl font-bold tracking-tight text-text sm:text-3xl">{displayName}</h2>
+                  <p className="mt-1 text-sm text-muted">{profile?.email}</p>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset',
+                        getRoleTone(profile),
+                      )}
+                    >
+                      {roleLabel}
                     </span>
-                  ) : null}
+                    <StatusBadge active={profile?.is_active} />
+                    {profile?.email_verified ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+                        <FiShield className="h-3 w-3" />
+                        Verified
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="hidden gap-3 sm:grid sm:grid-cols-3 print:hidden">
-              <StatPill
-                label="Last login"
-                value={profile?.last_login ? fromNow(profile.last_login) : '—'}
-                hint={profile?.last_login ? formatDateTime(profile.last_login) : undefined}
-              />
-              <StatPill
-                label="Member since"
-                value={profile?.created_at ? formatDate(profile.created_at, 'MMM YYYY') : '—'}
-                hint={profile?.created_at ? formatDate(profile.created_at) : undefined}
-              />
-              <StatPill
-                label="Username"
-                value={profile?.username || '—'}
-              />
+              <div className="hidden gap-3 sm:grid sm:grid-cols-3 print:hidden">
+                <StatPill
+                  label="Last login"
+                  value={profile?.last_login ? fromNow(profile.last_login) : '—'}
+                  hint={profile?.last_login ? formatDateTime(profile.last_login) : undefined}
+                />
+                <StatPill
+                  label="Member since"
+                  value={profile?.created_at ? formatDate(profile.created_at, 'MMM YYYY') : '—'}
+                  hint={profile?.created_at ? formatDate(profile.created_at) : undefined}
+                />
+                <StatPill
+                  label="Username"
+                  value={profile?.username || '—'}
+                />
+              </div>
             </div>
-          </div>
         </div>
       </Card>
 
@@ -293,6 +332,8 @@ export default function ProfilePage() {
           </div>
         </SectionCard>
       </div>
+        </>
+      )}
     </div>
   )
 }

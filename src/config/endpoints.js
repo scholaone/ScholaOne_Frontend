@@ -471,6 +471,7 @@ export const API_ENDPOINTS = {
   },
   TEACHERS: {
     LIST: '/api/v1/teachers/',
+    ME: '/api/v1/teachers/me/',
     DETAIL: (id) => `/api/v1/teachers/${id}/`,
     EXPORT: '/api/v1/teachers/export/',
     DASHBOARD: '/api/v1/teachers/dashboard/',
@@ -480,6 +481,10 @@ export const API_ENDPOINTS = {
     UPLOAD_PHOTO: (id) => `/api/v1/teachers/${id}/upload-photo/`,
     QUALIFICATIONS: (id) => `/api/v1/teachers/${id}/qualifications/`,
     EXPERIENCE: (id) => `/api/v1/teachers/${id}/experience/`,
+    EXPERIENCE_UPDATE: (teacherId, experienceId) =>
+      `/api/v1/teachers/${teacherId}/experience/${experienceId}/update/`,
+    EXPERIENCE_DELETE: (teacherId, experienceId) =>
+      `/api/v1/teachers/${teacherId}/experience/${experienceId}/delete/`,
     ASSIGN_SUBJECT: (id) => `/api/v1/teachers/${id}/assign-subject/`,
     ACADEMIC_ASSIGNMENTS: (id) => `/api/v1/teachers/${id}/academic-assignments/`,
     WORKLOAD: (id) => `/api/v1/teachers/${id}/workload/`,

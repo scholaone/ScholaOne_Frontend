@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FiKey, FiSend } from 'react-icons/fi'
+import { FiEdit2, FiKey, FiSend, FiTrash2 } from 'react-icons/fi'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import { PageHeader, Card } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -12,7 +12,16 @@ import { teacherService } from '@/api/services'
 import { getErrorMessage, unwrapData } from '@/api/client'
 import { TEACHER_LEAVE_TYPE_OPTIONS, TEACHER_STATUS_OPTIONS } from '@/config/constants'
 import { resolveMediaUrl } from '@/utils/format'
-import TeacherPhotoField from '@/components/teachers/TeacherPhotoField'
+import {
+  buildExperiencePayload,
+  EMPTY_EXPERIENCE_FORM,
+  formatExperiencePeriod,
+  formatTotalExperienceYears,
+  experienceToForm,
+  validateExperienceForm,
+} from '@/utils/teacherExperience'
+import TeacherPhotoField, { formatClassTeacherLabel } from '@/components/teachers/TeacherPhotoField'
+import { TeacherProfileDetailsGrid } from '@/components/teachers/TeacherProfileSections'
 import TeacherCredentialsModal from '@/components/teachers/TeacherCredentialsModal'
 import { useTeacherPhotoUpload } from '@/components/teachers/useTeacherPhotoUpload'
 
@@ -50,7 +59,8 @@ export default function TeacherDetail() {
   const [credentialsOpen, setCredentialsOpen] = useState(false)
 
   const [qualForm, setQualForm] = useState({ degree: '', institution: '', year_completed: '' })
-  const [expForm, setExpForm] = useState({ organization_name: '', role: '', start_date: '' })
+  const [expForm, setExpForm] = useState({ ...EMPTY_EXPERIENCE_FORM })
+  const [editingExperienceId, setEditingExperienceId] = useState(null)
   const [subjectForm, setSubjectForm] = useState({ academic_year: '', subject: '', class_section: '' })
   const [assignForm, setAssignForm] = useState({
     assignment_type: 'subject',
@@ -94,9 +104,46 @@ export default function TeacherDetail() {
     onSuccess: () => { invalidate(); toast.success('Qualification added') },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
+  const resetExperienceForm = () => {
+    setExpForm({ ...EMPTY_EXPERIENCE_FORM })
+    setEditingExperienceId(null)
+  }
+
+  const experienceSuccessToast = (response, fallback) => {
+    const total = unwrapData(response)?.total_experience_years
+    toast.success(
+      total != null && total !== ''
+        ? `${fallback}. Total experience: ${formatTotalExperienceYears(total)} years`
+        : fallback,
+    )
+  }
+
   const expMut = useMutation({
-    mutationFn: () => teacherService.addExperience(id, expForm),
-    onSuccess: () => { invalidate(); toast.success('Experience added') },
+    mutationFn: () => teacherService.addExperience(id, buildExperiencePayload(expForm)),
+    onSuccess: (response) => {
+      invalidate()
+      resetExperienceForm()
+      experienceSuccessToast(response, 'Experience added')
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+  const expUpdateMut = useMutation({
+    mutationFn: () =>
+      teacherService.updateExperience(id, editingExperienceId, buildExperiencePayload(expForm)),
+    onSuccess: (response) => {
+      invalidate()
+      resetExperienceForm()
+      experienceSuccessToast(response, 'Experience updated')
+    },
+    onError: (e) => toast.error(getErrorMessage(e)),
+  })
+  const expDeleteMut = useMutation({
+    mutationFn: (experienceId) => teacherService.deleteExperience(id, experienceId),
+    onSuccess: (response) => {
+      invalidate()
+      if (editingExperienceId) resetExperienceForm()
+      experienceSuccessToast(response, 'Experience deleted')
+    },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
   const subjectMut = useMutation({
@@ -220,16 +267,23 @@ export default function TeacherDetail() {
         { label: 'Teachers', href: '/teachers' },
         { label: teacher.full_name },
       ]} />
-      <PageHeader
-        title={teacher.full_name}
-        subtitle={[teacher.teacher_code || teacher.employee_id, teacher.academic_role, teacher.designation, teacher.department].filter(Boolean).join(' · ')}
+      <TeacherPhotoField
+        {...photoUpload.photoFieldProps}
+        name={teacher.full_name}
+        email={teacher.email}
+        employeeId={teacher.employee_id}
+        designation={teacher.designation}
+        roleLabel={teacher.academic_role_display || teacher.academic_role}
+        classLabel={formatClassTeacherLabel(teacher.class_teacher_mappings)}
         actions={
           <>
-            <Link to={`/teachers/${id}/edit`}><Button variant="edit">Edit</Button></Link>
-            <Button variant="outline" onClick={() => setCredentialsOpen(true)}>
+            <Link to={`/teachers/${id}/edit`}>
+              <Button variant="edit" size="sm">Edit</Button>
+            </Link>
+            <Button variant="outline" size="sm" onClick={() => setCredentialsOpen(true)}>
               <FiKey className="h-4 w-4" /> View Creds
             </Button>
-            <Button variant="outline" onClick={() => credentialsMut.mutate()} loading={credentialsMut.isPending}>
+            <Button variant="outline" size="sm" onClick={() => credentialsMut.mutate()} loading={credentialsMut.isPending}>
               <FiSend className="h-4 w-4" /> Send Credentials
             </Button>
           </>
@@ -250,37 +304,7 @@ export default function TeacherDetail() {
       </div>
 
       {tab === 'profile' && (
-        <Card>
-          <div className="mb-6">
-            <TeacherPhotoField {...photoUpload.photoFieldProps} name={teacher.full_name} />
-          </div>
-          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="Status" value={teacher.status_display || teacher.status} />
-            <Field label="Employee ID" value={teacher.employee_id} />
-            <Field label="Teacher Code" value={teacher.teacher_code} />
-            <Field label="Academic Role" value={teacher.academic_role_display || teacher.academic_role} />
-            <Field label="Username" value={teacher.username} />
-            <Field label="Email" value={teacher.email} />
-            <Field label="Mobile" value={teacher.mobile_number} />
-            <Field label="Specialization" value={teacher.specialization} />
-            <Field label="Qualification" value={teacher.qualification_summary} />
-            <Field label="Experience (Years)" value={teacher.total_experience_years} />
-            <Field label="Joining Date" value={teacher.joining_date} />
-            <Field label="Confirmation Date" value={teacher.confirmation_date} />
-            <Field label="Date of Birth" value={teacher.date_of_birth} />
-            <Field label="Gender" value={teacher.gender} />
-            <Field label="Blood Group" value={teacher.blood_group} />
-            <Field label="Nationality" value={teacher.nationality} />
-            <Field label="Languages" value={Array.isArray(teacher.languages_known) ? teacher.languages_known.join(', ') : teacher.languages_known} />
-            <Field label="Address" value={teacher.address} />
-            <Field label="City" value={teacher.city} />
-            <Field label="State" value={teacher.state} />
-            <Field label="Portal Access" value={teacher.portal_access ? 'Yes' : 'No'} />
-            <Field label="Mobile App" value={teacher.mobile_app_access ? 'Yes' : 'No'} />
-            <Field label="Bio" value={teacher.bio} />
-            <Field label="Emergency Contact" value={`${teacher.emergency_contact_name || ''} ${teacher.emergency_contact_phone || ''}`} />
-          </dl>
-        </Card>
+        <TeacherProfileDetailsGrid teacher={teacher} />
       )}
 
       {tab === 'assignments' && (
@@ -356,16 +380,130 @@ export default function TeacherDetail() {
 
       {tab === 'experience' && (
         <Card>
-          <div className="mb-4 grid gap-2 sm:grid-cols-3 max-w-3xl">
-            <Input placeholder="Organization" value={expForm.organization_name} onChange={(e) => setExpForm((p) => ({ ...p, organization_name: e.target.value }))} />
-            <Input placeholder="Role" value={expForm.role} onChange={(e) => setExpForm((p) => ({ ...p, role: e.target.value }))} />
-            <Input placeholder="Start date" type="date" value={expForm.start_date} onChange={(e) => setExpForm((p) => ({ ...p, start_date: e.target.value }))} />
+          <p className="mb-4 text-sm text-muted">
+            Total experience:{' '}
+            <span className="font-semibold text-text">
+              {formatTotalExperienceYears(teacher.total_experience_years)} years
+            </span>
+            <span className="ml-1 text-xs">(auto-calculated from dates below)</span>
+          </p>
+          <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl">
+            <Input
+              label="Organization"
+              placeholder="School / company name"
+              value={expForm.organization_name}
+              onChange={(e) => setExpForm((p) => ({ ...p, organization_name: e.target.value }))}
+            />
+            <Input
+              label="Role"
+              placeholder="Designation / subject taught"
+              value={expForm.role}
+              onChange={(e) => setExpForm((p) => ({ ...p, role: e.target.value }))}
+            />
+            <Input
+              label="From date"
+              type="date"
+              required
+              value={expForm.start_date}
+              onChange={(e) => setExpForm((p) => ({ ...p, start_date: e.target.value }))}
+            />
+            <Input
+              label="To date"
+              type="date"
+              required={!expForm.is_current}
+              disabled={expForm.is_current}
+              value={expForm.end_date}
+              onChange={(e) => setExpForm((p) => ({ ...p, end_date: e.target.value }))}
+              hint={expForm.is_current ? 'Not required while Present is selected' : undefined}
+            />
+            <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium text-text">
+              <input
+                type="checkbox"
+                checked={expForm.is_current}
+                onChange={(e) => setExpForm((p) => ({
+                  ...p,
+                  is_current: e.target.checked,
+                  end_date: e.target.checked ? '' : p.end_date,
+                }))}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+              />
+              Present (currently working here)
+            </label>
+            <Input
+              label="Notes"
+              placeholder="Optional description"
+              className="sm:col-span-2 lg:col-span-3"
+              value={expForm.description}
+              onChange={(e) => setExpForm((p) => ({ ...p, description: e.target.value }))}
+            />
           </div>
-          <Button loading={expMut.isPending} onClick={() => expMut.mutate()}>Add Experience</Button>
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Button
+              loading={expMut.isPending || expUpdateMut.isPending}
+              onClick={() => {
+                const message = validateExperienceForm(expForm)
+                if (message) {
+                  toast.error(message)
+                  return
+                }
+                if (editingExperienceId) {
+                  expUpdateMut.mutate()
+                } else {
+                  expMut.mutate()
+                }
+              }}
+            >
+              {editingExperienceId ? 'Update Experience' : 'Add Experience'}
+            </Button>
+            {editingExperienceId ? (
+              <Button variant="outline" onClick={resetExperienceForm}>
+                Cancel
+              </Button>
+            ) : null}
+          </div>
           <ul className="mt-4 space-y-2 text-sm">
             {(teacher.experiences || []).map((e) => (
-              <li key={e.experience_id} className="rounded-lg border px-3 py-2">
-                {e.organization_name} — {e.role} ({e.start_date || '—'} to {e.end_date || 'Present'})
+              <li
+                key={e.experience_id}
+                className={`rounded-lg border px-3 py-2 ${editingExperienceId === e.experience_id ? 'border-primary bg-primary/5' : ''}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="font-medium">{e.organization_name}</span>
+                    {e.role ? ` — ${e.role}` : ''}
+                    <span className="mt-0.5 block text-xs text-muted">
+                      {formatExperiencePeriod(e)}
+                      {e.is_current ? ' · Current' : ''}
+                    </span>
+                    {e.description ? <span className="mt-1 block text-xs text-muted">{e.description}</span> : null}
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Edit experience"
+                      onClick={() => {
+                        setEditingExperienceId(e.experience_id)
+                        setExpForm(experienceToForm(e))
+                      }}
+                    >
+                      <FiEdit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label="Delete experience"
+                      loading={expDeleteMut.isPending}
+                      onClick={() => {
+                        if (window.confirm('Delete this experience record?')) {
+                          expDeleteMut.mutate(e.experience_id)
+                        }
+                      }}
+                    >
+                      <FiTrash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
               </li>
             ))}
           </ul>

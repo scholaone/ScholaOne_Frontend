@@ -26,5 +26,5 @@ export const BRAND_AI_NAME = 'ScholaOne AI'
 export const BRAND_MAIL_NAME = 'ScholaOne Post'
 
 export const BRAND_WEBSITE_URL = 'https://scholaone.in/'
-export const BRAND_CONTACT_EMAIL = 'sharanreddy@scholaone.in'
+export const BRAND_CONTACT_EMAIL = 'info@scholaone.in'
 export const BRAND_GITHUB_URL = 'https://github.com/sharanreddy'

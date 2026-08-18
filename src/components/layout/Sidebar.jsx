@@ -162,6 +162,7 @@ const orgAdminNav = [
 
 /** Class Allocation menus reuse /academics/* URLs — exclude from Academic Structure highlight. */
 const CLASS_ALLOCATION_ACADEMIC_PREFIXES = [
+  '/academics/subject-allocation',
   '/academics/class-section-subjects',
   '/academics/class-teachers',
   '/academics/class-sections',

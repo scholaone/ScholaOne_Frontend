@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/Card'
-import { formatExperiencePeriod, formatTotalExperienceYears } from '@/utils/teacherExperience'
+import ExperienceSummary from '@/components/teachers/ExperienceSummary'
+import { formatTotalExperienceYears } from '@/utils/teacherExperience'
 
 export function TeacherProfileField({ label, value }) {
   return (
@@ -57,9 +58,13 @@ export function TeacherProfileDetailsGrid({ teacher }) {
         <TeacherProfileField
           label="Experience (Years)"
           value={
-            teacher.total_experience_years != null
-              ? `${formatTotalExperienceYears(teacher.total_experience_years)} years (calculated)`
-              : ''
+            teacher.total_experience_years != null ? (
+              <>
+                <b>{formatTotalExperienceYears(teacher.total_experience_years)} years</b> (calculated)
+              </>
+            ) : (
+              ''
+            )
           }
         />
         <TeacherProfileField label="Joining Date" value={teacher.joining_date} />
@@ -113,7 +118,10 @@ export function TeacherProfileReadOnlySections({ teacher }) {
           <>
             <strong>{e.organization_name}</strong>
             {e.role ? ` — ${e.role}` : ''}
-            <span className="tp-list-meta">{formatExperiencePeriod(e)}{e.is_current ? ' · Current' : ''}</span>
+            <span className="tp-list-meta">
+              <ExperienceSummary record={e} />
+              {e.is_current ? ' · Current' : ''}
+            </span>
             {e.description ? <span className="tp-list-meta">{e.description}</span> : null}
           </>
         )}
@@ -127,7 +135,7 @@ export function TeacherProfileReadOnlySections({ teacher }) {
         renderItem={(s) => (
           <>
             {[s.subject_name, s.class_name, s.section_name].filter(Boolean).join(' · ') || '—'}
-            {s.academic_year ? ` (${s.academic_year})` : ''}
+            {s.academic_year_name ? ` (${s.academic_year_name})` : ''}
           </>
         )}
       />

@@ -415,6 +415,16 @@ export const timetableService = {
   export: (versionId, params) => apiGetBlob(API_ENDPOINTS.TIMETABLE.EXPORT(versionId), params),
   importCsv: (versionId, formData) => apiPostForm(API_ENDPOINTS.TIMETABLE.IMPORT(versionId), formData),
   enqueueAiJob: (versionId, data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_JOBS(versionId), data),
+  updateSlot: (versionId, slotId, data) =>
+    apiPatch(API_ENDPOINTS.TIMETABLE.SLOT_DETAIL(versionId, slotId), data),
+  deleteSlot: (versionId, slotId, params) =>
+    apiDelete(API_ENDPOINTS.TIMETABLE.SLOT_DETAIL(versionId, slotId), { params }),
+  validateAssignment: (data) => apiPost(API_ENDPOINTS.TIMETABLE.VALIDATE, data),
+  aiParse: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_PARSE, data),
+  aiGenerate: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_GENERATE, data),
+  aiRegenerate: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_REGENERATE, data),
+  aiModify: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_MODIFY, data),
+  aiApprove: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_APPROVE, data),
   templates: (params) => apiGet(API_ENDPOINTS.TIMETABLE.TEMPLATES, params),
   createTemplate: (data) => apiPost(API_ENDPOINTS.TIMETABLE.TEMPLATES, data),
 }

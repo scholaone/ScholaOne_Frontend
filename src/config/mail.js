@@ -10,7 +10,7 @@ export const NEXUS_MAIL_SEND_MODE =
 export const NEXUS_MAIL_IS_FRONTEND = NEXUS_MAIL_SEND_MODE === 'frontend'
 
 export const NEXUS_MAIL_FROM_EMAIL =
-  import.meta.env.VITE_NEXUS_MAIL_FROM?.trim() || 'sharanreddy26372@gmail.com'
+  import.meta.env.VITE_NEXUS_MAIL_FROM?.trim() || 'info@scholaone.in@gmail.com'
 
 export const NEXUS_MAIL_FROM_NAME =
   import.meta.env.VITE_NEXUS_MAIL_FROM_NAME?.trim() || 'ScholaOne Post'

@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { FiMail, FiLock } from 'react-icons/fi'
 import { AuthInput, AuthPasswordInput } from '../ui/AuthInput'
 import AuthButton from '../ui/AuthButton'
-import AuthMiniFooter from '../ui/AuthMiniFooter'
 import ScholaOneLogo from '@/components/brand/ScholaOneLogo'
 
 const fieldVariants = {
@@ -98,7 +97,6 @@ export default function SignInCard({
         </motion.div>
       </form>
 
-      <AuthMiniFooter />
     </motion.div>
   )
 }

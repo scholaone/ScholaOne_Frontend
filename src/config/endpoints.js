@@ -270,6 +270,13 @@ export const API_ENDPOINTS = {
     EXPORT: (versionId) => `/api/v1/timetable/versions/${versionId}/export/`,
     IMPORT: (versionId) => `/api/v1/timetable/versions/${versionId}/import/`,
     AI_JOBS: (versionId) => `/api/v1/timetable/versions/${versionId}/ai-jobs/`,
+    SLOT_DETAIL: (versionId, slotId) => `/api/v1/timetable/versions/${versionId}/slots/${slotId}/`,
+    VALIDATE: '/api/v1/timetable/validate/',
+    AI_PARSE: '/api/v1/timetable/ai/parse/',
+    AI_GENERATE: '/api/v1/timetable/ai/generate/',
+    AI_REGENERATE: '/api/v1/timetable/ai/regenerate/',
+    AI_MODIFY: '/api/v1/timetable/ai/modify/',
+    AI_APPROVE: '/api/v1/timetable/ai/approve/',
     TEMPLATES: '/api/v1/timetable/templates/',
   },
   FEES: {

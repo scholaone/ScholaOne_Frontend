@@ -18,7 +18,7 @@ import Button from '@/components/ui/Button'
 import { ErrorState } from '@/components/ui/Feedback'
 import { formatClassTeacherLabel } from '@/components/teachers/TeacherPhotoField'
 import TeacherAttendanceDots from '@/components/teachers/portal/TeacherAttendanceDots'
-import { formatExperiencePeriod } from '@/utils/teacherExperience'
+import ExperienceSummary from '@/components/teachers/ExperienceSummary'
 import { cn, formatDate, formatDateTime, fromNow, resolveMediaUrl } from '@/utils/format'
 
 const DETAIL_TABS = [
@@ -297,7 +297,7 @@ export default function TeacherPortalProfile({
                       <strong>{e.organization_name}</strong>
                       {e.role ? ` — ${e.role}` : ''}
                       <span className="tp-list-meta">
-                        {formatExperiencePeriod(e)}
+                        <ExperienceSummary record={e} />
                         {e.is_current ? ' · Current' : ''}
                       </span>
                       {e.description ? <span className="tp-list-meta">{e.description}</span> : null}
@@ -316,7 +316,7 @@ export default function TeacherPortalProfile({
                 renderItem={(s) => (
                   <>
                     {[s.subject_name, s.class_name, s.section_name].filter(Boolean).join(' · ')}
-                    {s.academic_year ? ` · ${s.academic_year}` : ''}
+                    {s.academic_year_name ? ` · ${s.academic_year_name}` : ''}
                   </>
                 )}
               />

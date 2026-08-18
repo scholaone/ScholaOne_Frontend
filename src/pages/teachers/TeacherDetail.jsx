@@ -12,10 +12,10 @@ import { teacherService } from '@/api/services'
 import { getErrorMessage, unwrapData } from '@/api/client'
 import { TEACHER_LEAVE_TYPE_OPTIONS, TEACHER_STATUS_OPTIONS } from '@/config/constants'
 import { resolveMediaUrl } from '@/utils/format'
+import ExperienceSummary from '@/components/teachers/ExperienceSummary'
 import {
   buildExperiencePayload,
   EMPTY_EXPERIENCE_FORM,
-  formatExperiencePeriod,
   formatTotalExperienceYears,
   experienceToForm,
   validateExperienceForm,
@@ -61,7 +61,6 @@ export default function TeacherDetail() {
   const [qualForm, setQualForm] = useState({ degree: '', institution: '', year_completed: '' })
   const [expForm, setExpForm] = useState({ ...EMPTY_EXPERIENCE_FORM })
   const [editingExperienceId, setEditingExperienceId] = useState(null)
-  const [subjectForm, setSubjectForm] = useState({ academic_year: '', subject: '', class_section: '' })
   const [assignForm, setAssignForm] = useState({
     assignment_type: 'subject',
     academic_year_id: '',
@@ -144,11 +143,6 @@ export default function TeacherDetail() {
       if (editingExperienceId) resetExperienceForm()
       experienceSuccessToast(response, 'Experience deleted')
     },
-    onError: (e) => toast.error(getErrorMessage(e)),
-  })
-  const subjectMut = useMutation({
-    mutationFn: () => teacherService.assignSubject(id, subjectForm),
-    onSuccess: () => { invalidate(); toast.success('Subject assigned') },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
   const assignMut = useMutation({
@@ -382,9 +376,7 @@ export default function TeacherDetail() {
         <Card>
           <p className="mb-4 text-sm text-muted">
             Total experience:{' '}
-            <span className="font-semibold text-text">
-              {formatTotalExperienceYears(teacher.total_experience_years)} years
-            </span>
+            <b>{formatTotalExperienceYears(teacher.total_experience_years)} years</b>
             <span className="ml-1 text-xs">(auto-calculated from dates below)</span>
           </p>
           <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl">
@@ -472,7 +464,7 @@ export default function TeacherDetail() {
                     <span className="font-medium">{e.organization_name}</span>
                     {e.role ? ` — ${e.role}` : ''}
                     <span className="mt-0.5 block text-xs text-muted">
-                      {formatExperiencePeriod(e)}
+                      <ExperienceSummary record={e} />
                       {e.is_current ? ' · Current' : ''}
                     </span>
                     {e.description ? <span className="mt-1 block text-xs text-muted">{e.description}</span> : null}
@@ -512,19 +504,35 @@ export default function TeacherDetail() {
 
       {tab === 'subjects' && (
         <Card>
-          <p className="mb-3 text-xs text-muted">Enter UUIDs for academic year, subject, and optional class section.</p>
-          <div className="mb-4 grid gap-2 sm:grid-cols-3 max-w-3xl">
-            <Input placeholder="Academic Year UUID" value={subjectForm.academic_year} onChange={(e) => setSubjectForm((p) => ({ ...p, academic_year: e.target.value }))} />
-            <Input placeholder="Subject UUID" value={subjectForm.subject} onChange={(e) => setSubjectForm((p) => ({ ...p, subject: e.target.value }))} />
-            <Input placeholder="Class Section UUID (optional)" value={subjectForm.class_section} onChange={(e) => setSubjectForm((p) => ({ ...p, class_section: e.target.value || null }))} />
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted">
+              Subject allocations are managed centrally and synced to this profile.
+            </p>
+            <Link to="/academics/class-section-subjects">
+              <Button variant="secondary" size="sm">Open Subject Teacher Mapping</Button>
+            </Link>
           </div>
-          <Button loading={subjectMut.isPending} onClick={() => subjectMut.mutate()}>Assign Subject</Button>
-          <ul className="mt-4 space-y-2 text-sm">
-            {(teacher.subject_assignments || []).map((s) => (
-              <li key={s.assignment_id} className="rounded-lg border px-3 py-2">
-                {s.subject_name} — {s.class_name} {s.section_name}
+          <ul className="space-y-2 text-sm">
+            {(teacher.subject_assignments || []).length === 0 ? (
+              <li className="rounded-lg border border-dashed px-3 py-4 text-center text-muted">
+                No subject assignments yet. Map this teacher under Class Allocation → Subject Teacher Mapping.
               </li>
-            ))}
+            ) : (
+              (teacher.subject_assignments || []).map((s) => (
+                <li key={s.assignment_id} className="rounded-lg border px-3 py-2">
+                  <span className="font-medium">{s.subject_name || 'Subject'}</span>
+                  {(s.class_name || s.section_name) ? (
+                    <span className="text-muted">
+                      {' '}
+                      — {[s.class_name, s.section_name].filter(Boolean).join(' ')}
+                    </span>
+                  ) : null}
+                  {s.periods_per_week ? (
+                    <span className="ml-1 text-xs text-muted">· {s.periods_per_week} periods/week</span>
+                  ) : null}
+                </li>
+              ))
+            )}
           </ul>
         </Card>
       )}

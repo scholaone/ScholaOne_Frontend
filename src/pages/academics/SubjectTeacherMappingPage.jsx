@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FiTrash2, FiUsers } from 'react-icons/fi'
+import { FiBookOpen, FiTrash2, FiUsers } from 'react-icons/fi'
 import Breadcrumb from '@/components/layout/Breadcrumb'
 import { PageHeader } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { SelectField } from '@/components/ui/Input'
+import Input, { SelectField } from '@/components/ui/Input'
 import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { ToggleSwitch } from '@/components/navigation/NavAdminUi'
 import SchoolScopeField from '@/components/forms/SchoolScopeField'
@@ -18,19 +18,23 @@ import {
 } from '@/components/academics/MappingFormLayout'
 import {
   ClassMappingPicker,
-  getMappedClassIdsForTeacher,
   MAPPING_COLUMN_STACK,
   MAPPING_COLUMNS_GRID,
   MappingModeHeader,
-  resolveIdsForMapping,
 } from '@/components/academics/TeacherMappingPicker'
+import SubjectSelectField from '@/components/academics/SubjectSelectField'
 import { academicServices, academicYearService, teacherService } from '@/api/services'
 import { getErrorMessage, unwrapList } from '@/api/client'
 import { resolveRecordId } from '@/utils/record'
-import { classSectionLabel } from '@/utils/classSections'
+import {
+  classSectionLabel,
+  mapSchoolClassOptions,
+  resolveSectionIdsFromStandard,
+  resolveSectionIdsFromStandards,
+} from '@/utils/classSections'
 import { useSchoolScopedSelection } from '@/hooks/useSchoolScopedSelection'
 
-export default function ClassTeacherMappingPage() {
+export default function SubjectTeacherMappingPage() {
   const queryClient = useQueryClient()
   const {
     schoolId,
@@ -48,13 +52,15 @@ export default function ClassTeacherMappingPage() {
   const [classMode, setClassMode] = useState('single')
   const [classSectionId, setClassSectionId] = useState('')
   const [selectedClassIds, setSelectedClassIds] = useState([])
-  const [isPrimary, setIsPrimary] = useState(true)
+  const [subjectId, setSubjectId] = useState('')
+  const [weeklyPeriods, setWeeklyPeriods] = useState('')
 
   useEffect(() => {
     setAcademicYearId('')
     setTeacherUserId('')
     setClassSectionId('')
     setSelectedClassIds([])
+    setSubjectId('')
     setClassMode('single')
   }, [schoolId])
 
@@ -62,10 +68,11 @@ export default function ClassTeacherMappingPage() {
     setTeacherUserId('')
     setClassSectionId('')
     setSelectedClassIds([])
+    setSubjectId('')
   }, [academicYearId])
 
   const yearsQuery = useQuery({
-    queryKey: ['class-teacher-years', schoolId, resolvedOrgId],
+    queryKey: ['subject-teacher-years', schoolId, resolvedOrgId],
     queryFn: () =>
       academicYearService.list(
         {
@@ -100,7 +107,7 @@ export default function ClassTeacherMappingPage() {
   }, [yearOptions, academicYearId])
 
   const teachersQuery = useQuery({
-    queryKey: ['class-teacher-teachers', schoolId],
+    queryKey: ['subject-teacher-teachers', schoolId],
     queryFn: () =>
       teacherService.list({
         page_size: 500,
@@ -122,7 +129,7 @@ export default function ClassTeacherMappingPage() {
   }, [teachersQuery.data])
 
   const sectionsQuery = useQuery({
-    queryKey: ['class-teacher-sections', schoolId, academicYearId],
+    queryKey: ['subject-teacher-sections', schoolId, academicYearId],
     queryFn: () =>
       academicServices.classSections.list({
         page_size: 500,
@@ -134,18 +141,27 @@ export default function ClassTeacherMappingPage() {
     enabled: Boolean(schoolId && academicYearId),
   })
 
-  const classOptions = useMemo(() => {
+  const rawSections = useMemo(() => {
     const { results } = unwrapList(sectionsQuery.data)
-    return (results || []).map((row) => ({
-      value: String(resolveRecordId(row) || row.id),
-      label: classSectionLabel(row),
-    }))
+    return results || []
   }, [sectionsQuery.data])
 
+  const standardOptions = useMemo(
+    () => mapSchoolClassOptions(rawSections),
+    [rawSections],
+  )
+
+  const classSectionIdsToMap = useMemo(() => {
+    if (classMode === 'multiple') {
+      return resolveSectionIdsFromStandards(standardOptions, selectedClassIds)
+    }
+    return resolveSectionIdsFromStandard(standardOptions, classSectionId)
+  }, [classMode, standardOptions, selectedClassIds, classSectionId])
+
   const mappingsQuery = useQuery({
-    queryKey: ['class-teacher-mappings', schoolId, academicYearId],
+    queryKey: ['subject-teacher-mappings', schoolId, academicYearId],
     queryFn: () =>
-      academicServices.classTeachers.list({
+      academicServices.classSectionSubjects.list({
         page_size: 500,
         school: schoolId,
         academic_year: academicYearId,
@@ -155,75 +171,71 @@ export default function ClassTeacherMappingPage() {
 
   const mappings = useMemo(() => unwrapList(mappingsQuery.data).results || [], [mappingsQuery.data])
 
-  const mappedClassIdsForTeacher = useMemo(
-    () => getMappedClassIdsForTeacher(mappings, teacherUserId, classOptions),
-    [mappings, teacherUserId, classOptions],
-  )
-
-  useEffect(() => {
-    if (classMode !== 'multiple') return
-    setSelectedClassIds(teacherUserId ? mappedClassIdsForTeacher : [])
-  }, [classMode, teacherUserId, mappedClassIdsForTeacher])
-
-  const classSectionIdsToMap = useMemo(() => {
-    const ids = resolveIdsForMapping(classMode, classSectionId, selectedClassIds)
-    return [...new Set(ids)]
-  }, [classMode, classSectionId, selectedClassIds])
-
   const mapMutation = useMutation({
     mutationFn: async () =>
       Promise.all(
         classSectionIdsToMap.map((classSection) =>
-          academicServices.classTeachers.create({
+          academicServices.classSectionSubjects.create({
             organization_id: resolvedOrgId,
             school_id: schoolId,
             academic_year_id: academicYearId,
             class_section: classSection,
+            subject: subjectId,
             teacher: teacherUserId,
-            is_primary: isPrimary,
+            ...(weeklyPeriods ? { weekly_periods: Number(weeklyPeriods) } : {}),
             is_active: true,
           }),
         ),
       ),
     onSuccess: (results) => {
-      queryClient.invalidateQueries({ queryKey: ['class-teacher-mappings'] })
+      queryClient.invalidateQueries({ queryKey: ['subject-teacher-mappings'] })
+      queryClient.invalidateQueries({ queryKey: ['teachers'] })
       toast.success(
         results.length === 1
-          ? 'Class teacher mapped'
-          : `Teacher mapped to ${results.length} classes`,
+          ? 'Subject teacher mapped — visible on teacher profile'
+          : `Teacher mapped to ${results.length} section(s) — visible on teacher profile`,
       )
       setTeacherUserId('')
       setClassSectionId('')
       setSelectedClassIds([])
+      setSubjectId('')
+      setWeeklyPeriods('')
     },
-    onError: (err) => toast.error(getErrorMessage(err, 'Could not map class teacher')),
+    onError: (err) => toast.error(getErrorMessage(err, 'Could not map subject teacher')),
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => academicServices.classTeachers.delete(id),
+    mutationFn: (id) => academicServices.classSectionSubjects.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['class-teacher-mappings'] })
+      queryClient.invalidateQueries({ queryKey: ['subject-teacher-mappings'] })
+      queryClient.invalidateQueries({ queryKey: ['teachers'] })
       toast.success('Mapping removed')
     },
     onError: (err) => toast.error(getErrorMessage(err)),
   })
 
   const toggleActiveMutation = useMutation({
-    mutationFn: ({ id, is_active }) => academicServices.classTeachers.update(id, { is_active }),
+    mutationFn: ({ id, is_active }) => academicServices.classSectionSubjects.update(id, { is_active }),
     onSuccess: (_data, { is_active }) => {
-      queryClient.invalidateQueries({ queryKey: ['class-teacher-mappings'] })
+      queryClient.invalidateQueries({ queryKey: ['subject-teacher-mappings'] })
+      queryClient.invalidateQueries({ queryKey: ['teachers'] })
       toast.success(is_active ? 'Mapping activated' : 'Mapping deactivated')
     },
     onError: (err) => toast.error(getErrorMessage(err, 'Could not update status')),
   })
 
   const canMap = Boolean(
-    schoolId && academicYearId && teacherUserId && resolvedOrgId && classSectionIdsToMap.length,
+    schoolId
+      && academicYearId
+      && teacherUserId
+      && subjectId
+      && resolvedOrgId
+      && classSectionIdsToMap.length,
   )
 
   const mapButtonLabel =
     classSectionIdsToMap.length > 1
-      ? `Map to ${classSectionIdsToMap.length} classes`
+      ? `Map to ${classSectionIdsToMap.length} sections`
       : 'Save mapping'
 
   const handleClassModeChange = (nextMode) => {
@@ -236,40 +248,37 @@ export default function ClassTeacherMappingPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <Breadcrumb items={[{ label: 'Class Teacher Mapping' }]} />
+      <Breadcrumb items={[{ label: 'Subject Teacher Mapping' }]} />
       <PageHeader
-        title="Class Teacher Mapping"
-        subtitle="Assign a teacher as class teacher for one or more classes in the selected year."
+        title="Subject Teacher Mapping"
+        subtitle="Assign teachers to subjects already allocated to classes. Allocate subjects first if needed."
         actions={
-          <Link to="/teachers/roster">
+          <div className="flex flex-wrap gap-2">
+            <Link to="/academics/subject-allocation">
+              <Button variant="secondary">
+                <FiBookOpen className="h-4 w-4" /> Subject allocation
+              </Button>
+            </Link>
+            <Link to="/teachers/roster">
             <Button variant="secondary">
               <FiUsers className="h-4 w-4" /> Teacher roster
             </Button>
-          </Link>
+            </Link>
+          </div>
         }
       />
 
       <ScopeFilterCard
         footer={
-          <>
-            <label className="flex cursor-pointer items-center gap-2 text-sm text-text">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-border text-primary"
-                checked={isPrimary}
-                onChange={(e) => setIsPrimary(e.target.checked)}
-              />
-              Mark as primary class teacher
-            </label>
-            <Button
-              className="w-full sm:w-auto"
-              loading={mapMutation.isPending}
-              disabled={!canMap}
-              onClick={() => mapMutation.mutate()}
-            >
-              {mapButtonLabel}
-            </Button>
-          </>
+          <Button
+            className="ml-auto w-full sm:w-auto"
+            loading={mapMutation.isPending}
+            disabled={!canMap}
+            onClick={() => mapMutation.mutate()}
+          >
+            <FiBookOpen className="h-4 w-4" />
+            {mapButtonLabel}
+          </Button>
         }
       >
         <div className={MAPPING_COLUMNS_GRID}>
@@ -318,7 +327,7 @@ export default function ClassTeacherMappingPage() {
               <ClassMappingPicker
                 mode={classMode}
                 onModeChange={handleClassModeChange}
-                classOptions={classOptions}
+                classOptions={standardOptions}
                 singleClassId={classSectionId}
                 onSingleClassChange={setClassSectionId}
                 selectedClassIds={selectedClassIds}
@@ -326,12 +335,26 @@ export default function ClassTeacherMappingPage() {
                 loading={sectionsQuery.isLoading}
                 disabled={!academicYearId}
                 hideModeToggle
+                itemLabel="Standard"
+                itemLabelPlural="Standards"
+                emptyMessage="No active standards for this year"
               />
             ) : null}
           </div>
 
           <div className={MAPPING_COLUMN_STACK}>
             <MappingModeHeader mode={classMode} onChange={handleClassModeChange} />
+            <SubjectSelectField
+              label="Subject"
+              required
+              value={subjectId}
+              onChange={(e) => setSubjectId(e.target.value)}
+              schoolId={schoolId}
+              academicYearId={academicYearId}
+              classSectionIds={classSectionIdsToMap}
+              source="allocated"
+              disabled={!classSectionIdsToMap.length}
+            />
           </div>
         </div>
 
@@ -339,7 +362,7 @@ export default function ClassTeacherMappingPage() {
           <ClassMappingPicker
             mode={classMode}
             onModeChange={handleClassModeChange}
-            classOptions={classOptions}
+            classOptions={standardOptions}
             singleClassId={classSectionId}
             onSingleClassChange={setClassSectionId}
             selectedClassIds={selectedClassIds}
@@ -348,22 +371,48 @@ export default function ClassTeacherMappingPage() {
             disabled={!academicYearId}
             hideModeToggle
             multipleOnly
+            itemLabel="Standard"
+            itemLabelPlural="Standards"
+            emptyMessage="No active standards for this year"
+            selectionHint="Tick every standard. All sections under it are included."
           />
         ) : null}
 
-        {!classOptions.length && academicYearId && !sectionsQuery.isLoading ? (
+        <div className={MAPPING_COLUMNS_GRID}>
+          <div className={MAPPING_COLUMN_STACK}>
+            <Input
+              label="Periods per week"
+              type="number"
+              min="0"
+              value={weeklyPeriods}
+              onChange={(e) => setWeeklyPeriods(e.target.value)}
+              placeholder="Optional"
+            />
+          </div>
+        </div>
+
+        {!standardOptions.length && academicYearId && !sectionsQuery.isLoading ? (
           <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
             No active classes for this year.{' '}
             <Link to="/academics/class-sections" className="font-semibold underline">
               Activate classes
-            </Link>{' '}
-            or{' '}
-            <Link to="/masters/setup/map" className="font-semibold underline">
-              map standards & sections
             </Link>
             .
           </p>
         ) : null}
+        {!classSectionIdsToMap.length && academicYearId ? (
+          <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Select at least one class before choosing a subject.
+          </p>
+        ) : null}
+        {!schoolId ? null : (
+          <p className="text-xs text-muted">
+            Subjects shown are allocated to the selected class(es).{' '}
+            <Link to="/academics/subject-allocation" className="font-medium text-primary hover:underline">
+              Manage subject allocation
+            </Link>
+          </p>
+        )}
       </ScopeFilterCard>
 
       <MappingListCard title="Current mappings" count={mappings.length}>
@@ -374,15 +423,16 @@ export default function ClassTeacherMappingPage() {
         ) : mappingsQuery.error ? (
           <ErrorState message={getErrorMessage(mappingsQuery.error)} onRetry={() => mappingsQuery.refetch()} />
         ) : mappings.length === 0 ? (
-          <MappingEmptyState message="No class teachers mapped yet. Create your first mapping above." />
+          <MappingEmptyState message="No subject teachers mapped yet. Create your first mapping above." />
         ) : (
           <MappingTableWrap>
             <table className="min-w-full text-sm">
               <thead className="bg-muted/50 text-left text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Class</th>
+                  <th className="px-4 py-3 font-semibold">Subject</th>
                   <th className="px-4 py-3 font-semibold">Teacher</th>
-                  <th className="px-4 py-3 font-semibold">Primary</th>
+                  <th className="px-4 py-3 font-semibold">Periods</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
                   <th className="px-4 py-3 text-right font-semibold">Action</th>
                 </tr>
@@ -393,16 +443,9 @@ export default function ClassTeacherMappingPage() {
                   return (
                     <tr key={id} className="bg-card hover:bg-muted/20">
                       <td className="px-4 py-3 font-medium text-text">{classSectionLabel(row)}</td>
+                      <td className="px-4 py-3 text-text">{row.subject_name || '—'}</td>
                       <td className="px-4 py-3 text-text">{row.teacher_name || '—'}</td>
-                      <td className="px-4 py-3">
-                        {row.is_primary ? (
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                            Primary
-                          </span>
-                        ) : (
-                          <span className="text-muted">Co-teacher</span>
-                        )}
-                      </td>
+                      <td className="px-4 py-3 text-muted">{row.weekly_periods ?? '—'}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <ToggleSwitch
@@ -414,7 +457,7 @@ export default function ClassTeacherMappingPage() {
                             onChange={(checked) =>
                               toggleActiveMutation.mutate({ id, is_active: checked })
                             }
-                            label={`Set class teacher mapping ${row.is_active ? 'inactive' : 'active'}`}
+                            label={`Set subject teacher mapping ${row.is_active ? 'inactive' : 'active'}`}
                           />
                           <span className="text-xs font-medium text-muted">
                             {row.is_active ? 'Active' : 'Inactive'}
@@ -427,7 +470,7 @@ export default function ClassTeacherMappingPage() {
                           variant="danger"
                           loading={deleteMutation.isPending}
                           onClick={() => {
-                            if (window.confirm('Remove this class teacher mapping?')) {
+                            if (window.confirm('Remove this subject teacher mapping?')) {
                               deleteMutation.mutate(id)
                             }
                           }}

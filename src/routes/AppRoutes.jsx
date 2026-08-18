@@ -89,6 +89,8 @@ import TimetableHubPage, {
   TimetableBuilderPage,
   TimetableSubstitutionsPage,
 } from '@/pages/timetable/TimetableHubPage'
+import ManualTimetablePage from '@/pages/timetable/ManualTimetablePage'
+import AITimetableGeneratorPage from '@/pages/timetable/AITimetableGeneratorPage'
 import FeesHubPage from '@/pages/fees/FeesHubPage'
 import {
   FeesCollectPage,
@@ -169,6 +171,8 @@ import AcademicsHubPage from '@/pages/academics/AcademicsHubPage'
 import AcademicSetupViewPage from '@/pages/academics/AcademicSetupViewPage'
 import ClassSectionActivationPage from '@/pages/academics/ClassSectionActivationPage'
 import ClassTeacherMappingPage from '@/pages/academics/ClassTeacherMappingPage'
+import SubjectTeacherMappingPage from '@/pages/academics/SubjectTeacherMappingPage'
+import SubjectAllocationPage from '@/pages/academics/SubjectAllocationPage'
 import { AcademicList, AcademicForm } from '@/pages/academics/AcademicList'
 import MdmHubPage from '@/pages/mdm/MdmHubPage'
 
@@ -300,6 +304,8 @@ export default function AppRoutes() {
           <Route path="/attendance/mark" element={<MarkAttendancePage />} />
           <Route path="/attendance/reports" element={<AttendanceReportsPage />} />
           <Route path="/timetable" element={<TimetableHubPage />} />
+          <Route path="/timetable/manual" element={<ManualTimetablePage />} />
+          <Route path="/timetable/ai-generator" element={<AITimetableGeneratorPage />} />
           <Route path="/timetable/builder" element={<TimetableBuilderPage />} />
           <Route path="/timetable/substitutions" element={<TimetableSubstitutionsPage />} />
           <Route path="/homework" element={<Navigate to="/lms/assignments?kind=homework" replace />} />
@@ -413,6 +419,8 @@ export default function AppRoutes() {
           <Route path="/academics" element={<AcademicsHubPage />} />
           <Route path="/academics/admission-setup" element={<AcademicSetupViewPage />} />
           <Route path="/academics/class-teachers" element={<ClassTeacherMappingPage />} />
+          <Route path="/academics/subject-allocation" element={<SubjectAllocationPage />} />
+          <Route path="/academics/class-section-subjects" element={<SubjectTeacherMappingPage />} />
           <Route path="/academics/class-sections" element={<ClassSectionActivationPage />} />
           <Route path="/academics/:entityKey" element={<AcademicList />} />
           <Route path="/academics/:entityKey/new" element={<AcademicForm />} />

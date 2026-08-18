@@ -108,7 +108,7 @@ function MailSidebar({ folder, onFolderChange, onCompose, counts, deliveryHint, 
         <p className="mt-1">{deliveryHint}</p>
         {!isEmailJsConfigured() && NEXUS_MAIL_IS_FRONTEND && (
           <p className="mt-2 rounded-lg bg-[#fef7e0] px-2 py-1.5 text-[11px] text-[#8a6d00]">
-            Tip: Add VITE_EMAILJS_* keys in .env for one-click delivery from sharanreddy26372@gmail.com
+            Tip: Add VITE_EMAILJS_* keys in .env for one-click delivery from info@scholaone.in@gmail.com
           </p>
         )}
       </div>

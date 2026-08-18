@@ -514,8 +514,8 @@ export const ACADEMIC_DEFINITIONS = {
   },
   'class-section-subjects': {
     key: 'class-section-subjects',
-    label: 'Class Subject',
-    labelPlural: 'Class Section Subjects',
+    label: 'Subject Teacher Mapping',
+    labelPlural: 'Subject Teacher Mappings',
     serviceKey: 'classSectionSubjects',
     scope: 'school',
     fields: [

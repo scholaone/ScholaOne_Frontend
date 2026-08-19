@@ -126,14 +126,16 @@ export function useRoleOptions(organizationId, enabled = true) {
   return { ...query, options }
 }
 
-export function useModuleOptions(organizationId, enabled = true) {
+export function useModuleOptions(organizationId, enabled = true, extraParams = {}) {
+  const useMasterScope = !organizationId || extraParams.scope === 'master'
   const query = useQuery({
-    queryKey: ['modules', 'form-options', organizationId || 'all'],
+    queryKey: ['modules', 'form-options', organizationId || 'master', extraParams.scope || ''],
     queryFn: () =>
       moduleService.list({
         page_size: 500,
         ordering: 'module_name',
-        organization: organizationId || undefined,
+        ...(useMasterScope ? { scope: 'master' } : { organization: organizationId }),
+        ...extraParams,
       }),
     enabled,
     staleTime: STALE_TIME,
@@ -143,15 +145,15 @@ export function useModuleOptions(organizationId, enabled = true) {
     const { results } = unwrapList(query.data)
     return (results || []).map((mod) => ({
       value: String(mod.module_id || mod.id),
-      label: `${mod.module_name} (${mod.module_code})${mod.organization_name ? ` — ${mod.organization_name}` : ''}`,
+      label: `${mod.module_name} (${mod.module_code})`,
       organizationId: mod.organization_id ? String(mod.organization_id) : '',
     }))
   }, [query.data])
 
   const filteredOptions = useMemo(() => {
-    if (!organizationId) return options
+    if (!organizationId || useMasterScope) return options
     return options.filter((opt) => !opt.organizationId || opt.organizationId === String(organizationId))
-  }, [options, organizationId])
+  }, [options, organizationId, useMasterScope])
 
   return { ...query, options: filteredOptions }
 }

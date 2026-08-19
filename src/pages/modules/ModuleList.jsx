@@ -1,11 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { moduleService } from '@/api/services'
 import { unwrapList, getErrorMessage } from '@/api/client'
-import { useAuth } from '@/contexts/AuthContext'
-import { useOrganizationOptions } from '@/hooks/useFormOptions'
-import { getUserOrganizationId } from '@/utils/schoolScope'
 import { resolveRecordId } from '@/utils/record'
 import { resolveNavIcon } from '@/utils/navFromApi'
 import { confirmDelete } from '@/utils/confirm'
@@ -16,14 +13,12 @@ import ResourceDetailModal, { useListDetailModal } from '@/components/crud/Resou
 import {
   NavPageShell,
   NavAdminHeader,
-  NavScopeBar,
   NavStatPill,
   StatusBadge,
   SearchField,
   EmptyNavState,
   IconActionLink,
   Button,
-  SelectField,
   Link,
   FiPlus,
   FiEdit2,
@@ -37,7 +32,6 @@ const DETAIL_FIELDS = [
   { key: 'module_code', label: 'Code' },
   { key: 'icon', label: 'Icon' },
   { key: 'sequence', label: 'Order' },
-  { key: 'organization_name', label: 'Organization' },
   { key: 'description', label: 'Description', fullWidth: true },
   { key: 'is_active', label: 'Status', render: (item) => <StatusBadge active={item.is_active} /> },
 ]
@@ -72,9 +66,6 @@ function ModuleCard({ module, onView, onDelete, deleting }) {
             </div>
             <StatusBadge active={active} />
           </div>
-          {module.organization_name ? (
-            <p className="mt-2 text-xs text-muted-foreground">{module.organization_name}</p>
-          ) : null}
           <div className="mt-3 inline-flex items-center rounded-lg bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
             Order
             {' '}
@@ -111,36 +102,14 @@ function ModuleCard({ module, onView, onDelete, deleting }) {
 export default function ModuleList() {
   const queryClient = useQueryClient()
   const { viewId, isOpen, openView, closeView } = useListDetailModal()
-  const { user, isSuperAdmin } = useAuth()
-  const orgQuery = useOrganizationOptions(isSuperAdmin)
-  const userOrgId = getUserOrganizationId(user)
-  const [organizationId, setOrganizationId] = useState('')
   const [search, setSearch] = useState('')
   const [deletingId, setDeletingId] = useState(null)
 
-  useEffect(() => {
-    if (organizationId) return
-    if (userOrgId) setOrganizationId(userOrgId)
-    else if (isSuperAdmin && orgQuery.options.length > 0) {
-      setOrganizationId(orgQuery.options[0].value)
-    }
-  }, [organizationId, userOrgId, isSuperAdmin, orgQuery.options])
-
-  const listParams = useMemo(() => {
-    const params = {}
-    if (isSuperAdmin && organizationId) params.organization = organizationId
-    else if (!isSuperAdmin && userOrgId) params.organization = userOrgId
-    return params
-  }, [isSuperAdmin, organizationId, userOrgId])
-
-  const showOrgFilter = isSuperAdmin && orgQuery.options.length > 0
-
-  const listQueryKey = useMemo(() => ['modules', 'list', listParams], [listParams])
+  const listQueryKey = useMemo(() => ['modules', 'list', 'master'], [])
 
   const listQuery = useQuery({
     queryKey: listQueryKey,
-    queryFn: () => moduleService.list({ page_size: 200, ...listParams }),
-    enabled: Boolean(listParams.organization),
+    queryFn: () => moduleService.list({ scope: 'master', page_size: 500 }),
   })
 
   const deleteMutation = useMutation({
@@ -184,8 +153,6 @@ export default function ModuleList() {
     deleteMutation.mutate(id)
   }
 
-  if (orgQuery.isLoading) return <PageLoader />
-
   return (
     <NavPageShell breadcrumb={[{ label: 'Modules' }]}>
       <NavAdminHeader
@@ -200,26 +167,7 @@ export default function ModuleList() {
         )}
       />
 
-      {showOrgFilter && (
-        <NavScopeBar hint="Modules are scoped to one organization. Switch org to manage a different catalog.">
-          <SelectField
-            label="Organization"
-            value={organizationId}
-            onChange={(e) => setOrganizationId(e.target.value)}
-            options={[
-              { label: 'Select organization…', value: '' },
-              ...orgQuery.options,
-            ]}
-          />
-        </NavScopeBar>
-      )}
-
-      {!listParams.organization ? (
-        <EmptyNavState
-          title="Select an organization"
-          description="Choose an organization to view and manage its navigation modules."
-        />
-      ) : listQuery.isLoading ? (
+      {listQuery.isLoading ? (
         <PageLoader />
       ) : listQuery.isError ? (
         <ErrorState message={getErrorMessage(listQuery.error)} onRetry={listQuery.refetch} />
@@ -239,7 +187,7 @@ export default function ModuleList() {
               description={
                 search
                   ? 'Try a different search term or clear the filter.'
-                  : 'Create your first module or provision the school admin catalog.'
+                  : 'Create your first module to build the ERP navigation master catalog.'
               }
               action={
                 !search ? (

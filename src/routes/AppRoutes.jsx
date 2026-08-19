@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute, { PublicRoute } from './ProtectedRoute'
+import MenuAccessRoute from './MenuAccessRoute'
 import LandingPage from '@/website/LandingPage'
 import DashboardLayout from '@/layouts/DashboardLayout'
 import NotFoundPage from '@/pages/NotFoundPage'
@@ -144,8 +145,9 @@ import PermissionList from '@/pages/permissions/PermissionList'
 import PermissionForm from '@/pages/permissions/PermissionForm'
 import PermissionMatrix from '@/pages/permissions/PermissionMatrix'
 
-import MenuList from '@/pages/menus/MenuList'
-import RoleMenuMapping from '@/pages/menus/RoleMenuMapping'
+import MenuMasterPage from '@/pages/menus/MenuMasterPage'
+import SchoolMenuAllocationPage from '@/pages/menus/SchoolMenuAllocationPage'
+import UserMenuAllocationPage from '@/pages/menus/UserMenuAllocationPage'
 import MenuForm from '@/pages/menus/MenuForm'
 import ModuleList from '@/pages/modules/ModuleList'
 import ModuleForm from '@/pages/modules/ModuleForm'
@@ -207,6 +209,7 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
+          <Route element={<MenuAccessRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/student" element={<StudentDashboardView />} />
           <Route path="/dashboard/teacher" element={<TeacherDashboardView />} />
@@ -383,12 +386,16 @@ export default function AppRoutes() {
           <Route path="/permissions/:id/edit" element={<PermissionForm />} />
           <Route path="/permissions/matrix" element={<PermissionMatrix />} />
 
-          <Route path="/menus" element={<MenuList />} />
+          <Route element={<ProtectedRoute requireOrgOrSuperAdmin />}>
+            <Route path="/menus" element={<MenuMasterPage />} />
+            <Route path="/menus/school-allocation" element={<SchoolMenuAllocationPage />} />
+          </Route>
           <Route path="/menus/new" element={<MenuForm />} />
           <Route path="/menus/:id/edit" element={<MenuForm />} />
+          <Route path="/menus/role-mapping" element={<Navigate to="/menus/user-allocation" replace />} />
 
-          <Route element={<ProtectedRoute requireSchoolAdmin />}>
-            <Route path="/menus/role-mapping" element={<RoleMenuMapping />} />
+          <Route element={<ProtectedRoute requireMenuAllocator />}>
+            <Route path="/menus/user-allocation" element={<UserMenuAllocationPage />} />
           </Route>
 
           <Route path="/modules" element={<ModuleList />} />
@@ -432,6 +439,7 @@ export default function AppRoutes() {
           <Route path="/audit-logs/:id" element={<AuditLogDetail />} />
 
           <Route path="/notifications" element={<NotificationsPage />} />
+          </Route>
         </Route>
       </Route>
 

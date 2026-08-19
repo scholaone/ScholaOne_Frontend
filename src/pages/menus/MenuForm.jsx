@@ -31,19 +31,18 @@ function transformMenuLoad(item) {
 
 export default function MenuForm() {
   const [searchParams] = useSearchParams()
-  const presetOrganization = searchParams.get('organization') || ''
   const presetModule = searchParams.get('module') || ''
   const presetParent = searchParams.get('parent') || ''
 
-  const moduleQuery = useModuleOptions(presetOrganization || undefined)
+  const moduleQuery = useModuleOptions()
 
   const allMenusQuery = useQuery({
-    queryKey: ['menus', 'menu-form-all', presetOrganization],
+    queryKey: ['menus', 'menu-form-master'],
     queryFn: () =>
       menuService.list({
+        scope: 'master',
         page_size: 500,
         ordering: 'menu_name',
-        ...(presetOrganization ? { organization: presetOrganization } : {}),
       }),
     staleTime: 5 * 60 * 1000,
   })
@@ -104,11 +103,7 @@ export default function MenuForm() {
     [presetModule, presetParent],
   )
 
-  const formTitle = presetParent
-    ? 'Sub-menu'
-    : presetModule
-      ? 'Menu'
-      : 'Menu'
+  const formTitle = presetParent ? 'Sub-menu' : 'Menu'
 
   if (moduleQuery.isLoading || allMenusQuery.isLoading) return <PageLoader />
   if (moduleQuery.error) {
@@ -137,13 +132,13 @@ export default function MenuForm() {
         return payload
       }}
       renderTop={({ isEdit }) =>
-        !isEdit && (presetParent || presetModule) ? (
+        !isEdit ? (
           <p className="text-sm text-muted-foreground">
             {presetParent
-              ? `Creating a sub-menu under "${presetParentLabel || 'selected parent'}". It will appear nested in the school admin sidebar.`
-              : 'This menu will be added at the top level of the selected module.'}
+              ? `Creating a sub-menu under "${presetParentLabel || 'selected parent'}".`
+              : 'This menu will be added to the ERP master catalog.'}
             {' '}
-            New menus are automatically mapped to all schools in the organization.
+            Use School Menu Allocation to grant it to organizations and schools.
           </p>
         ) : null
       }

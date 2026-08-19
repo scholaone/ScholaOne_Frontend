@@ -857,6 +857,26 @@ export const menuService = {
     )
   },
   reorder: (items) => apiPost(API_ENDPOINTS.MENUS.REORDER, { items }),
+  masterTree: (params) => apiGet(API_ENDPOINTS.MENUS.MASTER_TREE, params),
+  allocationCategories: (params) => apiGet(API_ENDPOINTS.MENUS.ALLOCATION_CATEGORIES, params),
+  schoolAllocationTree: (params) => apiGet(API_ENDPOINTS.MENUS.SCHOOL_ALLOCATION_TREE, params),
+  syncSchoolAllocation: (data) => {
+    const { organization, ...body } = data
+    return apiPost(
+      API_ENDPOINTS.MENUS.SCHOOL_ALLOCATION_SYNC,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
+  userAllocationTree: (params) => apiGet(API_ENDPOINTS.MENUS.USER_ALLOCATION_TREE, params),
+  syncUserAllocation: (data) => {
+    const { organization, ...body } = data
+    return apiPost(
+      API_ENDPOINTS.MENUS.USER_ALLOCATION_SYNC,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
 }
 
 export const moduleService = {

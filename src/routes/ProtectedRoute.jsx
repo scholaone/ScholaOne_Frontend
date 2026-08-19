@@ -3,8 +3,13 @@ import { useAuth } from '@/contexts/AuthContext'
 import { getPostLoginPath } from '@/utils/authRoles'
 import { hasValidStoredAccessToken } from '@/utils/authSession'
 
-export default function ProtectedRoute({ requireSuperAdmin = false, requireSchoolAdmin = false }) {
-  const { isAuthenticated, isSuperAdmin, isSchoolAdmin, isHydrated, user } = useAuth()
+export default function ProtectedRoute({
+  requireSuperAdmin = false,
+  requireOrgOrSuperAdmin = false,
+  requireSchoolAdmin = false,
+  requireMenuAllocator = false,
+}) {
+  const { isAuthenticated, isSuperAdmin, isOrgAdmin, isSchoolAdmin, isHydrated, user } = useAuth()
   const hasStoredSession = hasValidStoredAccessToken()
 
   if (!isHydrated && !hasStoredSession) {
@@ -23,7 +28,15 @@ export default function ProtectedRoute({ requireSuperAdmin = false, requireSchoo
     return <Navigate to="/dashboard" replace />
   }
 
+  if (requireOrgOrSuperAdmin && !isSuperAdmin && !isOrgAdmin) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   if (requireSchoolAdmin && !isSchoolAdmin) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  if (requireMenuAllocator && !isSuperAdmin && !isOrgAdmin && !isSchoolAdmin) {
     return <Navigate to="/dashboard" replace />
   }
 

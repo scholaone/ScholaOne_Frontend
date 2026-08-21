@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute, { PublicRoute } from './ProtectedRoute'
+import MenuAccessRoute from './MenuAccessRoute'
 import LandingPage from '@/website/LandingPage'
 import DashboardLayout from '@/layouts/DashboardLayout'
 import NotFoundPage from '@/pages/NotFoundPage'
@@ -11,6 +12,7 @@ import ProfilePage from '@/pages/auth/ProfilePage'
 import DashboardPage from '@/pages/dashboard/DashboardPage'
 import StudentDashboardView from '@/pages/dashboard/StudentDashboardView'
 import TeacherDashboardView from '@/pages/dashboard/TeacherDashboardView'
+import TeacherMyStudentsPage from '@/pages/dashboard/TeacherMyStudentsPage'
 
 import OrganizationList from '@/pages/organizations/OrganizationList'
 import OrganizationForm from '@/pages/organizations/OrganizationForm'
@@ -67,11 +69,20 @@ import {
   AdmissionsLeadsRedirect,
   AdmissionsApplicationsRedirect,
 } from '@/pages/admissions/AdmissionsLmsPages'
-import {
-  TransportPage,
-} from '@/pages/school-ops/SchoolOpsPages'
+import TransportHubPage from '@/pages/transport/TransportHubPage'
+import TransportRoutesPage from '@/pages/transport/TransportRoutesPage'
+import TransportRouteForm from '@/pages/transport/TransportRouteForm'
+import TransportVehiclesPage from '@/pages/transport/TransportVehiclesPage'
+import TransportVehicleForm from '@/pages/transport/TransportVehicleForm'
+import TransportAssignmentsPage, { TransportAssignmentForm } from '@/pages/transport/TransportAssignmentsPage'
 import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage'
-import LibraryPage from '@/pages/library/LibraryPage'
+import CircularsPage from '@/pages/communications/CircularsPage'
+import CommunicationNotificationsPage from '@/pages/communications/CommunicationNotificationsPage'
+import LibraryHubPage from '@/pages/library/LibraryHubPage'
+import LibraryBooksPage from '@/pages/library/LibraryBooksPage'
+import LibraryCirculationPage from '@/pages/library/LibraryCirculationPage'
+import LibraryMembersPage from '@/pages/library/LibraryMembersPage'
+import LibraryIssuedReturnedReportPage from '@/pages/library/LibraryIssuedReturnedReportPage'
 import LibraryBookForm from '@/pages/library/LibraryBookForm'
 import AttendanceHubPage, { AttendanceReportsPage } from '@/pages/attendance/AttendanceHubPage'
 import MarkAttendancePage from '@/pages/attendance/MarkAttendancePage'
@@ -79,6 +90,8 @@ import TimetableHubPage, {
   TimetableBuilderPage,
   TimetableSubstitutionsPage,
 } from '@/pages/timetable/TimetableHubPage'
+import ManualTimetablePage from '@/pages/timetable/ManualTimetablePage'
+import AITimetableGeneratorPage from '@/pages/timetable/AITimetableGeneratorPage'
 import FeesHubPage from '@/pages/fees/FeesHubPage'
 import {
   FeesCollectPage,
@@ -132,8 +145,9 @@ import PermissionList from '@/pages/permissions/PermissionList'
 import PermissionForm from '@/pages/permissions/PermissionForm'
 import PermissionMatrix from '@/pages/permissions/PermissionMatrix'
 
-import MenuList from '@/pages/menus/MenuList'
-import RoleMenuMapping from '@/pages/menus/RoleMenuMapping'
+import MenuMasterPage from '@/pages/menus/MenuMasterPage'
+import SchoolMenuAllocationPage from '@/pages/menus/SchoolMenuAllocationPage'
+import UserMenuAllocationPage from '@/pages/menus/UserMenuAllocationPage'
 import MenuForm from '@/pages/menus/MenuForm'
 import ModuleList from '@/pages/modules/ModuleList'
 import ModuleForm from '@/pages/modules/ModuleForm'
@@ -157,6 +171,10 @@ import SchoolMasterForm from '@/pages/school-masters/SchoolMasterForm'
 
 import AcademicsHubPage from '@/pages/academics/AcademicsHubPage'
 import AcademicSetupViewPage from '@/pages/academics/AcademicSetupViewPage'
+import ClassSectionActivationPage from '@/pages/academics/ClassSectionActivationPage'
+import ClassTeacherMappingPage from '@/pages/academics/ClassTeacherMappingPage'
+import SubjectTeacherMappingPage from '@/pages/academics/SubjectTeacherMappingPage'
+import SubjectAllocationPage from '@/pages/academics/SubjectAllocationPage'
 import { AcademicList, AcademicForm } from '@/pages/academics/AcademicList'
 import MdmHubPage from '@/pages/mdm/MdmHubPage'
 
@@ -191,9 +209,11 @@ export default function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
+          <Route element={<MenuAccessRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/student" element={<StudentDashboardView />} />
           <Route path="/dashboard/teacher" element={<TeacherDashboardView />} />
+          <Route path="/dashboard/teacher/my-students" element={<TeacherMyStudentsPage />} />
           <Route path="/scholaone-post" element={<ScholaOnePostPage />} />
           <Route path="/edu-nexus-post" element={<Navigate to="/scholaone-post" replace />} />
           <Route path="/ai-hub" element={<AiHubPage />} />
@@ -252,6 +272,7 @@ export default function AppRoutes() {
           <Route path="/staff/:id/edit" element={<StaffForm />} />
 
           <Route path="/communications" element={<CommunicationsHubPage />} />
+          <Route path="/communications/notifications" element={<CommunicationNotificationsPage />} />
           <Route path="/communications/templates" element={<CommunicationTemplateList />} />
           <Route path="/communications/templates/new" element={<CommunicationTemplateForm />} />
           <Route path="/communications/templates/:id/edit" element={<CommunicationTemplateForm />} />
@@ -286,10 +307,13 @@ export default function AppRoutes() {
           <Route path="/attendance/mark" element={<MarkAttendancePage />} />
           <Route path="/attendance/reports" element={<AttendanceReportsPage />} />
           <Route path="/timetable" element={<TimetableHubPage />} />
+          <Route path="/timetable/manual" element={<ManualTimetablePage />} />
+          <Route path="/timetable/ai-generator" element={<AITimetableGeneratorPage />} />
           <Route path="/timetable/builder" element={<TimetableBuilderPage />} />
           <Route path="/timetable/substitutions" element={<TimetableSubstitutionsPage />} />
           <Route path="/homework" element={<Navigate to="/lms/assignments?kind=homework" replace />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/circulars" element={<CircularsPage />} />
           <Route path="/examinations" element={<AssessmentsHubPage />} />
           <Route path="/examinations/marks" element={<AssessmentsMarksPage />} />
           <Route path="/examinations/results" element={<AssessmentsResultsPage />} />
@@ -322,10 +346,23 @@ export default function AppRoutes() {
           <Route path="/fees/reports/class-wise-paid" element={<ClassWiseFeePaidReportPage />} />
           <Route path="/fees/reports/staff-children" element={<Navigate to="/reports/staff-children" replace />} />
           <Route path="/fees/:moduleKey" element={<FeeModulePlaceholder />} />
-          <Route path="/transport" element={<TransportPage />} />
-          <Route path="/library" element={<LibraryPage />} />
-          <Route path="/library/new" element={<LibraryBookForm />} />
-          <Route path="/library/:id/edit" element={<LibraryBookForm />} />
+          <Route path="/transport" element={<TransportHubPage />} />
+          <Route path="/transport/routes" element={<TransportRoutesPage />} />
+          <Route path="/transport/routes/new" element={<TransportRouteForm />} />
+          <Route path="/transport/routes/:id/edit" element={<TransportRouteForm />} />
+          <Route path="/transport/vehicles" element={<TransportVehiclesPage />} />
+          <Route path="/transport/vehicles/new" element={<TransportVehicleForm />} />
+          <Route path="/transport/vehicles/:id/edit" element={<TransportVehicleForm />} />
+          <Route path="/transport/assignments" element={<TransportAssignmentsPage />} />
+          <Route path="/transport/assignments/new" element={<TransportAssignmentForm />} />
+          <Route path="/transport/assignments/:id/edit" element={<TransportAssignmentForm />} />
+          <Route path="/library" element={<LibraryHubPage />} />
+          <Route path="/library/books" element={<LibraryBooksPage />} />
+          <Route path="/library/books/new" element={<LibraryBookForm />} />
+          <Route path="/library/books/:id/edit" element={<LibraryBookForm />} />
+          <Route path="/library/circulation" element={<LibraryCirculationPage />} />
+          <Route path="/library/reports/issued-returned" element={<LibraryIssuedReturnedReportPage />} />
+          <Route path="/library/members" element={<LibraryMembersPage />} />
           <Route path="/reports" element={<ReportsHubPage />} />
           <Route path="/reports/staff-children" element={<StaffChildrenReportPage />} />
 
@@ -349,12 +386,16 @@ export default function AppRoutes() {
           <Route path="/permissions/:id/edit" element={<PermissionForm />} />
           <Route path="/permissions/matrix" element={<PermissionMatrix />} />
 
-          <Route path="/menus" element={<MenuList />} />
+          <Route element={<ProtectedRoute requireOrgOrSuperAdmin />}>
+            <Route path="/menus" element={<MenuMasterPage />} />
+            <Route path="/menus/school-allocation" element={<SchoolMenuAllocationPage />} />
+          </Route>
           <Route path="/menus/new" element={<MenuForm />} />
           <Route path="/menus/:id/edit" element={<MenuForm />} />
+          <Route path="/menus/role-mapping" element={<Navigate to="/menus/user-allocation" replace />} />
 
-          <Route element={<ProtectedRoute requireSchoolAdmin />}>
-            <Route path="/menus/role-mapping" element={<RoleMenuMapping />} />
+          <Route element={<ProtectedRoute requireMenuAllocator />}>
+            <Route path="/menus/user-allocation" element={<UserMenuAllocationPage />} />
           </Route>
 
           <Route path="/modules" element={<ModuleList />} />
@@ -384,6 +425,10 @@ export default function AppRoutes() {
 
           <Route path="/academics" element={<AcademicsHubPage />} />
           <Route path="/academics/admission-setup" element={<AcademicSetupViewPage />} />
+          <Route path="/academics/class-teachers" element={<ClassTeacherMappingPage />} />
+          <Route path="/academics/subject-allocation" element={<SubjectAllocationPage />} />
+          <Route path="/academics/class-section-subjects" element={<SubjectTeacherMappingPage />} />
+          <Route path="/academics/class-sections" element={<ClassSectionActivationPage />} />
           <Route path="/academics/:entityKey" element={<AcademicList />} />
           <Route path="/academics/:entityKey/new" element={<AcademicForm />} />
           <Route path="/academics/:entityKey/:id/edit" element={<AcademicForm />} />
@@ -394,6 +439,7 @@ export default function AppRoutes() {
           <Route path="/audit-logs/:id" element={<AuditLogDetail />} />
 
           <Route path="/notifications" element={<NotificationsPage />} />
+          </Route>
         </Route>
       </Route>
 

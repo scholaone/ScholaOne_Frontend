@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -11,7 +11,7 @@ import { PageLoader, ErrorState } from '@/components/ui/Feedback'
 import { communicationService } from '@/api/services'
 import { getErrorMessage, unwrapData } from '@/api/client'
 import { COMMUNICATION_CATEGORY_OPTIONS, COMMUNICATION_STATUS_OPTIONS } from '@/config/constants'
-import { formatDateTime } from '@/utils/format'
+import { formatDateTime, datetimeLocalToISO, isoToDatetimeLocal } from '@/utils/format'
 
 const STATUS_LABELS = Object.fromEntries(COMMUNICATION_STATUS_OPTIONS.map((o) => [o.value, o.label]))
 const CATEGORY_LABELS = Object.fromEntries(COMMUNICATION_CATEGORY_OPTIONS.map((o) => [o.value, o.label]))
@@ -40,6 +40,10 @@ export default function CommunicationMessageDetail() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['communication-messages', id],
     queryFn: () => communicationService.messages.get(id),
+    refetchInterval: (query) => {
+      const item = query.state.data ? unwrapData(query.state.data) : null
+      return item?.status === 'scheduled' ? 15000 : false
+    },
   })
 
   const invalidate = () => {
@@ -54,7 +58,9 @@ export default function CommunicationMessageDetail() {
   })
 
   const scheduleMut = useMutation({
-    mutationFn: () => communicationService.messages.schedule(id, { scheduled_at: scheduleAt }),
+    mutationFn: () => communicationService.messages.schedule(id, {
+      scheduled_at: datetimeLocalToISO(scheduleAt),
+    }),
     onSuccess: () => { invalidate(); toast.success('Message scheduled') },
     onError: (e) => toast.error(getErrorMessage(e)),
   })
@@ -77,10 +83,18 @@ export default function CommunicationMessageDetail() {
     enabled: tab === 'receipts',
   })
 
+  const message = data ? unwrapData(data) : null
+
+  useEffect(() => {
+    if (message?.scheduled_at) {
+      setScheduleAt(isoToDatetimeLocal(message.scheduled_at))
+    }
+  }, [message?.scheduled_at, message?.message_id])
+
   if (isLoading) return <PageLoader />
   if (error) return <ErrorState message={getErrorMessage(error)} onRetry={refetch} />
+  if (!message) return <ErrorState message="Message not found." onRetry={refetch} />
 
-  const message = unwrapData(data)
   const report = unwrapData(reportQuery.data)?.data || unwrapData(reportQuery.data) || message.delivery_report || {}
   const receipts = unwrapData(receiptsQuery.data)?.data?.results || unwrapData(receiptsQuery.data)?.results || []
 
@@ -138,6 +152,12 @@ export default function CommunicationMessageDetail() {
             <Field label="Recipients" value={message.total_recipients} />
             <Field label="Sent / Failed / Read" value={`${message.sent_count} / ${message.failed_count} / ${message.read_count}`} />
           </dl>
+          {message.status === 'scheduled' && message.scheduled_at ? (
+            <p className="mb-4 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-xs text-brand-800">
+              Scheduled for {formatDateTime(message.scheduled_at)}. The server sends this automatically
+              within about 30 seconds of that time — you do not need to keep this page open.
+            </p>
+          ) : null}
           <div className="rounded-lg border border-border bg-slate-50 p-4 text-sm whitespace-pre-wrap">{message.body}</div>
 
           {canSend && (

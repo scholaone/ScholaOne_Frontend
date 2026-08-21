@@ -1,8 +1,15 @@
 /** Resolve primary key from list row objects across modules. */
 const ENTITY_PK_PRIORITY = [
   'student_id',
+  'teacher_id',
+  'staff_id',
+  'parent_id',
   'lead_id',
   'application_id',
+  'book_id',
+  'route_id',
+  'vehicle_id',
+  'assignment_id',
   'user_id',
   'school_id',
   'role_id',

@@ -40,7 +40,92 @@ export function sortClassSections(sections) {
 }
 
 export function classSectionLabel(row) {
-  return [row?.class_name, row?.section_name].filter(Boolean).join(' — ') || 'Class section'
+  if (row?.class_section_label) {
+    return row.class_section_label
+  }
+
+  const className = String(row?.class_name || '').trim()
+  const sectionName = String(row?.section_name || '').trim()
+
+  if (className && sectionName) {
+    if (className.toLowerCase().includes(sectionName.toLowerCase())) {
+      return className
+    }
+    return `${className} — ${sectionName}`
+  }
+
+  return className || sectionName || 'Class section'
+}
+
+/** Standard / grade label only (e.g. LKG, UKG) — no section suffix. */
+export function schoolClassLabel(row) {
+  return String(row?.class_name || row?.school_class?.name || '').trim() || 'Class'
+}
+
+export function getSchoolClassKey(row) {
+  const classId = row?.class_id ?? row?.school_class?.id ?? row?.school_class_id
+  if (classId) return String(classId)
+  return schoolClassLabel(row).toLowerCase()
+}
+
+/** Group active class-section rows by standard (school class). */
+export function buildSchoolClassGroups(sections) {
+  const groups = new Map()
+
+  for (const row of sortClassSections(sections)) {
+    const key = getSchoolClassKey(row)
+    if (!key) continue
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        value: key,
+        label: schoolClassLabel(row),
+        sequence: classSequence(row),
+        sectionIds: [],
+      })
+    }
+
+    const group = groups.get(key)
+    group.sectionIds.push(String(row.id))
+  }
+
+  return [...groups.values()].sort((a, b) => {
+    const seqDiff = a.sequence - b.sequence
+    if (seqDiff !== 0) return seqDiff
+    return compareText(a.label, b.label)
+  })
+}
+
+/** Dropdown / checkbox options grouped by standard (LKG, UKG, …). */
+export function mapSchoolClassOptions(sections) {
+  return buildSchoolClassGroups(sections).map((group) => ({
+    value: group.value,
+    label:
+      group.sectionIds.length > 1
+        ? `${group.label} (${group.sectionIds.length} sections)`
+        : group.label,
+    sectionIds: group.sectionIds,
+  }))
+}
+
+/** Expand selected standard keys to all underlying class-section IDs. */
+export function resolveSectionIdsFromStandards(standardOptions, selectedKeys) {
+  const selected = new Set((selectedKeys || []).map(String))
+  if (!selected.size) return []
+
+  return [
+    ...new Set(
+      (standardOptions || [])
+        .filter((option) => selected.has(String(option.value)))
+        .flatMap((option) => option.sectionIds || []),
+    ),
+  ]
+}
+
+/** Resolve a single selected standard key to section IDs. */
+export function resolveSectionIdsFromStandard(standardOptions, standardKey) {
+  if (!standardKey) return []
+  return resolveSectionIdsFromStandards(standardOptions, [standardKey])
 }
 
 export function mapClassSectionOptions(sections, { includeCount = false, countLabel = '' } = {}) {

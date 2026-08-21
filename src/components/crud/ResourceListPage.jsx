@@ -37,6 +37,8 @@ export default function ResourceListPage({
   deleteSuccessMessage = 'Deleted successfully',
   deleteBehavior = 'remove',
   readOnly = false,
+  hideCreate = false,
+  onRowClick,
   /** When true, hide breadcrumb + page header (used inside LMS module shells) */
   embedded = false,
 }) {
@@ -106,7 +108,7 @@ export default function ResourceListPage({
           const item = row.original
           const id = resolveRecordId(item)
           return (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
               {onView ? (
                 <IconActionButton
                   variant="view"
@@ -179,6 +181,7 @@ export default function ResourceListPage({
       </Button>
       {extraActions}
       {!readOnly &&
+        !hideCreate &&
         !basePath.includes('/audit-logs') &&
         !basePath.includes('/notifications') && (
         <Link to={createPath || `${basePath}/new`}>
@@ -244,6 +247,7 @@ export default function ResourceListPage({
           enableSelection={enableBulkDelete}
           rowSelection={rowSelection}
           onRowSelectionChange={setRowSelection}
+          onRowClick={onRowClick}
         />
 
         <div className="px-2 pb-2">

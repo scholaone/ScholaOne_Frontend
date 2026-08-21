@@ -1,11 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import ResourceListPage from '@/components/crud/ResourceListPage'
 import ResourceDetailModal, { useListDetailModal } from '@/components/crud/ResourceDetailModal'
 import Button from '@/components/ui/Button'
 import { notificationService } from '@/api/services'
+import { getErrorMessage } from '@/api/client'
 import { fromNow, formatDateTime } from '@/utils/format'
 import { resolveRecordId } from '@/utils/record'
+import { resolveNotificationLink } from '@/utils/notifications'
+import { useNotificationContext } from '@/contexts/NotificationContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { isAdminPortalUser } from '@/utils/authRoles'
 
 const columns = [
   { accessorKey: 'title', header: 'Title' },
@@ -25,6 +31,7 @@ const DETAIL_FIELDS = [
 
 function NotificationDetailModal({ notificationId, open, onClose }) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const markReadMutation = useMutation({
     mutationFn: () => notificationService.markRead(notificationId),
@@ -32,7 +39,7 @@ function NotificationDetailModal({ notificationId, open, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
       toast.success('Marked as read')
     },
-    onError: () => toast.error('Failed to mark as read'),
+    onError: (error) => toast.error(getErrorMessage(error, 'Failed to mark as read')),
   })
 
   return (
@@ -47,11 +54,21 @@ function NotificationDetailModal({ notificationId, open, onClose }) {
       renderFooter={(item, _id, close) => (
         <>
           <Button variant="secondary" onClick={close}>Close</Button>
-          {!item.is_read && (
+          {!item.is_read ? (
             <Button loading={markReadMutation.isPending} onClick={() => markReadMutation.mutate()}>
               Mark as Read
             </Button>
-          )}
+          ) : null}
+          <Button
+            onClick={() => {
+              if (!item.is_read) markReadMutation.mutate()
+              const path = resolveNotificationLink(item)
+              close()
+              if (path) navigate(path)
+            }}
+          >
+            Open
+          </Button>
         </>
       )}
     />
@@ -59,16 +76,18 @@ function NotificationDetailModal({ notificationId, open, onClose }) {
 }
 
 export default function NotificationsPage() {
-  const queryClient = useQueryClient()
+  const { user } = useAuth()
+  const { markAllRead, isMarkingAllRead, openNotification } = useNotificationContext()
   const { viewId, isOpen, openView, closeView } = useListDetailModal()
+  const isAdmin = isAdminPortalUser(user)
 
-  const markAllMutation = useMutation({
-    mutationFn: () => notificationService.markAllRead(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
-      toast.success('All marked as read')
-    },
-  })
+  const handleOpen = (item) => {
+    if (isAdmin) {
+      openView(item, resolveRecordId(item))
+      return
+    }
+    openNotification(item)
+  }
 
   return (
     <>
@@ -80,15 +99,18 @@ export default function NotificationsPage() {
         deleteFn={null}
         basePath="/notifications"
         columns={columns}
-        onView={(item) => openView(item, resolveRecordId(item))}
+        onView={handleOpen}
+        onRowClick={handleOpen}
         extraActions={
-          <Button variant="secondary" onClick={() => markAllMutation.mutate()} loading={markAllMutation.isPending}>
+          <Button variant="secondary" onClick={() => markAllRead()} loading={isMarkingAllRead}>
             Mark All Read
           </Button>
         }
       />
 
-      <NotificationDetailModal notificationId={viewId} open={isOpen} onClose={closeView} />
+      {isAdmin ? (
+        <NotificationDetailModal notificationId={viewId} open={isOpen} onClose={closeView} />
+      ) : null}
     </>
   )
 }

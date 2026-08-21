@@ -13,7 +13,9 @@ import {
   FiBarChart2,
 } from 'react-icons/fi'
 import { formatNumber } from '@/utils/format'
+import { formatDashboardDate, getDisplayName, getTimeGreeting } from '@/utils/greeting'
 import { Card } from '@/components/ui/Card'
+import { cn } from '@/lib/utils'
 import { resolveActionIcon } from '@/utils/dashboardIcons'
 
 export function ClayStatSkeletonGrid({ count = 4 }) {
@@ -30,27 +32,74 @@ export function ClayStatSkeletonGrid({ count = 4 }) {
 }
 
 export function ClayInsightBanner({ userName, message }) {
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-  const firstName = userName?.split(' ')[0] || 'there'
-  const today = new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  })
+  const { text: greeting, period, emoji } = getTimeGreeting()
+  const displayName = getDisplayName(userName)
+  const dates = formatDashboardDate()
 
   return (
-    <Card className="mb-0 flex flex-col gap-2 bg-gradient-to-r from-brand-50 to-card sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-muted-foreground">
-          {greeting}, {firstName}
-        </p>
-        <p className="mt-0.5 text-sm font-semibold text-foreground">
-          {message || 'Here is your analytics overview for today.'}
-        </p>
+    <Card className="mb-0 overflow-hidden border-border/70 bg-gradient-to-br from-brand-50/90 via-white to-emerald-50/40 p-0">
+      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex min-w-0 items-start gap-4">
+          <div
+            className={cn(
+              'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl shadow-sm ring-1',
+              period === 'morning' && 'bg-amber-50 text-amber-700 ring-amber-100',
+              period === 'afternoon' && 'bg-sky-50 text-sky-700 ring-sky-100',
+              period === 'evening' && 'bg-indigo-50 text-indigo-700 ring-indigo-100',
+            )}
+            aria-hidden
+          >
+            {emoji}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{greeting}</p>
+            <h2 className="mt-1 break-words text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              {displayName}
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              {message || 'Here is your analytics overview for today.'}
+            </p>
+          </div>
+        </div>
+        <div className="shrink-0 rounded-xl bg-white/70 px-4 py-3 text-right ring-1 ring-border/60 backdrop-blur-sm">
+          <p className="text-sm font-semibold text-foreground">{dates.weekday}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{dates.full}</p>
+        </div>
       </div>
-      <p className="shrink-0 text-xs text-muted-foreground">{today}</p>
     </Card>
+  )
+}
+
+export function DashboardWelcomeHeader({ userName, subtitle, fallbackName = 'there' }) {
+  const { text: greeting, period, emoji } = getTimeGreeting()
+  const displayName = getDisplayName(userName, fallbackName)
+  const dates = formatDashboardDate()
+
+  return (
+    <header className="teacher-dash__welcome">
+      <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+        <div
+          className={cn(
+            'teacher-dash__greeting-badge',
+            period === 'morning' && 'teacher-dash__greeting-badge--morning',
+            period === 'afternoon' && 'teacher-dash__greeting-badge--afternoon',
+            period === 'evening' && 'teacher-dash__greeting-badge--evening',
+          )}
+          aria-hidden
+        >
+          {emoji}
+        </div>
+        <div className="min-w-0">
+          <p className="teacher-dash__greeting-label">{greeting}</p>
+          <h1 className="break-words">{displayName}</h1>
+          <p>{subtitle}</p>
+        </div>
+      </div>
+      <div className="teacher-dash__date-chip">
+        <p className="teacher-dash__date-weekday">{dates.weekday}</p>
+        <p className="teacher-dash__date-short">{dates.short}</p>
+      </div>
+    </header>
   )
 }
 

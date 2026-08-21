@@ -18,6 +18,7 @@ export default function DataTable({
   onRowSelectionChange,
   enableSelection = false,
   stickyHeader = true,
+  onRowClick,
 }) {
   const table = useReactTable({
     data,
@@ -107,7 +108,11 @@ export default function DataTable({
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr
+              key={row.id}
+              className={onRowClick ? 'cursor-pointer hover:bg-slate-50/80' : undefined}
+              onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+            >
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}

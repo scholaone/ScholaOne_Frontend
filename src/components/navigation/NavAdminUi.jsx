@@ -1,17 +1,31 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiGrid, FiLayers, FiMenu, FiPlus, FiSearch, FiChevronDown, FiChevronUp, FiEdit2, FiTrash2, FiEye, FiArrowUp, FiArrowDown, FiLink } from 'react-icons/fi'
+import { FiGrid, FiLayers, FiMenu, FiPlus, FiSearch, FiChevronDown, FiChevronUp, FiEdit2, FiTrash2, FiEye, FiArrowUp, FiArrowDown, FiLink, FiUsers, FiBriefcase } from 'react-icons/fi'
 import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import { SelectField } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
 import Breadcrumb from '@/components/layout/Breadcrumb'
+import { useAuth } from '@/contexts/AuthContext'
 
-export function NavAdminHeader({ activeTab = 'menus', actions }) {
-  const tabs = [
-    { id: 'menus', label: 'Menus', to: '/menus', icon: FiMenu },
-    { id: 'modules', label: 'Modules', to: '/modules', icon: FiLayers },
-  ]
+const SUPER_ADMIN_TABS = [
+  { id: 'master', label: 'Menu Master', to: '/menus', icon: FiMenu },
+  { id: 'school-allocation', label: 'School Allocation', to: '/menus/school-allocation', icon: FiBriefcase },
+  { id: 'modules', label: 'Modules', to: '/modules', icon: FiLayers },
+]
+
+const SCHOOL_ADMIN_TABS = [
+  { id: 'user-allocation', label: 'User Allocation', to: '/menus/user-allocation', icon: FiUsers },
+]
+
+export function NavAdminHeader({ activeTab = 'master', actions, variant }) {
+  const { isSuperAdmin, isOrgAdmin, isSchoolAdmin } = useAuth()
+  const resolvedVariant = variant || (isSchoolAdmin && !isSuperAdmin && !isOrgAdmin ? 'school' : 'super')
+  const tabs = resolvedVariant === 'school' ? SCHOOL_ADMIN_TABS : SUPER_ADMIN_TABS
+  const title = resolvedVariant === 'school' ? 'User Menu Allocation' : 'Menu Management'
+  const description = resolvedVariant === 'school'
+    ? 'Assign permitted modules and menus to teachers, staff, and other users within your school scope.'
+    : 'Maintain the ERP menu catalog and allocate menus to schools by user category without mixing master data with school assignments.'
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-white px-6 py-6 text-foreground shadow-sm sm:px-8">
@@ -25,9 +39,9 @@ export function NavAdminHeader({ activeTab = 'menus', actions }) {
             Navigation Builder
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">School Admin Navigation</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Design modules and menus per organization and school. Control visibility and display order with a live preview of the school admin sidebar.
+              {description}
             </p>
           </div>
           <nav className="flex flex-wrap gap-2">

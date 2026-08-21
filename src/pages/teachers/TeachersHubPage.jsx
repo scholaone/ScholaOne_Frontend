@@ -23,7 +23,6 @@ const QUICK_LINKS = [
   { to: '/teachers/roster', label: 'Teacher Roster', icon: FiUsers, desc: 'Profiles & academic roles' },
   { to: '/teachers/new', label: 'Add Teacher', icon: FiUserPlus, desc: 'Create academic staff login' },
   { to: '/academic', label: 'Academic Foundation', icon: FiBookOpen, desc: 'Years, subjects, sections' },
-  { to: '/teachers/roster', label: 'Assignments', icon: FiCalendar, desc: 'Subjects & class teachers' },
 ]
 
 export default function TeachersHubPage() {

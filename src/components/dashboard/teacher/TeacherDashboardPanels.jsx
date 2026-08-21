@@ -22,7 +22,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { formatNumber } from '@/utils/format'
+import { formatNumber, resolveMediaUrl } from '@/utils/format'
 import { dashboardService } from '@/api/services'
 import { unwrapData } from '@/api/client'
 
@@ -82,37 +82,78 @@ function formatActivityDate(iso) {
   return date.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-export function TeacherStatCards({ statistics = {}, loading = false }) {
-  const cards = [
-    {
-      key: 'classes',
-      label: 'Classes',
-      value: statistics.classes_assigned ?? 0,
-      tone: 'pink',
-      icon: FiLayers,
-    },
-    {
-      key: 'students',
-      label: 'Students',
-      value: statistics.students_assigned ?? 0,
-      tone: 'purple',
-      icon: FiUsers,
-    },
-    {
-      key: 'courses',
-      label: 'Courses',
-      value: statistics.courses ?? 0,
-      tone: 'yellow',
-      icon: FiBookOpen,
-    },
-    {
-      key: 'plans',
-      label: 'Lesson plans',
-      value: statistics.lesson_plans ?? 0,
-      tone: 'green',
-      icon: FiClipboard,
-    },
-  ]
+export function TeacherStatCards({ statistics = {}, classTeacher = {}, loading = false }) {
+  const isClassTeacher = Boolean(statistics.is_class_teacher || classTeacher.is_class_teacher)
+  const primarySection = classTeacher.sections?.[0]
+
+  const cards = isClassTeacher
+    ? [
+        {
+          key: 'my-class',
+          label: classTeacher.total_classes === 1 && primarySection?.display_name
+            ? primarySection.display_name
+            : 'My Classes',
+          value: classTeacher.total_classes === 1 && primarySection?.display_name
+            ? primarySection.student_count ?? 0
+            : statistics.class_teacher_classes ?? classTeacher.total_classes ?? 0,
+          tone: 'pink',
+          icon: FiLayers,
+          hint: classTeacher.total_classes === 1 ? 'Students in your class' : 'Classes you lead',
+          to: '/dashboard/teacher/my-students',
+        },
+        {
+          key: 'my-students',
+          label: 'My Students',
+          value: statistics.class_teacher_students ?? classTeacher.total_students ?? 0,
+          tone: 'purple',
+          icon: FiUsers,
+          to: '/dashboard/teacher/my-students',
+        },
+        {
+          key: 'courses',
+          label: 'Courses',
+          value: statistics.courses ?? 0,
+          tone: 'yellow',
+          icon: FiBookOpen,
+        },
+        {
+          key: 'plans',
+          label: 'Lesson plans',
+          value: statistics.lesson_plans ?? 0,
+          tone: 'green',
+          icon: FiClipboard,
+        },
+      ]
+    : [
+        {
+          key: 'classes',
+          label: 'Classes',
+          value: statistics.classes_assigned ?? 0,
+          tone: 'pink',
+          icon: FiLayers,
+        },
+        {
+          key: 'students',
+          label: 'Students',
+          value: statistics.students_assigned ?? 0,
+          tone: 'purple',
+          icon: FiUsers,
+        },
+        {
+          key: 'courses',
+          label: 'Courses',
+          value: statistics.courses ?? 0,
+          tone: 'yellow',
+          icon: FiBookOpen,
+        },
+        {
+          key: 'plans',
+          label: 'Lesson plans',
+          value: statistics.lesson_plans ?? 0,
+          tone: 'green',
+          icon: FiClipboard,
+        },
+      ]
 
   if (loading) {
     return (
@@ -134,15 +175,36 @@ export function TeacherStatCards({ statistics = {}, loading = false }) {
     <div className="teacher-dash__stats">
       {cards.map((card) => {
         const Icon = card.icon
-        return (
-          <div key={card.key} className={`teacher-stat-card teacher-stat-card--${card.tone}`}>
+        const content = (
+          <>
             <div className="teacher-stat-card__icon">
               <Icon aria-hidden />
             </div>
             <div className="min-w-0">
               <p className="teacher-stat-card__label">{card.label}</p>
               <p className="teacher-stat-card__value">{formatNumber(card.value)}</p>
+              {card.hint ? (
+                <p className="mt-0.5 text-[10px] text-[var(--td-muted)]">{card.hint}</p>
+              ) : null}
             </div>
+          </>
+        )
+
+        if (card.to) {
+          return (
+            <Link
+              key={card.key}
+              to={card.to}
+              className={`teacher-stat-card teacher-stat-card--${card.tone} teacher-stat-card--link`}
+            >
+              {content}
+            </Link>
+          )
+        }
+
+        return (
+          <div key={card.key} className={`teacher-stat-card teacher-stat-card--${card.tone}`}>
+            {content}
           </div>
         )
       })}
@@ -532,4 +594,169 @@ export function TeacherQuickAccessPanel({ links = [] }) {
 /** @deprecated Use TeacherQuickAccessPanel */
 export function TeacherQuickLinks({ links = [] }) {
   return <TeacherQuickAccessPanel links={links} />
+}
+
+function studentInitials(name = '') {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
+    || '?'
+}
+
+function StudentRowAvatar({ name, photoUrl, size = 'md' }) {
+  const [failed, setFailed] = useState(false)
+  const src = useMemo(() => resolveMediaUrl(photoUrl), [photoUrl])
+  const sizeClass = size === 'lg' ? 'teacher-class-students__avatar--lg' : size === 'sm' ? 'teacher-class-students__avatar--sm' : ''
+
+  if (!src || failed) {
+    return (
+      <span className={`teacher-class-students__avatar teacher-class-students__avatar--placeholder ${sizeClass}`.trim()}>
+        {studentInitials(name)}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={src}
+      alt=""
+      className={`teacher-class-students__avatar ${sizeClass}`.trim()}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+function formatStudentGender(gender = '') {
+  if (!gender) return ''
+  const value = String(gender).trim()
+  if (value.length <= 1) return value.toUpperCase()
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+}
+
+export function TeacherClassStudentList({ students = [], compact = false, variant = 'table' }) {
+  if (!students.length) {
+    return <p className="teacher-empty text-sm">No students enrolled in this class yet.</p>
+  }
+
+  if (variant === 'cards') {
+    return (
+      <div className="teacher-student-cards">
+        {students.map((student, index) => (
+          <article key={student.student_id} className="teacher-student-card">
+            <span className="teacher-student-card__index">{index + 1}</span>
+            <StudentRowAvatar name={student.full_name} photoUrl={student.photo_url} size="lg" />
+            <div className="teacher-student-card__body">
+              <p className="teacher-student-card__name">{student.full_name}</p>
+              <div className="teacher-student-card__meta">
+                <span>Roll {student.roll_number || '—'}</span>
+                <span className="teacher-student-card__dot" aria-hidden />
+                <span>Adm {student.admission_number || '—'}</span>
+                {student.gender ? (
+                  <>
+                    <span className="teacher-student-card__dot" aria-hidden />
+                    <span>{formatStudentGender(student.gender)}</span>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className={`teacher-class-students${compact ? ' teacher-class-students--compact' : ''}`}>
+      <div className="teacher-class-students__head">
+        <span>Roll</span>
+        <span>Student</span>
+        {!compact ? <span>Admission No.</span> : null}
+      </div>
+      {students.map((student) => (
+        <div key={student.student_id} className="teacher-class-students__row">
+          <span className="teacher-class-students__roll">{student.roll_number || '—'}</span>
+          <div className="teacher-class-students__name">
+            <StudentRowAvatar name={student.full_name} photoUrl={student.photo_url} />
+            <span className="truncate">{student.full_name}</span>
+          </div>
+          {!compact ? (
+            <span className="teacher-class-students__adm">{student.admission_number || '—'}</span>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export function TeacherMyClassPanel({ classTeacher = {}, loading = false }) {
+  const sections = classTeacher.sections || []
+
+  if (loading) {
+    return (
+      <div className="teacher-panel">
+        <div className="teacher-skeleton mb-3 h-5 w-40" />
+        <div className="teacher-skeleton h-32 w-full rounded-xl" />
+      </div>
+    )
+  }
+
+  if (!classTeacher.is_class_teacher) {
+    return (
+      <div className="teacher-panel">
+        <div className="teacher-panel__head">
+          <div>
+            <h2 className="teacher-panel__title">My Class</h2>
+            <p className="teacher-panel__sub">Class teacher assignment</p>
+          </div>
+        </div>
+        <p className="teacher-empty text-xs">
+          You are not assigned as a class teacher yet. Contact your school admin to map your class.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="teacher-panel">
+      <div className="teacher-panel__head">
+        <div>
+          <h2 className="teacher-panel__title">My Class</h2>
+          <p className="teacher-panel__sub">
+            {classTeacher.total_classes} class{classTeacher.total_classes === 1 ? '' : 'es'}
+            {' · '}
+            {classTeacher.total_students} student{classTeacher.total_students === 1 ? '' : 's'}
+          </p>
+        </div>
+        <Link to="/dashboard/teacher/my-students" className="teacher-panel__action">
+          View students
+        </Link>
+      </div>
+
+      <div className="space-y-3">
+        {sections.map((section) => (
+          <Link
+            key={section.class_section_id}
+            to={`/dashboard/teacher/my-students?class=${section.class_section_id}`}
+            className="teacher-class-block teacher-class-block--link"
+          >
+            <div className="teacher-class-block__head">
+              <div>
+                <p className="teacher-class-block__title">{section.display_name}</p>
+                <p className="teacher-class-block__meta">
+                  {section.academic_year_name}
+                  {' · '}
+                  {section.student_count} student{section.student_count === 1 ? '' : 's'}
+                </p>
+              </div>
+              <span className="teacher-class-block__cta">View students</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
 }

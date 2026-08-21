@@ -84,7 +84,8 @@ const superAdminNav = [
       { id: 'permissions', label: 'Permissions', path: '/permissions', icon: FiShield },
       { id: 'user-roles', label: 'User Roles', path: '/user-roles', icon: FiShield },
       { id: 'modules', label: 'Modules', path: '/modules', icon: FiLayers },
-      { id: 'menus', label: 'Menus', path: '/menus', icon: FiMenu },
+      { id: 'menu-master', label: 'Menu Master', path: '/menus', icon: FiMenu },
+      { id: 'school-menu-allocation', label: 'School Menu Allocation', path: '/menus/school-allocation', icon: FiBriefcase },
     ],
   },
   {
@@ -160,8 +161,67 @@ const orgAdminNav = [
   },
 ]
 
+/** Class Allocation menus reuse /academics/* URLs — exclude from Academic Structure highlight. */
+const CLASS_ALLOCATION_ACADEMIC_PREFIXES = [
+  '/academics/subject-allocation',
+  '/academics/class-section-subjects',
+  '/academics/class-teachers',
+  '/academics/class-sections',
+  '/academics/rooms',
+]
+
+function isClassAllocationAcademicRoute(pathname) {
+  return CLASS_ALLOCATION_ACADEMIC_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  )
+}
+
+function navHasPath(items, path) {
+  return items.some((item) => {
+    if (item.path === path) return true
+    if (item.children?.length) return navHasPath(item.children, path)
+    return false
+  })
+}
+
+function injectSchoolAdminUserAllocation(items) {
+  const allocationPath = '/menus/user-allocation'
+  if (navHasPath(items, allocationPath)) return items
+
+  const link = {
+    id: 'user-menu-allocation',
+    label: 'User Menu Allocation',
+    path: allocationPath,
+    icon: FiUsers,
+  }
+
+  const schoolAdminIndex = items.findIndex((item) => item.id === 'school_admin')
+  if (schoolAdminIndex >= 0) {
+    const schoolAdmin = items[schoolAdminIndex]
+    const next = [...items]
+    next[schoolAdminIndex] = {
+      ...schoolAdmin,
+      children: [...(schoolAdmin.children || []), link],
+    }
+    return next
+  }
+
+  return [
+    ...items,
+    {
+      id: 'access',
+      label: 'Access',
+      icon: FiShield,
+      children: [link],
+    },
+  ]
+}
+
 function isNavItemActive(pathname, itemPath) {
   if (itemPath === '/ai-hub') return pathname === '/ai-hub'
+  if (itemPath === '/menus/user-allocation') {
+    return pathname === '/menus/user-allocation' || pathname.startsWith('/menus/user-allocation/')
+  }
   if (itemPath === '/admissions') {
     return pathname === '/admissions'
   }
@@ -181,6 +241,7 @@ function isNavItemActive(pathname, itemPath) {
     return pathname.startsWith('/schools') && !/^\/schools\/[^/]+\/profile/.test(pathname)
   }
   if (itemPath === '/academics') {
+    if (isClassAllocationAcademicRoute(pathname)) return false
     return pathname === '/academics' || pathname.startsWith('/academics/')
   }
   if (itemPath === '/school-users') {
@@ -216,6 +277,12 @@ function isNavItemActive(pathname, itemPath) {
   }
   if (itemPath === '/communications') {
     return pathname === '/communications' || pathname.startsWith('/communications/')
+  }
+  if (itemPath === '/announcements') {
+    return pathname === '/announcements' || pathname.startsWith('/announcements/')
+  }
+  if (itemPath === '/circulars') {
+    return pathname === '/circulars' || pathname.startsWith('/circulars/')
   }
   if (itemPath === '/documents') {
     return pathname === '/documents' || pathname.startsWith('/documents/')
@@ -406,12 +473,20 @@ export default function Sidebar({ mobile, onClose }) {
     if (isOrgAdmin) return orgAdminNav
     if (usesDynamicSchoolNav && dynamicMenusQuery.isSuccess) {
       const modules = unwrapMenuModules(unwrapData(dynamicMenusQuery.data))
-      return modulesToNavItems(modules)
+      let items = modulesToNavItems(modules)
+      if (isSchoolAdmin) {
+        items = injectSchoolAdminUserAllocation(items)
+      }
+      return items
+    }
+    if (isSchoolAdmin) {
+      return injectSchoolAdminUserAllocation([])
     }
     return []
   }, [
     isSuperAdmin,
     isOrgAdmin,
+    isSchoolAdmin,
     usesDynamicSchoolNav,
     dynamicMenusQuery.isSuccess,
     dynamicMenusQuery.data,

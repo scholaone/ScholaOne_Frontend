@@ -31,7 +31,7 @@ Use the permission matrix for a bird's-eye view.`
 
   if (/mail|email|post/.test(q)) {
     return `Use **ScholaOne Post** (mail icon in the top bar or System → ScholaOne Post).
-Compose sends from sharanreddy26372@gmail.com. With EmailJS configured in \`.env\`, delivery is one-click; otherwise your mail app opens pre-filled.`
+Compose sends from info@scholaone.in@gmail.com. With EmailJS configured in \`.env\`, delivery is one-click; otherwise your mail app opens pre-filled.`
   }
 
   if (/automation|automate/.test(q)) {

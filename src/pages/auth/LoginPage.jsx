@@ -13,7 +13,7 @@ import SEO from '@/components/seo/SEO'
 import '@/components/auth/auth.css'
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading, user, getDashboardPath } = useAuth()
+  const { login, isAuthenticated, user, getDashboardPath } = useAuth()
   const navigate = useNavigate()
   const {
     register,
@@ -30,9 +30,8 @@ export default function LoginPage() {
   }, [])
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(getDashboardPath?.() || getPostLoginPath(user) || '/dashboard', { replace: true })
-    }
+    if (!isAuthenticated) return
+    navigate(getDashboardPath?.() || getPostLoginPath(user) || '/dashboard', { replace: true })
   }, [isAuthenticated, navigate, user, getDashboardPath])
 
   useEffect(() => {
@@ -52,9 +51,9 @@ export default function LoginPage() {
   const onSubmit = async (data) => {
     try {
       const session = await login({ email: data.email, password: data.password }, data.rememberMe)
-      const path = getPostLoginPath(session?.user) || '/dashboard'
+      const path = getPostLoginPath(session?.user) || getDashboardPath?.() || '/dashboard'
       navigate(path, { replace: true })
-      window.setTimeout(() => toast.success('Welcome back!', { duration: 2000 }), 0)
+      toast.success('Welcome back!', { duration: 2000 })
     } catch (error) {
       toast.error(getErrorMessage(error, 'Invalid credentials'))
     }
@@ -69,7 +68,7 @@ export default function LoginPage() {
           handleSubmit={handleSubmit}
           onSubmit={onSubmit}
           errors={errors}
-          isSubmitting={isSubmitting || isLoading}
+          isSubmitting={isSubmitting}
         />
       </AuthLayout>
     </>

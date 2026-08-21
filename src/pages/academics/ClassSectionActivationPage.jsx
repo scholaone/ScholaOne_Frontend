@@ -153,7 +153,6 @@ export default function ClassSectionActivationPage() {
     <div className="space-y-5">
       <Breadcrumb
         items={[
-          { label: 'Academic Foundation', href: '/academics' },
           { label: 'Active Classes' },
         ]}
       />

@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { setAuthHandlers } from '@/api/axios'
@@ -221,7 +222,6 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(
     async (credentials, rememberMe = false) => {
-      setState((prev) => ({ ...prev, isLoading: true }))
       try {
         const response = await authService.login(credentials)
         const data = unwrapData(response) || response?.data || response
@@ -259,7 +259,10 @@ export function AuthProvider({ children }) {
           onUnauthorized: () => forceLogoutLocal({ broadcast: true, message: 'Session expired. Please sign in again.' }),
         })
 
-        setState(next)
+        // Commit auth before callers navigate — avoids ProtectedRoute bouncing back to /login.
+        flushSync(() => {
+          setState(next)
+        })
 
         window.setTimeout(() => {
           queryClient.clear()
@@ -269,7 +272,6 @@ export function AuthProvider({ children }) {
 
         return next
       } catch (error) {
-        setState((prev) => ({ ...prev, isLoading: false }))
         throw error
       }
     },

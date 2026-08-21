@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import {
   FiCreditCard,
   FiDownload,
+  FiKey,
   FiMail,
   FiMapPin,
   FiPhone,
@@ -23,6 +24,7 @@ import { STUDENT_STATUS_OPTIONS } from '@/config/constants'
 import { resolveMediaUrl } from '@/utils/format'
 import { cn } from '@/lib/utils'
 import ProfilePhotoFrame from '@/components/common/ProfilePhotoFrame'
+import StudentCredentialsModal from '@/components/students/StudentCredentialsModal'
 import { compressImageFile } from '@/utils/imageCompress'
 
 const PRIMARY_TABS = [
@@ -198,6 +200,7 @@ export default function StudentDetail() {
   const { id } = useParams()
   const queryClient = useQueryClient()
   const [tab, setTab] = useState('overview')
+  const [credentialsOpen, setCredentialsOpen] = useState(false)
   const [transportForm, setTransportForm] = useState({})
   const [hostelForm, setHostelForm] = useState({})
   const [medicalForm, setMedicalForm] = useState({})
@@ -430,6 +433,9 @@ export default function StudentDetail() {
               <Link to={`/students/${id}/edit`}>
                 <Button variant="edit">Edit</Button>
               </Link>
+              <Button variant="outline" onClick={() => setCredentialsOpen(true)}>
+                <FiKey className="h-4 w-4" /> View Creds
+              </Button>
               <Button variant="outline" onClick={() => qrMutation.mutate()} loading={qrMutation.isPending}>
                 <FiRefreshCw className="h-4 w-4" /> QR
               </Button>
@@ -1075,6 +1081,13 @@ export default function StudentDetail() {
           </Section>
         </SoftCard>
       )}
+
+      <StudentCredentialsModal
+        student={student}
+        open={credentialsOpen}
+        onClose={() => setCredentialsOpen(false)}
+        loading={isLoading}
+      />
     </div>
   )
 }

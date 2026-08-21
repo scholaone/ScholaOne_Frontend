@@ -37,6 +37,13 @@ export const REPORT_MENU_ITEMS = [
     desc: 'Daily registers and attendance percentages',
     module: 'Attendance',
   },
+  {
+    id: 'library-issued-returned',
+    label: 'Library Issued & Returned',
+    path: '/library/reports/issued-returned',
+    desc: 'School-wide issue, return, overdue and fine report',
+    module: 'Library',
+  },
 ]
 
 /** Report links for the hub page (excludes overview). */

@@ -4,14 +4,17 @@ import { useAuth } from '@/contexts/AuthContext'
 import { dashboardService } from '@/api/services'
 import { unwrapData } from '@/api/client'
 import { getPostLoginPath, isTeacherPortalUser } from '@/utils/authRoles'
+import DashboardNotificationsPanel from '@/components/notifications/DashboardNotificationsPanel'
 import {
   TeacherActivitiesPanel,
   TeacherCalendarPanel,
+  TeacherMyClassPanel,
   TeacherPerformancePanel,
   TeacherQuickAccessPanel,
   TeacherStatCards,
   TeacherTopScorersPanel,
 } from '@/components/dashboard/teacher/TeacherDashboardPanels'
+import { DashboardWelcomeHeader } from '@/components/dashboard/clay/ClayWidgets'
 import '@/styles/teacher-dashboard.css'
 
 export default function TeacherDashboardView() {
@@ -33,6 +36,7 @@ export default function TeacherDashboardView() {
   const dashboard = unwrapData(data) || {}
   const profile = dashboard.profile || {}
   const statistics = dashboard.statistics || {}
+  const classTeacher = dashboard.class_teacher || {}
   const quickLinks = dashboard.quick_links || []
   const classPerformance = dashboard.class_performance || []
   const recentActivities = dashboard.recent_activities || []
@@ -48,24 +52,19 @@ export default function TeacherDashboardView() {
     .filter(Boolean)
     .join(' · ')
 
-  const todayLabel = new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-
   return (
     <div className="teacher-dash w-full min-w-0 max-w-full pb-4">
-      <header className="teacher-dash__welcome">
-        <div>
-          <h1>Welcome, {userName?.split(' ')[0] || 'Teacher'}</h1>
-          <p>{subtitle || 'Your teaching dashboard at a glance'}</p>
-        </div>
-        <p className="text-sm text-[var(--td-muted)]">{todayLabel}</p>
-      </header>
+      <DashboardWelcomeHeader
+        userName={userName}
+        subtitle={subtitle || 'Your teaching dashboard at a glance'}
+        fallbackName="Teacher"
+      />
 
-      <TeacherStatCards statistics={statistics} loading={isLoading && !data} />
+      <TeacherStatCards
+        statistics={statistics}
+        classTeacher={classTeacher}
+        loading={isLoading && !data}
+      />
 
       {isFetching && data ? (
         <p className="mb-4 text-center text-xs text-[var(--td-muted)]">Refreshing dashboard…</p>
@@ -73,11 +72,13 @@ export default function TeacherDashboardView() {
 
       <div className="teacher-dash__grid">
         <div className="space-y-5">
+          <DashboardNotificationsPanel title="Notifications" variant="teacher" />
           <TeacherCalendarPanel enabled={isTeacherPortalUser(user)} />
           <TeacherActivitiesPanel activities={recentActivities} quickLinks={quickLinks} />
         </div>
 
         <div className="space-y-5">
+          <TeacherMyClassPanel classTeacher={classTeacher} loading={isLoading && !data} />
           <TeacherPerformancePanel data={classPerformance} />
           <TeacherTopScorersPanel scorers={topScorers} schoolName={profile.school_name} />
         </div>

@@ -1,0 +1,45 @@
+/* Student portal — extends teacher dashboard tokens */
+
+.student-dash__grid {
+  align-items: start;
+}
+
+.student-exam-table thead th {
+  padding: 0.625rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--td-muted);
+  border-bottom: 1px solid var(--td-border);
+}
+
+.student-exam-table tbody td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--td-border);
+  color: var(--td-text);
+  vertical-align: middle;
+}
+
+.student-exam-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.student-exam-table tbody tr:hover {
+  background: rgba(99, 75, 177, 0.04);
+}
+
+.student-exam-table__pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.2rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.student-exam-table__pill--upcoming {
+  background: var(--td-green-soft);
+  color: #2e7d32;
+}

@@ -14,7 +14,8 @@ import {
 } from './client'
 
 export const authService = {
-  login: (payload) => apiPost(API_ENDPOINTS.AUTH.LOGIN, payload, { skipAuthRefresh: true }),
+  login: (payload) =>
+    apiPost(API_ENDPOINTS.AUTH.LOGIN, payload, { skipAuthRefresh: true, timeout: 15000 }),
   refresh: (refreshToken) =>
     apiPost(API_ENDPOINTS.AUTH.REFRESH, { refresh: refreshToken }, { skipAuthRefresh: true }),
   logout: (refresh, accessToken) =>
@@ -37,8 +38,10 @@ export const dashboardService = {
   schoolAdmin: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN, params),
   schoolAdminSummary: (params) => apiGet(API_ENDPOINTS.DASHBOARD.SCHOOL_ADMIN_SUMMARY, params),
   studentSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.STUDENT_SUMMARY),
+  studentCalendar: (params) => apiGet(API_ENDPOINTS.DASHBOARD.STUDENT_CALENDAR, params),
   teacherSummary: () => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_SUMMARY),
   teacherCalendar: (params) => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_CALENDAR, params),
+  teacherClassStudents: (params) => apiGet(API_ENDPOINTS.DASHBOARD.TEACHER_CLASS_STUDENTS, params),
 }
 
 export const organizationService = {
@@ -269,6 +272,7 @@ export const studentService = {
 
 export const teacherService = {
   list: (params) => apiGetPaginated(API_ENDPOINTS.TEACHERS.LIST, params),
+  me: () => apiGet(API_ENDPOINTS.TEACHERS.ME),
   get: (id) => apiGet(API_ENDPOINTS.TEACHERS.DETAIL(id)),
   create: (data) => apiPost(API_ENDPOINTS.TEACHERS.LIST, data),
   update: (id, data) => apiPatch(API_ENDPOINTS.TEACHERS.DETAIL(id), data),
@@ -279,8 +283,13 @@ export const teacherService = {
   getTeacherSettings: (params) => apiGet(API_ENDPOINTS.TEACHERS.TEACHER_SETTINGS, params),
   updateTeacherSettings: (data, params) => apiPatch(API_ENDPOINTS.TEACHERS.TEACHER_SETTINGS, data, { params }),
   sendCredentials: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.SEND_CREDENTIALS(id), data),
+  uploadPhoto: (id, formData) => apiPostForm(API_ENDPOINTS.TEACHERS.UPLOAD_PHOTO(id), formData),
   addQualification: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.QUALIFICATIONS(id), data),
   addExperience: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.EXPERIENCE(id), data),
+  updateExperience: (teacherId, experienceId, data) =>
+    apiPost(API_ENDPOINTS.TEACHERS.EXPERIENCE_UPDATE(teacherId, experienceId), data),
+  deleteExperience: (teacherId, experienceId) =>
+    apiPost(API_ENDPOINTS.TEACHERS.EXPERIENCE_DELETE(teacherId, experienceId)),
   assignSubject: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.ASSIGN_SUBJECT(id), data),
   academicAssign: (id, data) => apiPost(API_ENDPOINTS.TEACHERS.ACADEMIC_ASSIGNMENTS(id), data),
   workload: (id, params) => apiGet(API_ENDPOINTS.TEACHERS.WORKLOAD(id), params),
@@ -406,6 +415,16 @@ export const timetableService = {
   export: (versionId, params) => apiGetBlob(API_ENDPOINTS.TIMETABLE.EXPORT(versionId), params),
   importCsv: (versionId, formData) => apiPostForm(API_ENDPOINTS.TIMETABLE.IMPORT(versionId), formData),
   enqueueAiJob: (versionId, data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_JOBS(versionId), data),
+  updateSlot: (versionId, slotId, data) =>
+    apiPatch(API_ENDPOINTS.TIMETABLE.SLOT_DETAIL(versionId, slotId), data),
+  deleteSlot: (versionId, slotId, params) =>
+    apiDelete(API_ENDPOINTS.TIMETABLE.SLOT_DETAIL(versionId, slotId), { params }),
+  validateAssignment: (data) => apiPost(API_ENDPOINTS.TIMETABLE.VALIDATE, data),
+  aiParse: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_PARSE, data),
+  aiGenerate: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_GENERATE, data),
+  aiRegenerate: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_REGENERATE, data),
+  aiModify: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_MODIFY, data),
+  aiApprove: (data) => apiPost(API_ENDPOINTS.TIMETABLE.AI_APPROVE, data),
   templates: (params) => apiGet(API_ENDPOINTS.TIMETABLE.TEMPLATES, params),
   createTemplate: (data) => apiPost(API_ENDPOINTS.TIMETABLE.TEMPLATES, data),
 }
@@ -602,12 +621,59 @@ export const documentsService = {
 }
 
 export const libraryService = {
+  dashboard: (params) => apiGet(API_ENDPOINTS.LIBRARY.DASHBOARD, params),
   books: {
     list: (params) => apiGetPaginated(API_ENDPOINTS.LIBRARY.BOOKS, params),
     get: (id) => apiGet(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id)),
     create: (data) => apiPost(API_ENDPOINTS.LIBRARY.BOOKS, data),
     update: (id, data) => apiPatch(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id), data),
     delete: (id) => apiDelete(API_ENDPOINTS.LIBRARY.BOOK_DETAIL(id)),
+    bulkImport: (items, config) => apiPost(API_ENDPOINTS.LIBRARY.BOOKS_BULK_IMPORT, { items }, config),
+  },
+  issues: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.LIBRARY.ISSUES, params),
+    get: (id) => apiGet(API_ENDPOINTS.LIBRARY.ISSUE_DETAIL(id)),
+    lookup: (params) => apiGet(API_ENDPOINTS.LIBRARY.LOOKUP_BORROWER, params),
+    report: (params) => apiGet(API_ENDPOINTS.LIBRARY.ISSUES_REPORT, params),
+    issue: (data) => apiPost(API_ENDPOINTS.LIBRARY.ISSUE_BOOK, data),
+    return: (id, data) => apiPost(API_ENDPOINTS.LIBRARY.RETURN_BOOK(id), data),
+  },
+  members: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.LIBRARY.MEMBERS, params),
+    get: (id) => apiGet(API_ENDPOINTS.LIBRARY.MEMBER_DETAIL(id)),
+    update: (id, data) => apiPatch(API_ENDPOINTS.LIBRARY.MEMBER_DETAIL(id), data),
+  },
+}
+
+export const transportService = {
+  dashboard: (params) => apiGet(API_ENDPOINTS.TRANSPORT.DASHBOARD, params),
+  routes: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.ROUTES, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.ROUTE_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.ROUTES, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.ROUTE_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.ROUTE_DETAIL(id)),
+  },
+  vehicles: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.VEHICLES, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.VEHICLE_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.VEHICLES, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.VEHICLE_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.VEHICLE_DETAIL(id)),
+  },
+  stops: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.STOPS, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.STOP_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.STOPS, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.STOP_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.STOP_DETAIL(id)),
+  },
+  assignments: {
+    list: (params) => apiGetPaginated(API_ENDPOINTS.TRANSPORT.ASSIGNMENTS, params),
+    get: (id) => apiGet(API_ENDPOINTS.TRANSPORT.ASSIGNMENT_DETAIL(id)),
+    create: (data) => apiPost(API_ENDPOINTS.TRANSPORT.ASSIGNMENTS, data),
+    update: (id, data) => apiPatch(API_ENDPOINTS.TRANSPORT.ASSIGNMENT_DETAIL(id), data),
+    delete: (id) => apiDelete(API_ENDPOINTS.TRANSPORT.ASSIGNMENT_DETAIL(id)),
   },
 }
 
@@ -791,6 +857,26 @@ export const menuService = {
     )
   },
   reorder: (items) => apiPost(API_ENDPOINTS.MENUS.REORDER, { items }),
+  masterTree: (params) => apiGet(API_ENDPOINTS.MENUS.MASTER_TREE, params),
+  allocationCategories: (params) => apiGet(API_ENDPOINTS.MENUS.ALLOCATION_CATEGORIES, params),
+  schoolAllocationTree: (params) => apiGet(API_ENDPOINTS.MENUS.SCHOOL_ALLOCATION_TREE, params),
+  syncSchoolAllocation: (data) => {
+    const { organization, ...body } = data
+    return apiPost(
+      API_ENDPOINTS.MENUS.SCHOOL_ALLOCATION_SYNC,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
+  userAllocationTree: (params) => apiGet(API_ENDPOINTS.MENUS.USER_ALLOCATION_TREE, params),
+  syncUserAllocation: (data) => {
+    const { organization, ...body } = data
+    return apiPost(
+      API_ENDPOINTS.MENUS.USER_ALLOCATION_SYNC,
+      body,
+      organization ? { params: { organization } } : undefined,
+    )
+  },
 }
 
 export const moduleService = {
@@ -843,7 +929,7 @@ export const notificationService = {
   list: (params) => apiGetPaginated(API_ENDPOINTS.NOTIFICATIONS.LIST, params),
   get: (id) => apiGet(API_ENDPOINTS.NOTIFICATIONS.DETAIL(id)),
   markRead: (id) => apiPost(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id)),
-  markAllRead: () => apiPost(API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ),
+  markAllRead: () => apiPost(API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {}),
   unreadCount: () => apiGet(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT),
 }
 
